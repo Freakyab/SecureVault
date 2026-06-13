@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "permissions": {
+    "allow": ["Shell(*)"],
+    "deny": [
+      "Shell(rm)",
+      "Shell(rmdir)",
+      "Shell(shutdown)",
+      "Shell(reboot)",
+      "Shell(diskpart)",
+      "Shell(fdisk)",
+      "Shell(sudo)",
+      "Shell(su)"
+    ]
+  }
+}

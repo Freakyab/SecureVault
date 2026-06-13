@@ -1,6 +1,70 @@
-# Welcome to your Expo app 👋
+# SecureVault
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+SecureVault is an offline-first Expo password manager prototype. The current app uses Expo Router,
+React Native, TypeScript, StyleSheet-driven components, and `lucide-react-native` icons.
+
+## V1 Scope
+
+V1 is focused on a local mobile vault, not cloud sync.
+
+Must-have:
+
+- Onboarding, master-password setup, and unlock flow.
+- Dashboard, Vault, Add Credential, Settings, and Password Health screens.
+- Local credential CRUD with website, URL, username, password, and category fields.
+- Password generator and basic health checks for weak or reused passwords.
+- Encrypted local storage before beta release.
+
+Deferred / later:
+
+- Cloud sync, account login, credential sharing, browser extension, and breach monitoring.
+- Custom credential logos and offline logo caching unless they are pulled into v1.1.
+
+## Project Decisions
+
+- Storage model: offline-only for v1.
+- Unlock method: master password first; biometrics only after explicit opt-in and security review.
+- State management: React Context for shared vault/session state.
+- Styling: React Native `StyleSheet` with centralized vault design tokens.
+- Icons: `lucide-react-native`.
+- Theme: current Figma-derived dark aubergine/glassmorphic palette, with light/dark token expansion still tracked in the roadmap.
+
+## Workflow
+
+Branch names:
+
+- `feature/<short-description>` for user-visible features.
+- `fix/<bug-id>-<short-description>` for tracked bugs.
+- `chore/<short-description>` for tooling, docs, and release work.
+
+Suggested issue labels:
+
+- `priority:p0`, `priority:p1`, `priority:p2`, `priority:p3`
+- `type:bug`, `type:feature`, `type:task`, `type:security`, `type:docs`
+- `area:auth`, `area:vault`, `area:health`, `area:ui`, `area:release`
+
+Use `ROADMAP.md` and `BUGS-AND-TASKS.md` as the source of truth. Update both files whenever a feature or fix ships.
+
+## Verify
+
+```bash
+npm run lint
+npm test
+```
+
+## Security notes
+
+- Credentials are stored locally in AsyncStorage with a salted master-password hash. Full AES encryption is tracked in the roadmap (TASK-015).
+- Copied passwords auto-clear from the clipboard after 30 seconds.
+- Vault backups exported from Settings are plaintext JSON — keep them private.
+
+## Release checklist (internal beta)
+
+- [ ] App icon and splash match the SecureVault aubergine palette.
+- [ ] Privacy policy and terms drafted.
+- [ ] EAS Build profiles for development, preview, and production.
+- [ ] TestFlight / internal testing track configured.
+- [ ] Store listing copy drafted.
 
 ## Get started
 

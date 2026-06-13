@@ -1,7 +1,9 @@
 {
   "expo": {
-    "name": "pass-code-expo-temp",
+    "name": "SecureVault",
     "slug": "pass-code-expo-temp",
+    "description": "SecureVault is an offline-first password manager: store credentials, generate strong passwords, and monitor password health locally on your device.",
+    "primaryColor": "#7b2cbf",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -17,7 +19,8 @@
         "backgroundImage": "./assets/images/android-icon-background.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "package": "com.anonymous.passcodeexpotemp"
     },
     "web": {
       "output": "static",
@@ -28,7 +31,7 @@
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#208AEF",
+          "backgroundColor": "#190e27",
           "android": {
             "image": "./assets/images/splash-icon.png",
             "imageWidth": 76
