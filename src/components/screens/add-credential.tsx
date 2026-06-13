@@ -1,10 +1,11 @@
-import { useRouter } from 'expo-router';
-import { CreditCard, Eye, EyeOff, FileText, Globe, KeyRound, RefreshCw } from 'lucide-react-native';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import { Eye, EyeOff, Globe, RefreshCw } from 'lucide-react-native';
 import { useState } from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { PrimaryButton, ScreenBackground, VaultHeader } from '@/components/vault';
+import { CREDENTIAL_CATEGORIES, DEFAULT_CATEGORY } from '@/constants/categories';
 import { VaultColors, VaultType } from '@/constants/vault-theme';
 import { useToast } from '@/contexts/toast-context';
 import { useVault } from '@/contexts/vault-context';
@@ -15,11 +16,6 @@ const QUICK_SITES = [
   { label: 'Google', url: 'https://google.com' },
   { label: 'GitHub', url: 'https://github.com' },
   { label: 'Apple', url: 'https://apple.com' },
-];
-const CATEGORIES = [
-  { label: 'Login', icon: KeyRound },
-  { label: 'Card', icon: CreditCard },
-  { label: 'Note', icon: FileText },
 ];
 
 function BoxedField({
@@ -52,14 +48,16 @@ function BoxedField({
 export function AddCredentialScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const params = useLocalSearchParams<{ password?: string }>();
   const { showToast } = useToast();
   const { addCredential } = useVault();
   const [name, setName] = useState('');
   const [url, setUrl] = useState('');
   const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
+  // Prefill when arriving from the Generator's "Save secure password" CTA (3.15).
+  const [password, setPassword] = useState(params.password ?? '');
   const [showPassword, setShowPassword] = useState(false);
-  const [category, setCategory] = useState('Login');
+  const [category, setCategory] = useState(DEFAULT_CATEGORY);
 
   function applyQuickSite(site: (typeof QUICK_SITES)[number]) {
     setName(site.label);
@@ -169,16 +167,16 @@ export function AddCredentialScreen() {
           <View style={styles.field}>
             <Text style={styles.fieldLabel}>Category</Text>
             <View style={styles.categoryRow}>
-              {CATEGORIES.map((item) => {
-                const active = item.label === category;
+              {CREDENTIAL_CATEGORIES.map((item) => {
+                const active = item.id === category;
                 const Icon = item.icon;
                 return (
                   <Pressable
-                    key={item.label}
+                    key={item.id}
                     accessibilityRole="button"
                     accessibilityLabel={`Set category to ${item.label}`}
                     accessibilityState={{ selected: active }}
-                    onPress={() => setCategory(item.label)}
+                    onPress={() => setCategory(item.id)}
                     style={[styles.categoryChip, active && styles.categoryChipActive]}>
                     <Icon
                       size={16}
@@ -284,6 +282,7 @@ const styles = StyleSheet.create({
   },
   categoryRow: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     gap: 10,
   },
   categoryChip: {

@@ -55,18 +55,18 @@ export function CredentialAvatar({
   const showFavicon = !showCustom && Boolean(domain) && !failed;
 
   return (
-    <View style={[styles.tile, { width: size, height: size, borderRadius: size / 3.4, borderColor: accent + '55' }]}>
+    <View style={[styles.tile, { width: size, height: size, borderRadius: size / 2, borderColor: accent + '55' }]}>
       {showCustom ? (
         <Image
           source={{ uri: customLogoUri }}
-          style={[styles.image, { borderRadius: size / 3.4 }]}
+          style={[styles.image, { borderRadius: size / 2 }]}
           contentFit="cover"
           transition={150}
         />
       ) : showFavicon && domain ? (
         <Image
           source={{ uri: faviconUrl(domain, 64) }}
-          style={[styles.image, { borderRadius: size / 4 }]}
+          style={[styles.image, { borderRadius: size / 2 }]}
           contentFit="contain"
           cachePolicy="disk"
           transition={150}

@@ -1,20 +1,26 @@
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import {
   AlertTriangle,
   ArrowRight,
+  Download,
+  Fingerprint,
   Inbox,
   KeyRound,
+  Plus,
   Search,
   Shield,
   SlidersHorizontal,
+  Upload,
 } from 'lucide-react-native';
 import { useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { BottomNav, CredentialRow, EmptyState, GlassCard, ScreenBackground } from '@/components/vault';
-import { VaultColors, VaultType } from '@/constants/vault-theme';
+import { CATEGORY_FILTERS, CREDENTIAL_CATEGORIES } from '@/constants/categories';
+import { Fonts } from '@/constants/theme';
+import { VaultColors, VaultType, vaultShadow } from '@/constants/vault-theme';
 import { useToast } from '@/contexts/toast-context';
 import { useVault } from '@/contexts/vault-context';
 import { useNavigationLock } from '@/hooks/use-navigation-lock';
@@ -25,18 +31,20 @@ import { computeHealthMetrics } from '@/services/health-checks';
 const VIEW_FILTERS = ['Active', 'Favorites', 'Archived'] as const;
 type ViewFilter = (typeof VIEW_FILTERS)[number];
 
-const CATEGORY_FILTERS = ['All', 'Login', 'Card', 'Note', 'Identity'];
-
 export function MainVaultScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const { credentials, toggleFavorite } = useVault();
+  const params = useLocalSearchParams<{ category?: string }>();
+  const { credentials, toggleFavorite, lockVault } = useVault();
   const { showToast } = useToast();
   const runLocked = useNavigationLock();
   const [view, setView] = useState<ViewFilter>('Active');
-  const [category, setCategory] = useState('All');
+  const [category, setCategory] = useState(
+    params.category && CATEGORY_FILTERS.includes(params.category) ? params.category : 'All',
+  );
   const [folderTag, setFolderTag] = useState('All');
   const [query, setQuery] = useState('');
+  const [isFilterPanelOpen, setIsFilterPanelOpen] = useState(false);
 
   const health = useMemo(() => computeHealthMetrics(credentials), [credentials]);
   const weakIds = useMemo(() => new Set(health.weakIds), [health.weakIds]);
@@ -81,7 +89,33 @@ export function MainVaultScreen() {
     return filterCredentials(byFolderTag, query);
   }, [viewCredentials, category, folderTag, query]);
 
+  // Group the filtered list by category, ordered to match CREDENTIAL_CATEGORIES,
+  // so the vault reads as named sections (FINANCE, ENTERTAINMENT, …) like the design.
+  const groupedCredentials = useMemo(() => {
+    const order = CREDENTIAL_CATEGORIES.map((entry) => entry.id);
+    const labelById = new Map(CREDENTIAL_CATEGORIES.map((entry) => [entry.id, entry.pluralLabel]));
+    const buckets = new Map<string, typeof filteredCredentials>();
+    filteredCredentials.forEach((credential) => {
+      const key = credential.category?.trim() || 'Other';
+      const bucket = buckets.get(key);
+      if (bucket) bucket.push(credential);
+      else buckets.set(key, [credential]);
+    });
+    return Array.from(buckets.keys())
+      .sort((a, b) => {
+        const ia = order.indexOf(a);
+        const ib = order.indexOf(b);
+        return (ia === -1 ? order.length : ia) - (ib === -1 ? order.length : ib);
+      })
+      .map((key) => ({
+        key,
+        label: (labelById.get(key) ?? key).toUpperCase(),
+        items: buckets.get(key) ?? [],
+      }));
+  }, [filteredCredentials]);
+
   const hasAlerts = health.weak > 0 || health.reused > 0;
+  const hasAdvancedFilters = category !== 'All' || folderTag !== 'All';
 
   function openCredential(id: string) {
     runLocked(() => router.push({ pathname: '/edit-credential', params: { id } }));
@@ -105,22 +139,55 @@ export function MainVaultScreen() {
           styles.content,
           { paddingTop: insets.top + 24, paddingBottom: insets.bottom + 120 },
         ]}>
+        <View style={styles.brandRow}>
+          <View style={styles.brandLeading}>
+            <Shield size={18} color={VaultColors.accent} strokeWidth={2} />
+            <Text style={styles.brandWordmark}>SecureVault</Text>
+          </View>
+          <View style={styles.brandActions}>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Export vault backup"
+              hitSlop={10}
+              onPress={() => router.push('/settings')}
+              style={styles.brandIconButton}>
+              <Upload size={18} color={VaultColors.heading} strokeWidth={1.75} />
+            </Pressable>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Import vault backup"
+              hitSlop={10}
+              onPress={() => router.push('/settings')}
+              style={styles.brandIconButton}>
+              <Download size={18} color={VaultColors.heading} strokeWidth={1.75} />
+            </Pressable>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Open settings"
+              onPress={() => router.push('/settings')}
+              style={styles.avatar}
+            />
+          </View>
+        </View>
+
         <View style={styles.headerRow}>
           <View style={styles.headerLeading}>
-            <View style={styles.brandIcon}>
-              <Shield size={20} color={VaultColors.accent} strokeWidth={2} />
-            </View>
-            <View>
-              <Text style={styles.title}>Main Vault</Text>
-              <Text style={styles.subtitle}>{viewCredentials.length} passwords</Text>
-            </View>
+            <Text style={styles.title}>Main Vault</Text>
+            <Text style={styles.subtitle}>{viewCredentials.length} Items Secured</Text>
           </View>
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel="Sort credentials"
-            style={styles.sortButton}>
-            <SlidersHorizontal size={15} color={VaultColors.accent} strokeWidth={2} />
-            <Text style={styles.sortText}>Sort by</Text>
+            accessibilityLabel="Add new item"
+            onPress={() => runLocked(() => router.push('/add-credential'))}
+            style={({ pressed }) => pressed && styles.pressed}>
+            <LinearGradient
+              colors={[VaultColors.accentStrong, VaultColors.accent]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.newItemButton}>
+              <Plus size={16} color={VaultColors.buttonText} strokeWidth={2.5} />
+              <Text style={styles.newItemText}>NEW ITEM</Text>
+            </LinearGradient>
           </Pressable>
         </View>
 
@@ -151,44 +218,74 @@ export function MainVaultScreen() {
               </Pressable>
             );
           })}
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={isFilterPanelOpen ? 'Hide vault filters' : 'Show vault filters'}
+            accessibilityState={{ expanded: isFilterPanelOpen, selected: hasAdvancedFilters }}
+            onPress={() => setIsFilterPanelOpen((open) => !open)}
+            style={[
+              styles.filterToggle,
+              (isFilterPanelOpen || hasAdvancedFilters) && styles.filterToggleActive,
+            ]}>
+            <SlidersHorizontal
+              size={15}
+              color={isFilterPanelOpen || hasAdvancedFilters ? VaultColors.heading : VaultColors.muted}
+              strokeWidth={2}
+            />
+            <Text
+              style={[
+                styles.filterToggleText,
+                (isFilterPanelOpen || hasAdvancedFilters) && styles.filterToggleTextActive,
+              ]}>
+              Filter
+            </Text>
+          </Pressable>
         </View>
 
-        <View style={styles.filters}>
-          {CATEGORY_FILTERS.map((item) => {
-            const active = item === category;
-            return (
-              <Pressable
-                key={item}
-                accessibilityRole="button"
-                accessibilityLabel={`Filter by ${item} category`}
-                accessibilityState={{ selected: active }}
-                onPress={() => setCategory(item)}
-                style={[styles.chip, active && styles.chipActive]}>
-                <Text style={[styles.chipText, active && styles.chipTextActive]}>{item}</Text>
-              </Pressable>
-            );
-          })}
-        </View>
+        {isFilterPanelOpen ? (
+          <GlassCard style={styles.filterPanel}>
+            <Text style={styles.filterPanelTitle}>Category</Text>
+            <View style={styles.filters}>
+              {CATEGORY_FILTERS.map((item) => {
+                const active = item === category;
+                return (
+                  <Pressable
+                    key={item}
+                    accessibilityRole="button"
+                    accessibilityLabel={`Filter by ${item} category`}
+                    accessibilityState={{ selected: active }}
+                    onPress={() => setCategory(item)}
+                    style={[styles.chip, active && styles.chipActive]}>
+                    <Text style={[styles.chipText, active && styles.chipTextActive]}>{item}</Text>
+                  </Pressable>
+                );
+              })}
+            </View>
 
-        {folderTagFilters.length > 1 ? (
-          <View style={styles.filters}>
-            {folderTagFilters.map((item) => {
-              const active = item === folderTag;
-              return (
-                <Pressable
-                  key={item}
-                  accessibilityRole="button"
-                  accessibilityLabel={item === 'All' ? 'Show all folders and tags' : `Filter by ${item}`}
-                  accessibilityState={{ selected: active }}
-                  onPress={() => setFolderTag(item)}
-                  style={[styles.tagChip, active && styles.tagChipActive]}>
-                  <Text style={[styles.tagChipText, active && styles.tagChipTextActive]}>
-                    {item === 'All' ? 'All folders' : item}
-                  </Text>
-                </Pressable>
-              );
-            })}
-          </View>
+            {folderTagFilters.length > 1 ? (
+              <>
+                <Text style={[styles.filterPanelTitle, styles.filterPanelSectionTitle]}>Folders & tags</Text>
+                <View style={styles.filters}>
+                  {folderTagFilters.map((item) => {
+                    const active = item === folderTag;
+                    return (
+                      <Pressable
+                        key={item}
+                        accessibilityRole="button"
+                        accessibilityLabel={item === 'All' ? 'Show all folders and tags' : `Filter by ${item}`}
+                        accessibilityState={{ selected: active }}
+                        onPress={() => setFolderTag(item)}
+                        style={[styles.tagChip, active && styles.tagChipActive]}>
+                        <Text style={[styles.tagChipText, active && styles.tagChipTextActive]}>
+                          {item === 'All' ? 'All folders' : item}
+                        </Text>
+                      </Pressable>
+                    );
+                  })}
+                </View>
+              </>
+            ) : null}
+          </GlassCard>
         ) : null}
 
         {hasAlerts && view !== 'Archived' ? (
@@ -199,7 +296,7 @@ export function MainVaultScreen() {
             style={({ pressed }) => pressed && styles.pressed}>
             <GlassCard style={styles.alertCard}>
               <View style={styles.alertHeader}>
-                <AlertTriangle size={18} color={VaultColors.danger} strokeWidth={2} />
+                <AlertTriangle size={18} color={VaultColors.accent} strokeWidth={2} />
                 <Text style={styles.alertEyebrow}>SECURITY PULSE</Text>
               </View>
               <Text style={styles.alertTitle}>Review {health.weak + health.reused} password risks</Text>
@@ -208,7 +305,7 @@ export function MainVaultScreen() {
               </Text>
               <View style={styles.alertButton}>
                 <Text style={styles.alertButtonText}>View Health</Text>
-                <ArrowRight size={15} color={VaultColors.danger} strokeWidth={2.5} />
+                <ArrowRight size={15} color={VaultColors.accent} strokeWidth={2.5} />
               </View>
             </GlassCard>
           </Pressable>
@@ -232,42 +329,60 @@ export function MainVaultScreen() {
           </Text>
         </GlassCard>
 
-        <View style={styles.group}>
-          <View style={styles.groupHeader}>
-            <Text style={styles.groupTitle}>{view.toUpperCase()} CREDENTIALS</Text>
-            <View style={styles.divider} />
+        {filteredCredentials.length > 0 ? (
+          groupedCredentials.map((group) => (
+            <View key={group.key} style={styles.group}>
+              <View style={styles.groupHeader}>
+                <Text style={styles.groupTitle}>{group.label}</Text>
+                <View style={styles.divider} />
+              </View>
+              <View style={styles.groupList}>
+                {group.items.map((credential) => (
+                  <CredentialRow
+                    key={credential.id}
+                    name={credential.website}
+                    detail={credential.username || 'No username'}
+                    icon={KeyRound}
+                    accent={VaultColors.accent}
+                    website={credential.website}
+                    url={credential.url}
+                    customLogoUri={credential.customLogoUri}
+                    badges={{
+                      weak: weakIds.has(credential.id),
+                      reused: reusedIds.has(credential.id),
+                      old: oldIds.has(credential.id),
+                    }}
+                    isFavorite={credential.isFavorite}
+                    onPress={() => openCredential(credential.id)}
+                    onCopy={() => copyPassword(credential.password, credential.website)}
+                    onToggleFavorite={() =>
+                      onToggleFavorite(credential.id, credential.website, credential.isFavorite)
+                    }
+                  />
+                ))}
+              </View>
+            </View>
+          ))
+        ) : (
+          <View style={styles.group}>
+            <EmptyState icon={Inbox} title="Nothing here yet" description={emptyMessage(view, credentials.length, query)} />
           </View>
-          <View style={styles.groupList}>
-            {filteredCredentials.length > 0 ? (
-              filteredCredentials.map((credential) => (
-                <CredentialRow
-                  key={credential.id}
-                  name={credential.website}
-                  detail={credential.username || 'No username'}
-                  icon={KeyRound}
-                  accent={VaultColors.accent}
-                  website={credential.website}
-                  url={credential.url}
-                  customLogoUri={credential.customLogoUri}
-                  badges={{
-                    weak: weakIds.has(credential.id),
-                    reused: reusedIds.has(credential.id),
-                    old: oldIds.has(credential.id),
-                  }}
-                  isFavorite={credential.isFavorite}
-                  onPress={() => openCredential(credential.id)}
-                  onCopy={() => copyPassword(credential.password, credential.website)}
-                  onToggleFavorite={() =>
-                    onToggleFavorite(credential.id, credential.website, credential.isFavorite)
-                  }
-                />
-              ))
-            ) : (
-              <EmptyState icon={Inbox} title="Nothing here yet" description={emptyMessage(view, credentials.length, query)} />
-            )}
-          </View>
-        </View>
+        )}
       </ScrollView>
+
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel="Lock vault"
+        onPress={() => runLocked(() => lockVault())}
+        style={({ pressed }) => [styles.fab, { bottom: insets.bottom + 90 }, pressed && styles.pressed]}>
+        <LinearGradient
+          colors={[VaultColors.accentStrong, VaultColors.accent]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={styles.fabInner}>
+          <Fingerprint size={24} color={VaultColors.buttonText} strokeWidth={2.25} />
+        </LinearGradient>
+      </Pressable>
 
       <BottomNav active="vault" />
     </ScreenBackground>
@@ -286,26 +401,51 @@ const styles = StyleSheet.create({
   content: {
     paddingHorizontal: 20,
   },
-  headerRow: {
+  brandRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
   },
-  headerLeading: {
+  brandLeading: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
-    flexShrink: 1,
+    gap: 8,
   },
-  brandIcon: {
-    width: 44,
-    height: 44,
-    borderRadius: 14,
+  brandWordmark: {
+    ...VaultType.brand,
+    color: VaultColors.accent,
+  },
+  brandActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  brandIconButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 9999,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: VaultColors.accentSoft,
+    backgroundColor: VaultColors.glassBackground,
     borderWidth: 1,
-    borderColor: VaultColors.accent + '55',
+    borderColor: VaultColors.glassBorder,
+  },
+  avatar: {
+    width: 36,
+    height: 36,
+    borderRadius: 9999,
+    backgroundColor: VaultColors.avatarBackground,
+    borderWidth: 1,
+    borderColor: VaultColors.avatarBorder,
+  },
+  headerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: 20,
+  },
+  headerLeading: {
+    flexShrink: 1,
   },
   title: {
     ...VaultType.title,
@@ -316,21 +456,19 @@ const styles = StyleSheet.create({
     color: VaultColors.muted,
     marginTop: 2,
   },
-  sortButton: {
+  newItemButton: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-    paddingHorizontal: 16,
-    paddingVertical: 10,
+    paddingHorizontal: 18,
+    paddingVertical: 12,
     borderRadius: 9999,
-    borderWidth: 1,
-    borderColor: VaultColors.glassBorder,
-    backgroundColor: VaultColors.glassBackground,
   },
-  sortText: {
+  newItemText: {
     fontSize: 13,
-    fontWeight: '600',
-    color: VaultColors.accent,
+    fontWeight: '700',
+    letterSpacing: 0.6,
+    color: VaultColors.buttonText,
   },
   search: {
     flexDirection: 'row',
@@ -352,12 +490,14 @@ const styles = StyleSheet.create({
   },
   viewFilters: {
     flexDirection: 'row',
+    alignItems: 'center',
+    flexWrap: 'wrap',
     gap: 8,
     marginTop: 16,
   },
   viewChip: {
-    flex: 1,
     alignItems: 'center',
+    paddingHorizontal: 18,
     paddingVertical: 10,
     borderRadius: 9999,
     borderWidth: 1,
@@ -375,6 +515,43 @@ const styles = StyleSheet.create({
   },
   viewChipTextActive: {
     color: VaultColors.heading,
+  },
+  filterToggle: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    borderRadius: 9999,
+    borderWidth: 1,
+    borderColor: VaultColors.glassBorder,
+    backgroundColor: VaultColors.glassBackground,
+  },
+  filterToggleActive: {
+    backgroundColor: VaultColors.accentSoft,
+    borderColor: VaultColors.accent,
+  },
+  filterToggleText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: VaultColors.muted,
+  },
+  filterToggleTextActive: {
+    color: VaultColors.heading,
+  },
+  filterPanel: {
+    marginTop: 12,
+    padding: 16,
+    borderRadius: 24,
+    gap: 0,
+  },
+  filterPanelTitle: {
+    ...VaultType.label,
+    color: VaultColors.accent,
+    opacity: 0.8,
+  },
+  filterPanelSectionTitle: {
+    marginTop: 16,
   },
   filters: {
     flexDirection: 'row',
@@ -428,7 +605,7 @@ const styles = StyleSheet.create({
   alertCard: {
     marginTop: 24,
     gap: 10,
-    borderColor: 'rgba(255,138,138,0.3)',
+    borderColor: VaultColors.accent + '4d',
   },
   alertHeader: {
     flexDirection: 'row',
@@ -437,11 +614,12 @@ const styles = StyleSheet.create({
   },
   alertEyebrow: {
     ...VaultType.label,
-    color: VaultColors.danger,
+    color: VaultColors.accent,
   },
   alertTitle: {
-    fontSize: 20,
-    fontWeight: '700',
+    fontFamily: Fonts.serif,
+    fontSize: 22,
+    lineHeight: 30,
     color: VaultColors.heading,
   },
   alertBody: {
@@ -458,7 +636,7 @@ const styles = StyleSheet.create({
   alertButtonText: {
     fontSize: 14,
     fontWeight: '700',
-    color: VaultColors.danger,
+    color: VaultColors.accent,
   },
   statsCard: {
     marginTop: 16,
@@ -480,9 +658,10 @@ const styles = StyleSheet.create({
     borderRadius: 9999,
   },
   statsValue: {
-    fontSize: 40,
-    fontWeight: '700',
-    color: VaultColors.heading,
+    fontFamily: Fonts.serif,
+    fontSize: 44,
+    lineHeight: 52,
+    color: VaultColors.accent,
   },
   statsCaption: {
     fontSize: 14,
@@ -514,5 +693,20 @@ const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 20,
     color: VaultColors.body,
+  },
+  fab: {
+    position: 'absolute',
+    right: 24,
+    width: 56,
+    height: 56,
+    borderRadius: 9999,
+    ...vaultShadow,
+  },
+  fabInner: {
+    width: 56,
+    height: 56,
+    borderRadius: 9999,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });

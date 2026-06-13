@@ -1,4 +1,3 @@
-import { LinearGradient } from 'expo-linear-gradient';
 import {
   AlertTriangle,
   ArrowRight,
@@ -10,8 +9,10 @@ import {
 } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
 import {
+  ActivityIndicator,
   Alert,
-  Platform,
+  InteractionManager,
+  Modal,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -21,16 +22,17 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { PrimaryButton, Toggle } from '@/components/vault';
 import { Fonts } from '@/constants/theme';
 import { BiometricAvailability, canUseBiometrics, getBiometricAvailability } from '@/services/biometric';
 
 const palette = {
-  background: '#190e27',
+  background: '#140b20',
   headerBackground: 'rgba(25,14,39,0.85)',
   headerBorder: 'rgba(76,67,83,0.4)',
   heading: '#eedcff',
   body: '#cfc2d5',
-  accent: '#deb7ff',
+  accent: '#b06af0',
   accentStrong: '#7b2cbf',
   glassBackground: 'rgba(255,255,255,0.03)',
   glassBorder: 'rgba(192,192,192,0.2)',
@@ -42,7 +44,7 @@ const palette = {
 };
 
 interface SetupMasterPasswordScreenProps {
-  onCreate?: (password: string, biometricEnabled: boolean) => void;
+  onCreate?: (password: string, biometricEnabled: boolean) => void | Promise<void>;
 }
 
 export function SetupMasterPasswordScreen({ onCreate }: SetupMasterPasswordScreenProps) {
@@ -52,6 +54,9 @@ export function SetupMasterPasswordScreen({ onCreate }: SetupMasterPasswordScree
   const [showPassword, setShowPassword] = useState(false);
   const [biometricEnabled, setBiometricEnabled] = useState(false);
   const [biometric, setBiometric] = useState<BiometricAvailability | null>(null);
+  const [isCreating, setIsCreating] = useState(false);
+  const [createError, setCreateError] = useState<string | null>(null);
+  const [loadingMessage, setLoadingMessage] = useState('Preparing your vault…');
 
   // Detect real device capability (BUG-012). Default the opt-in ON only when
   // biometrics are actually available and enrolled; otherwise keep it off.
@@ -76,8 +81,8 @@ export function SetupMasterPasswordScreen({ onCreate }: SetupMasterPasswordScree
         ? 'No biometrics enrolled on this device'
         : 'Not available on this device';
 
-  function handleBiometricToggle() {
-    if (!biometricSupported) {
+  function handleBiometricChange(next: boolean) {
+    if (next && !biometricSupported) {
       Alert.alert(
         'Biometrics unavailable',
         biometric?.hasHardware
@@ -86,10 +91,21 @@ export function SetupMasterPasswordScreen({ onCreate }: SetupMasterPasswordScree
       );
       return;
     }
-    setBiometricEnabled((prev) => !prev);
+    setBiometricEnabled(next);
   }
 
-  function handleCreate() {
+  async function yieldToUi() {
+    await new Promise<void>((resolve) => {
+      InteractionManager.runAfterInteractions(() => resolve());
+    });
+    await new Promise<void>((resolve) => {
+      requestAnimationFrame(() => resolve());
+    });
+  }
+
+  async function handleCreate() {
+    if (isCreating) return;
+
     if (password.length < 12) {
       Alert.alert('Use a stronger password', 'Your master password must be at least 12 characters.');
       return;
@@ -100,8 +116,41 @@ export function SetupMasterPasswordScreen({ onCreate }: SetupMasterPasswordScree
       return;
     }
 
-    onCreate?.(password, biometricEnabled);
+    setIsCreating(true);
+    setCreateError(null);
+    setLoadingMessage('Preparing your vault…');
+
+    try {
+      await yieldToUi();
+      setLoadingMessage('Deriving your encryption key…');
+      await yieldToUi();
+      await onCreate?.(password, biometricEnabled);
+      setLoadingMessage('Opening your vault…');
+    } catch (error) {
+      setCreateError(error instanceof Error ? error.message : 'Could not create vault. Please try again.');
+    } finally {
+      setIsCreating(false);
+    }
   }
+
+  useEffect(() => {
+    if (!isCreating) return;
+
+    const messages = [
+      'Deriving your encryption key…',
+      'Applying AES-256 encryption…',
+      'Securing your vault locally…',
+    ];
+    let index = 0;
+    setLoadingMessage(messages[0]);
+
+    const interval = setInterval(() => {
+      index = (index + 1) % messages.length;
+      setLoadingMessage(messages[index]);
+    }, 2200);
+
+    return () => clearInterval(interval);
+  }, [isCreating]);
 
   return (
     <View style={styles.root}>
@@ -116,6 +165,7 @@ export function SetupMasterPasswordScreen({ onCreate }: SetupMasterPasswordScree
       </View>
 
       <ScrollView
+        keyboardShouldPersistTaps="always"
         showsVerticalScrollIndicator={false}
         contentContainerStyle={[
           styles.scrollContent,
@@ -183,13 +233,7 @@ export function SetupMasterPasswordScreen({ onCreate }: SetupMasterPasswordScree
           </View>
 
           {/* Biometric card */}
-          <Pressable
-            accessibilityRole="switch"
-            accessibilityState={{ checked: biometricEnabled, disabled: !biometricSupported }}
-            accessibilityLabel="Enable biometric unlock"
-            accessibilityHint={biometricSubtitle}
-            onPress={handleBiometricToggle}
-            style={[styles.biometricCard, !biometricSupported && styles.biometricCardDisabled]}>
+          <View style={[styles.biometricCard, !biometricSupported && styles.biometricCardDisabled]}>
             <View style={styles.biometricInfo}>
               <View style={styles.biometricIcon}>
                 <Fingerprint size={24} color={palette.accent} strokeWidth={1.75} />
@@ -199,15 +243,13 @@ export function SetupMasterPasswordScreen({ onCreate }: SetupMasterPasswordScree
                 <Text style={styles.biometricSubtitle}>{biometricSubtitle}</Text>
               </View>
             </View>
-            <View
-              style={[
-                styles.toggleTrack,
-                biometricEnabled && styles.toggleTrackOn,
-                !biometricSupported && styles.toggleTrackDisabled,
-              ]}>
-              <View style={[styles.toggleKnob, biometricEnabled && styles.toggleKnobOn]} />
-            </View>
-          </Pressable>
+            <Toggle
+              value={biometricEnabled}
+              onChange={handleBiometricChange}
+              disabled={!biometricSupported}
+              label="Enable biometric unlock"
+            />
+          </View>
 
           {/* Caution note */}
           <View style={styles.cautionNote}>
@@ -219,20 +261,14 @@ export function SetupMasterPasswordScreen({ onCreate }: SetupMasterPasswordScree
           </View>
 
           {/* Action button */}
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="Create Vault"
-            onPress={handleCreate}
-            style={({ pressed }) => [styles.actionButtonWrapper, pressed && styles.pressed]}>
-            <LinearGradient
-              colors={[palette.accentStrong, palette.accent]}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              style={styles.actionButton}>
-              <Text style={styles.actionButtonText}>CREATE VAULT</Text>
-              <ArrowRight size={14} color={palette.buttonText} strokeWidth={2.5} />
-            </LinearGradient>
-          </Pressable>
+          {createError ? <Text style={styles.createError}>{createError}</Text> : null}
+          <PrimaryButton
+            label={isCreating ? 'CREATING VAULT…' : 'CREATE VAULT'}
+            icon={isCreating ? undefined : ArrowRight}
+            onPress={() => void handleCreate()}
+            disabled={isCreating}
+            loading={isCreating}
+          />
 
           {/* Footer meta */}
           <View style={styles.footerMeta}>
@@ -241,6 +277,20 @@ export function SetupMasterPasswordScreen({ onCreate }: SetupMasterPasswordScree
           </View>
         </View>
       </ScrollView>
+
+      <Modal visible={isCreating} transparent animationType="fade" statusBarTranslucent>
+        <View style={styles.loadingOverlay}>
+          <View style={styles.loadingCard}>
+            <View style={styles.loadingBadge}>
+              <Lock size={28} color={palette.heading} strokeWidth={1.75} />
+            </View>
+            <ActivityIndicator color={palette.accent} size="large" />
+            <Text style={styles.loadingTitle}>Creating your vault</Text>
+            <Text style={styles.loadingSubtitle}>{loadingMessage}</Text>
+            <Text style={styles.loadingHint}>This secure step can take up to 15 seconds.</Text>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -415,29 +465,6 @@ const styles = StyleSheet.create({
     color: palette.body,
     opacity: 0.6,
   },
-  toggleTrack: {
-    width: 48,
-    height: 24,
-    borderRadius: 9999,
-    backgroundColor: 'rgba(255,255,255,0.15)',
-    padding: 2,
-    justifyContent: 'center',
-  },
-  toggleTrackOn: {
-    backgroundColor: palette.accentStrong,
-  },
-  toggleTrackDisabled: {
-    backgroundColor: 'rgba(255,255,255,0.08)',
-  },
-  toggleKnob: {
-    width: 20,
-    height: 20,
-    borderRadius: 9999,
-    backgroundColor: '#ffffff',
-  },
-  toggleKnobOn: {
-    alignSelf: 'flex-end',
-  },
   cautionNote: {
     flexDirection: 'row',
     alignItems: 'flex-start',
@@ -451,34 +478,62 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     color: 'rgba(207,194,213,0.8)',
   },
-  actionButtonWrapper: {
-    borderRadius: 9999,
-    ...Platform.select({
-      ios: {
-        shadowColor: palette.accentStrong,
-        shadowOffset: { width: 0, height: 8 },
-        shadowOpacity: 0.3,
-        shadowRadius: 16,
-      },
-      android: { elevation: 8 },
-    }),
+  createError: {
+    fontSize: 13,
+    lineHeight: 18,
+    fontWeight: '500',
+    color: '#ff8a8a',
+    textAlign: 'center',
   },
-  pressed: {
-    opacity: 0.85,
-  },
-  actionButton: {
-    height: 56,
-    borderRadius: 9999,
-    flexDirection: 'row',
+  loadingOverlay: {
+    flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 8,
+    paddingHorizontal: 24,
+    backgroundColor: 'rgba(25,14,39,0.92)',
   },
-  actionButtonText: {
+  loadingCard: {
+    width: '100%',
+    maxWidth: 320,
+    alignItems: 'center',
+    gap: 16,
+    paddingHorizontal: 24,
+    paddingVertical: 32,
+    borderRadius: 32,
+    borderWidth: 1,
+    borderColor: palette.glassBorder,
+    backgroundColor: palette.glassBackground,
+  },
+  loadingBadge: {
+    width: 72,
+    height: 72,
+    borderRadius: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(123,44,191,0.2)',
+    borderWidth: 1,
+    borderColor: 'rgba(222,183,255,0.2)',
+  },
+  loadingTitle: {
+    fontFamily: Fonts.serif,
+    fontSize: 22,
+    fontWeight: '600',
+    color: palette.heading,
+    textAlign: 'center',
+  },
+  loadingSubtitle: {
     fontSize: 14,
-    fontWeight: '700',
-    letterSpacing: 1.4,
-    color: palette.buttonText,
+    lineHeight: 20,
+    fontWeight: '500',
+    color: palette.body,
+    textAlign: 'center',
+  },
+  loadingHint: {
+    fontSize: 12,
+    lineHeight: 16,
+    fontWeight: '500',
+    color: palette.placeholder,
+    textAlign: 'center',
   },
   footerMeta: {
     flexDirection: 'row',

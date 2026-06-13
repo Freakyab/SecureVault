@@ -1,6 +1,6 @@
 import { Platform } from 'react-native';
 
-import { Fonts } from '@/constants/theme';
+import { SerifFont } from '@/constants/theme';
 
 /**
  * Design tokens for the SecureVault interface, derived from the Figma
@@ -8,8 +8,8 @@ import { Fonts } from '@/constants/theme';
  * accents, glassmorphic surfaces, and ambient aurora glows.
  */
 export const VaultColors = {
-  background: '#190e27',
-  backgroundDeep: '#120a1c',
+  background: '#140b20',
+  backgroundDeep: '#0f0818',
   headerBackground: 'rgba(25,14,39,0.85)',
   headerBorder: 'rgba(76,67,83,0.4)',
 
@@ -18,9 +18,9 @@ export const VaultColors = {
   muted: 'rgba(207,194,213,0.6)',
   placeholder: 'rgba(207,194,213,0.4)',
 
-  accent: '#deb7ff',
+  accent: '#b06af0',
   accentStrong: '#7b2cbf',
-  accentSoft: 'rgba(123,44,191,0.2)',
+  accentSoft: 'rgba(123,44,191,0.25)',
 
   glassBackground: 'rgba(255,255,255,0.03)',
   glassBackgroundStrong: 'rgba(255,255,255,0.06)',
@@ -54,8 +54,8 @@ export const VaultSpacing = {
 } as const;
 
 export const VaultType = {
-  brand: { fontFamily: Fonts.serif, fontSize: 24, fontWeight: '500' as const, letterSpacing: -0.6 },
-  title: { fontFamily: Fonts.serif, fontSize: 28, fontWeight: '600' as const, lineHeight: 36 },
+  brand: { fontFamily: SerifFont.semibold, fontSize: 24, letterSpacing: -0.4 },
+  title: { fontFamily: SerifFont.semibold, fontSize: 28, lineHeight: 36 },
   heading: { fontSize: 18, fontWeight: '600' as const, letterSpacing: 0.2 },
   body: { fontSize: 16, lineHeight: 24, fontWeight: '400' as const },
   label: { fontSize: 12, fontWeight: '500' as const, letterSpacing: 1.2 },
@@ -65,10 +65,10 @@ export const VaultType = {
 export const vaultShadow = Platform.select({
   ios: {
     shadowColor: VaultColors.accentStrong,
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.3,
-    shadowRadius: 16,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.55,
+    shadowRadius: 22,
   },
-  android: { elevation: 8 },
+  android: { elevation: 14 },
   default: {},
 });

@@ -1,22 +1,23 @@
 import { useRouter } from 'expo-router';
-import { Activity, LayoutGrid, LucideIcon, Settings, Shield } from 'lucide-react-native';
+import { Activity, LayoutGrid, LucideIcon, Settings, Shield, Wand2 } from 'lucide-react-native';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { VaultColors } from '@/constants/vault-theme';
 
-export type VaultTab = 'dashboard' | 'vault' | 'health' | 'settings';
+export type VaultTab = 'dashboard' | 'vault' | 'generator' | 'health' | 'settings';
 
 interface NavItem {
   key: VaultTab;
   icon: LucideIcon;
-  route: '/dashboard' | '/vault' | '/health' | '/settings';
+  route: '/dashboard' | '/vault' | '/generator' | '/health' | '/settings';
   label: string;
 }
 
 const ITEMS: NavItem[] = [
   { key: 'dashboard', icon: Shield, route: '/dashboard', label: 'Dashboard' },
   { key: 'vault', icon: LayoutGrid, route: '/vault', label: 'Vault' },
+  { key: 'generator', icon: Wand2, route: '/generator', label: 'Generator' },
   { key: 'health', icon: Activity, route: '/health', label: 'Health' },
   { key: 'settings', icon: Settings, route: '/settings', label: 'Settings' },
 ];
@@ -43,12 +44,13 @@ export function BottomNav({ active }: BottomNavProps) {
               accessibilityState={{ selected: isActive }}
               onPress={() => router.replace(item.route)}
               style={styles.item}>
-              <Icon
-                size={22}
-                color={isActive ? VaultColors.accent : VaultColors.muted}
-                strokeWidth={isActive ? 2.25 : 1.75}
-              />
-              {isActive ? <View style={styles.activeDot} /> : null}
+              <View style={[styles.iconWrap, isActive && styles.iconWrapActive]}>
+                <Icon
+                  size={22}
+                  color={isActive ? VaultColors.heading : VaultColors.muted}
+                  strokeWidth={isActive ? 2.25 : 1.75}
+                />
+              </View>
             </Pressable>
           );
         })}
@@ -76,16 +78,19 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
   },
   item: {
-    width: 56,
+    flex: 1,
     height: 56,
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 4,
   },
-  activeDot: {
-    width: 4,
-    height: 4,
-    borderRadius: 9999,
-    backgroundColor: VaultColors.accent,
+  iconWrap: {
+    width: 44,
+    height: 40,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  iconWrapActive: {
+    backgroundColor: VaultColors.accentStrong,
   },
 });

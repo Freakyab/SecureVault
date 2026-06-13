@@ -1,14 +1,11 @@
-/**
- * Learn more about light and dark modes:
- * https://docs.expo.dev/guides/color-schemes/
- */
-
-import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import { getTheme, type ColorSchemeName } from '@/theme';
 
 export function useTheme() {
   const scheme = useColorScheme();
-  const theme = scheme === 'unspecified' ? 'light' : scheme;
+  // SecureVault ships dark-first: only an explicit light scheme opts out of the
+  // premium dark tokens, so unspecified/null resolves to dark.
+  const themeScheme: ColorSchemeName = scheme === 'light' ? 'light' : 'dark';
 
-  return Colors[theme];
+  return getTheme(themeScheme);
 }

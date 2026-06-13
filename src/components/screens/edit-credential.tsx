@@ -16,13 +16,12 @@ import { Alert, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { CredentialAvatar, GlassCard, PrimaryButton, ScreenBackground, Toggle, VaultHeader } from '@/components/vault';
+import { CREDENTIAL_CATEGORIES } from '@/constants/categories';
 import { VaultColors, VaultType } from '@/constants/vault-theme';
 import { useToast } from '@/contexts/toast-context';
 import { useVault } from '@/contexts/vault-context';
 import { copySensitiveToClipboard, copyToClipboard, hapticSuccess, hapticWarning } from '@/services/feedback';
 import { generatePassword, scorePasswordStrength } from '@/services/password-generator';
-
-const CATEGORIES = ['Login', 'Card', 'Note', 'Identity'];
 
 function formatAge(iso: string) {
   const date = new Date(iso);
@@ -300,14 +299,16 @@ export function EditCredentialScreen() {
           <View style={styles.field}>
             <Text style={styles.fieldLabel}>Category</Text>
             <View style={styles.categoryRow}>
-              {CATEGORIES.map((item) => {
-                const active = item === category;
+              {CREDENTIAL_CATEGORIES.map((item) => {
+                const active = item.id === category;
                 return (
                   <Pressable
-                    key={item}
-                    onPress={() => setCategory(item)}
+                    key={item.id}
+                    accessibilityRole="button"
+                    accessibilityState={{ selected: active }}
+                    onPress={() => setCategory(item.id)}
                     style={[styles.categoryChip, active && styles.categoryChipActive]}>
-                    <Text style={[styles.categoryText, active && styles.categoryTextActive]}>{item}</Text>
+                    <Text style={[styles.categoryText, active && styles.categoryTextActive]}>{item.label}</Text>
                   </Pressable>
                 );
               })}

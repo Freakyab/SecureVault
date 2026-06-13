@@ -6,17 +6,19 @@ interface ToggleProps {
   value: boolean;
   onChange: (next: boolean) => void;
   label?: string;
+  disabled?: boolean;
 }
 
-export function Toggle({ value, onChange, label = 'Toggle' }: ToggleProps) {
+export function Toggle({ value, onChange, label = 'Toggle', disabled = false }: ToggleProps) {
   return (
     <Pressable
       accessibilityRole="switch"
       accessibilityLabel={label}
-      accessibilityState={{ checked: value }}
+      accessibilityState={{ checked: value, disabled }}
+      disabled={disabled}
       hitSlop={8}
       onPress={() => onChange(!value)}
-      style={[styles.track, value && styles.trackOn]}>
+      style={[styles.track, value && styles.trackOn, disabled && styles.trackDisabled]}>
       <View style={[styles.knob, value && styles.knobOn]} />
     </Pressable>
   );
@@ -33,6 +35,9 @@ const styles = StyleSheet.create({
   },
   trackOn: {
     backgroundColor: VaultColors.accentStrong,
+  },
+  trackDisabled: {
+    opacity: 0.5,
   },
   knob: {
     width: 20,

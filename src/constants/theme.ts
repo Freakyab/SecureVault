@@ -26,12 +26,22 @@ export const Colors = {
 
 export type ThemeColor = keyof typeof Colors.light & keyof typeof Colors.dark;
 
+/**
+ * Playfair Display (loaded in `app/_layout.tsx`) backs every serif heading so
+ * the high-contrast display serif matches the design reference on all platforms,
+ * instead of falling back to the OS serif (Android Noto Serif / iOS New York).
+ */
+export const SerifFont = {
+  medium: 'PlayfairDisplay_500Medium',
+  semibold: 'PlayfairDisplay_600SemiBold',
+  bold: 'PlayfairDisplay_700Bold',
+} as const;
+
 export const Fonts = Platform.select({
   ios: {
     /** iOS `UIFontDescriptorSystemDesignDefault` */
     sans: 'system-ui',
-    /** iOS `UIFontDescriptorSystemDesignSerif` */
-    serif: 'ui-serif',
+    serif: SerifFont.semibold,
     /** iOS `UIFontDescriptorSystemDesignRounded` */
     rounded: 'ui-rounded',
     /** iOS `UIFontDescriptorSystemDesignMonospaced` */
@@ -39,13 +49,13 @@ export const Fonts = Platform.select({
   },
   default: {
     sans: 'normal',
-    serif: 'serif',
+    serif: SerifFont.semibold,
     rounded: 'normal',
     mono: 'monospace',
   },
   web: {
     sans: 'var(--font-display)',
-    serif: 'var(--font-serif)',
+    serif: SerifFont.semibold,
     rounded: 'var(--font-rounded)',
     mono: 'var(--font-mono)',
   },

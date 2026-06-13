@@ -2,16 +2,18 @@
 
 Track known issues and work not yet done. Update **Status** and **Progress** as items are fixed.
 
-**Last updated:** 2026-06-13 (Run 3 — biometrics, breach monitor, logos, auto-lock, master-password change)  
-**Open:** 4 · **In progress:** 0 · **Done:** 45
+**Last updated:** 2026-06-14 (BUG-015 Create vault button + BUG-016 biometric switch regressions fixed)  
+**Open:** 4 · **In progress:** 0 · **Done:** 57
 
-> **Status (2026-06-13, Run 3):** The earlier "UI-only prototype" audit note is **superseded**. The
-> `src/` tree now has working `contexts/vault-context.tsx`, `services/` (vault-storage, health-checks,
-> password-generator, credential-search, vault-backup, feedback, **biometric**, **breach-check**,
-> **site-branding**), `types/credential.ts`, AsyncStorage persistence, real CRUD, live health metrics,
-> biometric unlock (`expo-local-authentication`), breach monitoring (HIBP k-anonymity), brand logos
-> with offline cache, custom logo upload, auto-lock on background, screen-capture protection, and a
-> master-password change flow. Only the 4 backend/cloud-dependent items below remain open.
+> **Status (2026-06-14, Run 5):** No bug/task items changed — the 4 open items remain backend-gated
+> (out of scope for offline-first v1). This run verified the ROADMAP Phase 2 Dashboard and Vault
+> UI tasks (10 of them) against the shipped, data-wired screens and checked them off in
+> `ROADMAP.md` (Phase 2 → 61%, overall → 56%). See the ROADMAP Progress log for details.
+>
+> **Status (2026-06-13, Run 4):** Credentials are encrypted at rest with AES-256-GCM
+> (PBKDF2-SHA256, 120k iterations via `@noble/ciphers` / `@noble/hashes`). Legacy plaintext
+> vaults migrate on first unlock. The Generator tab is live. Categories are centralized in
+> `constants/categories.ts`. Biometric unlock uses SecureStore for the derived key.
 
 ---
 
@@ -22,11 +24,11 @@ Track known issues and work not yet done. Update **Status** and **Progress** as 
 | Open | 4 |
 | In progress | 0 |
 | Blocked | 0 |
-| Done | 45 |
-| **Total** | **49** |
+| Done | 57 |
+| **Total** | **61** |
 
 ```
-[██████████████████░░] 92% resolved
+[███████████████████░] 93% resolved
 ```
 
 | Priority | Open |
@@ -44,7 +46,7 @@ offline-first v1 (Open decision D1 = *Offline only*).
 
 ## Recommended Fix Order
 
-✅ done: TASK-009 → TASK-015 → TASK-016 → TASK-006 → TASK-007 → TASK-011 → BUG-012 → TASK-020 → TASK-032 → TASK-033 → TASK-034 → TASK-035 → TASK-036
+✅ done: TASK-009 → … → TASK-036 → TASK-037 → TASK-038 → TASK-039 → TASK-040 → TASK-041 → TASK-042 → TASK-043 → TASK-044 → TASK-045 → TASK-046
 ⏳ remaining (backend-gated): TASK-017 → TASK-022 → TASK-018 → TASK-019
 
 ---
@@ -68,6 +70,8 @@ _No open bugs._
 
 | ID | Title | Priority | Status |
 |----|-------|----------|--------|
+| [BUG-016](#bug-016) | Biometric unlock switch not working (setup + settings) | P1 | done |
+| [BUG-015](#bug-015) | Create Vault button does not work on setup screen | P0 | done |
 | [BUG-012](#bug-012) | Biometric enable switch cannot be toggled | P1 | done |
 | [BUG-007](#bug-007) | Home menu icon locks app with master password | P1 | done |
 | [BUG-002](#bug-002) | No master password after onboarding | P0 | done |
@@ -111,6 +115,16 @@ Track suspected issues before they are fully reproduced and converted into forma
 
 | ID | Title | Priority | Status |
 |----|-------|----------|--------|
+| [TASK-037](#task-037) | PBKDF2-SHA256 key derivation | P0 | done |
+| [TASK-038](#task-038) | AES-GCM encrypt vault at rest | P0 | done |
+| [TASK-039](#task-039) | Encrypted blob + salt storage | P0 | done |
+| [TASK-040](#task-040) | In-memory decrypted cache while unlocked | P1 | done |
+| [TASK-041](#task-041) | Categories enum/map | P2 | done |
+| [TASK-042](#task-042) | Wire category chips to filter state | P2 | done |
+| [TASK-043](#task-043) | Generator screen + bottom nav | P1 | done |
+| [TASK-044](#task-044) | Wire password generator service to screen | P1 | done |
+| [TASK-045](#task-045) | Save generated password to vault entry | P1 | done |
+| [TASK-046](#task-046) | Vault error handling (wrong password, corrupt, storage full) | P1 | done |
 | [TASK-001](#task-001) | Onboarding same image/content on all 3 steps | P1 | done |
 | [TASK-002](#task-002) | Password inputs missing show/hide (eye) | P1 | done |
 | [TASK-003](#task-003) | Support multiple credentials for the same account | P1 | done |
@@ -891,6 +905,115 @@ Switching between the bottom-nav tabs (Dashboard / Vault / Health / Settings) sh
 
 1. Declared explicit `Stack.Screen` entries for the four tab routes in `src/app/_layout.tsx` with `animation: 'none'`, so tab swaps are instant and never reveal the white window root.
 2. Added a shared dark `RouteFallback` (background `#190e27`) replacing the bare `<View />` loading placeholders in all tab route guards.
+
+---
+
+<a id="bug-015"></a>
+
+## BUG-015: Create Vault button does not work on setup screen
+
+| Field | Value |
+|-------|--------|
+| **ID** | BUG-015 |
+| **Type** | Bug (regression) |
+| **Priority** | P0 — Critical |
+| **Status** | done |
+| **Area** | Vault setup / UX |
+| **Reported** | 2026-06-14 |
+| **Related** | BUG-006 |
+
+### Description
+
+On the **Initialize Your Vault** setup screen, tapping **CREATE VAULT** after entering matching passwords appears to do nothing. Users cannot complete vault initialization.
+
+### Steps to reproduce
+
+1. Complete onboarding → reach setup screen.
+2. Enter master password (≥ 12 chars) and confirm.
+3. Tap **CREATE VAULT** while the keyboard is still open (or immediately after typing).
+4. Observe no action on first tap, or no feedback during the ~3s PBKDF2 derivation.
+
+### Expected
+
+- Button responds on first tap even with keyboard open.
+- Loading feedback while vault is being created.
+- Navigate to Dashboard on success; show alert on failure.
+
+### Actual
+
+- First tap often dismissed the keyboard instead of firing the button (`ScrollView` default `keyboardShouldPersistTaps`).
+- Custom gradient `Pressable` could fail to receive touches on some Android builds.
+- No loading state during async vault creation.
+
+### Root cause
+
+1. `ScrollView` missing `keyboardShouldPersistTaps` — classic RN tap-swallow bug.
+2. Setup screen used a bespoke gradient button instead of the shared `PrimaryButton`.
+3. `onCreate` was fire-and-forget with no `isCreating` guard.
+4. **Regression (2026-06-14):** `setupMasterPassword` **awaited** `storeBiometricKey()` (expo-secure-store) after vault creation. On Android Expo Go this call can **hang indefinitely** when biometric unlock is enabled, leaving the screen stuck on "CREATING VAULT…" and never navigating away.
+
+### Resolution
+
+1. Added `keyboardShouldPersistTaps="always"` to setup `ScrollView`.
+2. Replaced bespoke button with shared `PrimaryButton` (+ `pointerEvents="none"` on gradient child, `width: '100%'`).
+3. Await async `onCreate`, show **CREATING VAULT…** label, disable button while creating.
+4. **Do not await** `storeBiometricKey` during setup/unlock — run in background so SecureStore cannot block vault creation.
+5. Navigate via `useEffect` after `isInitialized && isUnlocked` flush (avoids router race with React state).
+
+### Related files
+
+- `src/components/setup-master-password.tsx`
+- `src/components/vault/primary-button.tsx`
+- `src/app/setup.tsx`
+
+---
+
+<a id="bug-016"></a>
+
+## BUG-016: Biometric unlock switch not working (setup + settings)
+
+| Field | Value |
+|-------|--------|
+| **ID** | BUG-016 |
+| **Type** | Bug (regression) |
+| **Priority** | P1 — High |
+| **Status** | done |
+| **Area** | Auth / Setup / Settings / Biometric UX |
+| **Reported** | 2026-06-14 |
+| **Related** | BUG-012, TASK-020 |
+
+### Description
+
+The **Enable Biometric Unlock** switch on the setup screen and the **Biometric Unlock** toggle in Settings do not respond to taps.
+
+### Steps to reproduce
+
+1. Open setup screen → try toggling biometric switch.
+2. Or unlock vault → Settings → Security → try toggling Biometric Unlock.
+3. Observe switch does not change state.
+
+### Expected
+
+- Toggle responds immediately on supported devices.
+- Clear alert when biometrics unavailable.
+- Settings toggle persists via `updateSettings`.
+
+### Actual
+
+- Setup: whole-card `Pressable` with decorative toggle `View` — taps lost when keyboard open (same `ScrollView` issue as BUG-015).
+- Settings: `SettingsRow` wrapped trailing `Toggle` in an outer `Pressable` even when `onPress` was undefined, blocking nested switch presses.
+
+### Resolution
+
+1. Setup: replaced card-level `Pressable` + fake toggle with shared `Toggle` component; added `keyboardShouldPersistTaps`.
+2. Settings: `SettingsRow` renders a plain `View` when no `onPress` is provided so trailing toggles receive touches.
+3. Added `disabled` prop to shared `Toggle` for unsupported devices.
+
+### Related files
+
+- `src/components/setup-master-password.tsx`
+- `src/components/screens/settings.tsx`
+- `src/components/vault/toggle.tsx`
 
 ---
 
@@ -2440,6 +2563,176 @@ Replace bare loading frames and plain-text empty states with polished, branded U
 
 ---
 
+<a id="task-037"></a>
+
+## TASK-037: PBKDF2-SHA256 key derivation
+
+| Field | Value |
+|-------|--------|
+| **ID** | TASK-037 |
+| **Priority** | P0 — Critical |
+| **Status** | done |
+| **Roadmap** | 3.5 |
+
+### Resolution (Run 4)
+
+1. New `services/crypto/vault-crypto.ts` derives a 256-bit AES key via PBKDF2-SHA256 (`@noble/hashes`), 120k iterations, random 16-byte salt.
+
+---
+
+<a id="task-038"></a>
+
+## TASK-038: AES-GCM encrypt vault at rest
+
+| Field | Value |
+|-------|--------|
+| **ID** | TASK-038 |
+| **Priority** | P0 — Critical |
+| **Status** | done |
+| **Roadmap** | 3.6 |
+
+### Resolution (Run 4)
+
+1. Credential payloads encrypt with AES-256-GCM (`@noble/ciphers/aes.js`); wrong password fails GCM authentication without a separate password hash.
+
+---
+
+<a id="task-039"></a>
+
+## TASK-039: Encrypted blob + salt storage
+
+| Field | Value |
+|-------|--------|
+| **ID** | TASK-039 |
+| **Priority** | P0 — Critical |
+| **Status** | done |
+| **Roadmap** | 3.7 |
+
+### Resolution (Run 4)
+
+1. `vault-storage.ts` v3 format stores salt + encrypted blob in AsyncStorage; biometric derived key in `expo-secure-store` via `services/biometric-key.ts`. Legacy v2 plaintext vaults migrate on first unlock.
+
+---
+
+<a id="task-040"></a>
+
+## TASK-040: In-memory decrypted cache while unlocked
+
+| Field | Value |
+|-------|--------|
+| **ID** | TASK-040 |
+| **Priority** | P1 — High |
+| **Status** | done |
+| **Roadmap** | 3.8 |
+
+### Resolution (Run 4)
+
+1. `VaultProvider` holds `encryptionKeyRef` only while unlocked; `clearUnlockedSession()` wipes key + credentials on lock and auto-lock.
+
+---
+
+<a id="task-041"></a>
+
+## TASK-041: Categories enum/map
+
+| Field | Value |
+|-------|--------|
+| **ID** | TASK-041 |
+| **Priority** | P2 — Medium |
+| **Status** | done |
+| **Roadmap** | 3.2 |
+
+### Resolution (Run 4)
+
+1. New `constants/categories.ts` with `CREDENTIAL_CATEGORIES`, `CATEGORY_FILTERS`, icons — reused by Dashboard, Vault, Add/Edit forms.
+
+---
+
+<a id="task-042"></a>
+
+## TASK-042: Wire category chips to filter state
+
+| Field | Value |
+|-------|--------|
+| **ID** | TASK-042 |
+| **Priority** | P2 — Medium |
+| **Status** | done |
+| **Roadmap** | 3.13 |
+
+### Resolution (Run 4)
+
+1. Dashboard category cards navigate to `/vault?category=<id>`; Main Vault reads the param and applies the shared filter chips.
+
+---
+
+<a id="task-043"></a>
+
+## TASK-043: Generator screen + bottom nav
+
+| Field | Value |
+|-------|--------|
+| **ID** | TASK-043 |
+| **Priority** | P1 — High |
+| **Status** | done |
+| **Roadmap** | 2.4 |
+
+### Resolution (Run 4)
+
+1. New `components/screens/generator.tsx` + `app/generator.tsx` route; `BottomNav` gained a Generator tab (Wand2 icon).
+
+---
+
+<a id="task-044"></a>
+
+## TASK-044: Wire password generator service to screen
+
+| Field | Value |
+|-------|--------|
+| **ID** | TASK-044 |
+| **Priority** | P1 — High |
+| **Status** | done |
+| **Roadmap** | 3.14 |
+
+### Resolution (Run 4)
+
+1. Generator uses `services/password-generator.ts` with length stepper/presets, charset toggles, strength meter, copy, and regenerate.
+
+---
+
+<a id="task-045"></a>
+
+## TASK-045: Save generated password to vault entry
+
+| Field | Value |
+|-------|--------|
+| **ID** | TASK-045 |
+| **Priority** | P1 — High |
+| **Status** | done |
+| **Roadmap** | 3.15 |
+
+### Resolution (Run 4)
+
+1. "Save secure password" navigates to `/add-credential?password=…`; Add Credential prefills the password field from route params.
+
+---
+
+<a id="task-046"></a>
+
+## TASK-046: Vault error handling (wrong password, corrupt, storage full)
+
+| Field | Value |
+|-------|--------|
+| **ID** | TASK-046 |
+| **Priority** | P1 — High |
+| **Status** | done |
+| **Roadmap** | 3.18 |
+
+### Resolution (Run 4)
+
+1. GCM decrypt failure → "Master password is incorrect"; corrupt JSON → `CorruptVaultError` with reset offer on unlock screen; AsyncStorage write failure → storage-full message.
+
+---
+
 ## Dependency graph
 
 ```mermaid
@@ -2519,6 +2812,19 @@ flowchart TD
 
 | Date | ID | Resolution | By |
 |------|-----|------------|-----|
+| 2026-06-14 | BUG-015 | Follow-up: stop awaiting SecureStore biometric key write (was hanging setup on Android); state-driven navigation after unlock. | Cursor |
+| 2026-06-14 | BUG-016 | Biometric toggles: shared `Toggle` on setup, `SettingsRow` no longer wraps toggles in dead `Pressable`, `Toggle.disabled` prop. | Cursor |
+| 2026-06-14 | ROADMAP 2.2/2.3 | Verified 10 Phase 2 UI tasks against shipped code (`dashboard.tsx`, `main-vault.tsx`, `bottom-nav.tsx`): Dashboard greeting header, 6-category stat cards, Manage/Recently-Used, pill tab bar; Vault shield header, search, category chips, credential rows, security-alert card, empty states. Checked in ROADMAP; no BUG/TASK counts changed. | Cursor |
+| 2026-06-13 | TASK-037 | PBKDF2-SHA256 key derivation (120k iter) in `services/crypto/vault-crypto.ts`. | Cursor |
+| 2026-06-13 | TASK-038 | AES-256-GCM encrypt/decrypt for credential blob at rest via `@noble/ciphers`. | Cursor |
+| 2026-06-13 | TASK-039 | Encrypted vault v3 in AsyncStorage + biometric key in SecureStore; legacy plaintext migration on unlock. | Cursor |
+| 2026-06-13 | TASK-040 | In-memory `encryptionKeyRef` cleared on lock/auto-lock; credentials empty while locked. | Cursor |
+| 2026-06-13 | TASK-041 | Shared `constants/categories.ts` map used across Dashboard/Vault/Add/Edit. | Cursor |
+| 2026-06-13 | TASK-042 | Dashboard category cards deep-link to Vault with `?category=` filter param. | Cursor |
+| 2026-06-13 | TASK-043 | Generator screen + `/generator` route + bottom-nav tab. | Cursor |
+| 2026-06-13 | TASK-044 | Generator wired to password-generator service (length, charset, strength, copy). | Cursor |
+| 2026-06-13 | TASK-045 | Save secure password → Add Credential with prefilled password param. | Cursor |
+| 2026-06-13 | TASK-046 | Wrong-password/corrupt-vault/storage-full error handling on unlock + storage layer. | Cursor |
 | 2026-06-13 | BUG-012 | Setup biometric toggle wired to real `expo-local-authentication` availability with context-aware messaging; defaults on only when supported+enrolled. | Cursor |
 | 2026-06-13 | TASK-020 | Real biometric unlock: `services/biometric.ts`, auto-prompt + fingerprint button on unlock screen, `unlockWithBiometrics` via `touchVaultUnlock`, master-password fallback. | Cursor |
 | 2026-06-13 | TASK-011 | HIBP k-anonymity breach monitor (`services/breach-check.ts`) + Password Health Breach Monitor card with loading/error/result states. | Cursor |

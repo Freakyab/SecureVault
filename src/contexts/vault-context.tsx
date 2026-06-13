@@ -9,10 +9,12 @@ import {
   persistSettings,
   resetStoredVault,
   setupStoredVault,
-  touchVaultUnlock,
   unlockStoredVault,
+  unlockStoredVaultWithKey,
 } from '@/services/vault-storage';
 import { mergeCredentials } from '@/services/vault-backup';
+import { clearBiometricKey, getBiometricKey, storeBiometricKey } from '@/services/biometric-key';
+import { hexToKey, keyToHex } from '@/services/crypto/vault-crypto';
 import {
   Credential,
   DEFAULT_VAULT_SETTINGS,
@@ -20,6 +22,9 @@ import {
   VaultMetadata,
   VaultSettings,
 } from '@/types/credential';
+
+/** Temporarily off — set to `true` to block screenshots while unlocked (TASK-035). */
+const SCREEN_CAPTURE_PROTECTION_ENABLED = false;
 
 interface CredentialInput {
   website: string;
@@ -82,6 +87,17 @@ export function VaultProvider({ children }: PropsWithChildren) {
   isUnlockedRef.current = isUnlocked;
   settingsRef.current = settings;
 
+  // The decrypted AES key lives only in memory for the unlocked session and is
+  // cleared on lock so credentials cannot be re-encrypted/read once locked
+  // (Roadmap 3.8).
+  const encryptionKeyRef = useRef<Uint8Array | null>(null);
+
+  function clearUnlockedSession() {
+    encryptionKeyRef.current = null;
+    setCredentials([]);
+    setIsUnlocked(false);
+  }
+
   useEffect(() => {
     let isMounted = true;
 
@@ -123,11 +139,11 @@ export function VaultProvider({ children }: PropsWithChildren) {
         const minutes = settingsRef.current.autoLockMinutes;
         if (minutes < 0) return; // Never auto-lock.
         if (minutes === 0) {
-          setIsUnlocked(false);
+          clearUnlockedSession();
           return;
         }
         if (backgroundedAt && Date.now() - backgroundedAt >= minutes * 60_000) {
-          setIsUnlocked(false);
+          clearUnlockedSession();
         }
       }
     }
@@ -143,6 +159,11 @@ export function VaultProvider({ children }: PropsWithChildren) {
 
     async function applyCapturePolicy() {
       try {
+        if (!SCREEN_CAPTURE_PROTECTION_ENABLED) {
+          await ScreenCapture.allowScreenCaptureAsync('securevault-unlocked');
+          return;
+        }
+
         if (isUnlocked) {
           await ScreenCapture.preventScreenCaptureAsync('securevault-unlocked');
         } else {
@@ -169,33 +190,47 @@ export function VaultProvider({ children }: PropsWithChildren) {
   }
 
   async function setupMasterPassword(password: string, biometricEnabled: boolean) {
-    const snapshot = await setupStoredVault(password, {
+    const { snapshot, key } = await setupStoredVault(password, {
       ...DEFAULT_VAULT_SETTINGS,
       biometricEnabled,
     });
+    encryptionKeyRef.current = key;
     applySnapshot(snapshot);
     setIsUnlocked(true);
+    // Never block vault creation on SecureStore — it can hang on some Expo Go /
+    // emulator builds. Biometric unlock falls back to master password until
+    // the key is persisted.
+    if (biometricEnabled) void storeBiometricKey(keyToHex(key));
   }
 
   async function unlockVault(password: string) {
-    const snapshot = await unlockStoredVault(password);
+    const { snapshot, key } = await unlockStoredVault(password);
+    encryptionKeyRef.current = key;
     applySnapshot(snapshot);
     setIsUnlocked(true);
+    // Refresh the keystore copy so biometric unlock stays in sync (covers
+    // legacy→encrypted migration and master-password changes).
+    if (snapshot.settings.biometricEnabled) void storeBiometricKey(keyToHex(key));
   }
 
   async function unlockWithBiometrics() {
-    const snapshot = await touchVaultUnlock();
+    const keyHex = await getBiometricKey();
+    if (!keyHex) throw new Error('Biometric unlock is unavailable. Use your master password.');
+    const { snapshot, key } = await unlockStoredVaultWithKey(hexToKey(keyHex));
+    encryptionKeyRef.current = key;
     applySnapshot(snapshot);
     setIsUnlocked(true);
   }
 
   function lockVault() {
-    setIsUnlocked(false);
+    clearUnlockedSession();
   }
 
   async function commitCredentials(nextCredentials: Credential[]) {
+    const key = encryptionKeyRef.current;
+    if (!key) throw new Error('Unlock your vault before saving changes.');
     setCredentials(nextCredentials);
-    const snapshot = await persistCredentials(nextCredentials);
+    const snapshot = await persistCredentials(nextCredentials, key);
     setMetadata(snapshot.metadata);
     setCredentials(snapshot.credentials);
   }
@@ -304,15 +339,27 @@ export function VaultProvider({ children }: PropsWithChildren) {
     setSettings(next);
     const snapshot = await persistSettings(next);
     setSettings(snapshot.settings);
+
+    // Keep the biometric keystore copy in sync with the opt-in.
+    if (partial.biometricEnabled === false) {
+      await clearBiometricKey();
+    } else if (partial.biometricEnabled === true && encryptionKeyRef.current) {
+      void storeBiometricKey(keyToHex(encryptionKeyRef.current));
+    }
   }
 
   async function changeMasterPassword(current: string, next: string) {
-    const snapshot = await changeStoredMasterPassword(current, next);
+    const { snapshot, key } = await changeStoredMasterPassword(current, next);
+    encryptionKeyRef.current = key;
     applySnapshot(snapshot);
+    setIsUnlocked(true);
+    if (snapshot.settings.biometricEnabled) void storeBiometricKey(keyToHex(key));
   }
 
   async function resetVault() {
     await resetStoredVault();
+    await clearBiometricKey();
+    encryptionKeyRef.current = null;
     setIsInitialized(false);
     setIsUnlocked(false);
     setCredentials([]);

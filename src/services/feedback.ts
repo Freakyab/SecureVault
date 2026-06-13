@@ -20,6 +20,14 @@ export function hapticWarning() {
   void safeHaptic(() => Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning));
 }
 
+export function hapticError() {
+  void safeHaptic(() => Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error));
+}
+
+export function hapticSoft() {
+  void safeHaptic(() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Soft));
+}
+
 export function hapticSelection() {
   void safeHaptic(() => Haptics.selectionAsync());
 }

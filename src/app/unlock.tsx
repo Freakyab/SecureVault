@@ -14,9 +14,33 @@ import {
 
 export default function Unlock() {
   const router = useRouter();
-  const { isInitialized, isLoading, isUnlocked, settings, unlockVault, unlockWithBiometrics } = useVault();
+  const { isInitialized, isLoading, isUnlocked, settings, unlockVault, unlockWithBiometrics, resetVault } =
+    useVault();
   const [biometric, setBiometric] = useState<BiometricAvailability | null>(null);
   const promptedRef = useRef(false);
+
+  const handleUnlockError = useCallback(
+    (error: unknown, fallback: string) => {
+      const message = error instanceof Error ? error.message : fallback;
+      // A corrupt vault cannot be unlocked with any password — offer a reset path.
+      if (message.toLowerCase().includes('corrupt')) {
+        Alert.alert('Vault data corrupted', message, [
+          { text: 'Cancel', style: 'cancel' },
+          {
+            text: 'Reset App',
+            style: 'destructive',
+            onPress: async () => {
+              await resetVault();
+              router.replace('/');
+            },
+          },
+        ]);
+        return;
+      }
+      Alert.alert('Could not unlock vault', message);
+    },
+    [resetVault, router],
+  );
 
   useEffect(() => {
     void getBiometricAvailability().then(setBiometric);
@@ -32,12 +56,9 @@ export default function Unlock() {
       await unlockWithBiometrics();
       router.replace('/dashboard');
     } catch (error) {
-      Alert.alert(
-        'Could not unlock vault',
-        error instanceof Error ? error.message : 'Please use your master password.',
-      );
+      handleUnlockError(error, 'Please use your master password.');
     }
-  }, [biometricReady, router, unlockWithBiometrics]);
+  }, [biometricReady, router, unlockWithBiometrics, handleUnlockError]);
 
   // Auto-prompt the scanner once when the screen opens and biometrics are ready.
   useEffect(() => {
@@ -52,10 +73,7 @@ export default function Unlock() {
       await unlockVault(password);
       router.replace('/dashboard');
     } catch (error) {
-      Alert.alert(
-        'Could not unlock vault',
-        error instanceof Error ? error.message : 'Please check your password.',
-      );
+      handleUnlockError(error, 'Please check your password.');
     }
   }
 

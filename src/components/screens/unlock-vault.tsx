@@ -36,6 +36,7 @@ export function UnlockVaultScreen({
       <VaultHeader trailingIcon={Settings} />
 
       <ScrollView
+        keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
         contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + 32 }]}>
         <View style={styles.shieldWrapper}>

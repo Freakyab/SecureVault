@@ -1,0 +1,141 @@
+import { useEffect } from 'react';
+import { StyleSheet, useWindowDimensions, View } from 'react-native';
+import Animated, { Easing, useAnimatedStyle, useSharedValue, withDelay, withRepeat, withTiming } from 'react-native-reanimated';
+import Svg, { Circle, Defs, RadialGradient, Stop } from 'react-native-svg';
+
+interface BlobConfig {
+  /** Unique, SVG-safe id used for the radial gradient reference. */
+  id: string;
+  /** Solid color for the blob (radial fade to transparent). */
+  color: string;
+  /** Peak opacity at the blob center. */
+  opacity: number;
+  /** Diameter in px. */
+  size: number;
+  /** Resting position as a fraction (0–1) of screen width / height. */
+  baseX: number;
+  baseY: number;
+  /** Horizontal / vertical travel distance in px across the loop. */
+  travelX: number;
+  travelY: number;
+  /** Loop durations (ms) — different per axis so the path wanders. */
+  durationX: number;
+  durationY: number;
+  /** Start offset so blobs fall out of sync. */
+  delay: number;
+}
+
+function Blob({ id, color, opacity, size, baseX, baseY, travelX, travelY, durationX, durationY, delay }: BlobConfig) {
+  'use no memo'; // React Compiler must not memoize the useAnimatedStyle worklet, or the blob freezes.
+  const { width, height } = useWindowDimensions();
+  const progressX = useSharedValue(0);
+  const progressY = useSharedValue(0);
+
+  useEffect(() => {
+    progressX.value = withDelay(
+      delay,
+      withRepeat(withTiming(1, { duration: durationX, easing: Easing.inOut(Easing.sin) }), -1, true),
+    );
+    progressY.value = withDelay(
+      delay,
+      withRepeat(withTiming(1, { duration: durationY, easing: Easing.inOut(Easing.sin) }), -1, true),
+    );
+  }, [progressX, progressY, durationX, durationY, delay]);
+
+  const originX = baseX * width - size / 2;
+  const originY = baseY * height - size / 2;
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [
+      { translateX: originX + travelX * (progressX.value - 0.5) },
+      { translateY: originY + travelY * (progressY.value - 0.5) },
+      { scale: 0.9 + 0.25 * progressX.value },
+    ],
+  }));
+
+  return (
+    <Animated.View pointerEvents="none" style={[styles.blob, { width: size, height: size }, animatedStyle]}>
+      <Svg width={size} height={size}>
+        <Defs>
+          <RadialGradient id={id} cx="50%" cy="50%" r="50%">
+            <Stop offset="0%" stopColor={color} stopOpacity={opacity} />
+            <Stop offset="35%" stopColor={color} stopOpacity={opacity * 0.55} />
+            <Stop offset="70%" stopColor={color} stopOpacity={opacity * 0.18} />
+            <Stop offset="100%" stopColor={color} stopOpacity={0} />
+          </RadialGradient>
+        </Defs>
+        <Circle cx={size / 2} cy={size / 2} r={size / 2} fill={`url(#${id})`} />
+      </Svg>
+    </Animated.View>
+  );
+}
+
+interface AnimatedBlobsProps {
+  /** Three colors used for the three roaming blobs (center → edges). */
+  colors: readonly [string, string, string];
+}
+
+/** Drifting, soft gradient blobs that roam the screen background. */
+export function AnimatedBlobs({ colors }: AnimatedBlobsProps) {
+  const blobs: BlobConfig[] = [
+    {
+      id: 'blob-a',
+      color: colors[0],
+      opacity: 0.22,
+      size: 460,
+      baseX: 0.08,
+      baseY: 0.05,
+      travelX: 200,
+      travelY: 150,
+      durationX: 4800,
+      durationY: 6200,
+      delay: 0,
+    },
+    {
+      id: 'blob-b',
+      color: colors[1],
+      opacity: 0.2,
+      size: 420,
+      baseX: 0.95,
+      baseY: 0.22,
+      travelX: -220,
+      travelY: 170,
+      durationX: 5600,
+      durationY: 4200,
+      delay: 600,
+    },
+    {
+      id: 'blob-c',
+      color: colors[2],
+      opacity: 0.18,
+      size: 440,
+      baseX: 0.5,
+      baseY: 0.95,
+      travelX: 220,
+      travelY: -160,
+      durationX: 6400,
+      durationY: 5200,
+      delay: 1100,
+    },
+  ];
+
+  return (
+    <View pointerEvents="none" style={styles.container}>
+      {blobs.map((blob) => (
+        <Blob key={blob.id} {...blob} />
+      ))}
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    ...StyleSheet.absoluteFillObject,
+    overflow: 'hidden',
+  },
+  blob: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+  },
+});

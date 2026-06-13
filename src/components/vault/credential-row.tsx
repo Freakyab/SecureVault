@@ -115,8 +115,8 @@ export function CredentialRow({
               style={({ pressed }) => [styles.actionButton, pressed && styles.pressed]}>
               <Star
                 size={18}
-                color={isFavorite ? VaultColors.warning : VaultColors.muted}
-                fill={isFavorite ? VaultColors.warning : 'transparent'}
+                color={isFavorite ? VaultColors.accent : VaultColors.muted}
+                fill={isFavorite ? VaultColors.accent : 'transparent'}
                 strokeWidth={1.75}
               />
             </Pressable>

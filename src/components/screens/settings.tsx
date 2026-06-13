@@ -7,6 +7,7 @@ import {
   Lock,
   LucideIcon,
   Moon,
+  Sparkles,
   Timer,
   Trash2,
   Upload,
@@ -18,6 +19,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Clipboard from 'expo-clipboard';
 
 import { BottomNav, GlassCard, ScreenBackground, Toggle, VaultHeader } from '@/components/vault';
+import { buildMockCredentials } from '@/constants/mock-credentials';
 import { VaultColors, VaultType } from '@/constants/vault-theme';
 import { useToast } from '@/contexts/toast-context';
 import { useVault } from '@/contexts/vault-context';
@@ -37,12 +39,8 @@ interface RowProps {
 
 function SettingsRow({ icon: Icon, label, detail, trailing, danger, onPress }: RowProps) {
   const tint = danger ? VaultColors.danger : VaultColors.accent;
-  return (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityLabel={label}
-      onPress={onPress}
-      style={({ pressed }) => [styles.row, pressed && styles.pressed]}>
+  const content = (
+    <>
       <View style={styles.rowLeft}>
         <View style={[styles.rowIcon, danger && styles.rowIconDanger]}>
           <Icon size={18} color={tint} strokeWidth={1.75} />
@@ -53,6 +51,20 @@ function SettingsRow({ icon: Icon, label, detail, trailing, danger, onPress }: R
         </View>
       </View>
       {trailing ?? <ChevronRight size={18} color={VaultColors.muted} strokeWidth={2} />}
+    </>
+  );
+
+  if (!onPress) {
+    return <View style={styles.row}>{content}</View>;
+  }
+
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      onPress={onPress}
+      style={({ pressed }) => [styles.row, pressed && styles.pressed]}>
+      {content}
     </Pressable>
   );
 }
@@ -175,6 +187,37 @@ export function SettingsScreen() {
     );
   }
 
+  async function handleLoadSampleData() {
+    Alert.alert(
+      'Load sample data',
+      'Adds a set of demo credentials covering every category so you can explore the app. Existing accounts are kept; duplicates are skipped.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Load Samples',
+          onPress: async () => {
+            try {
+              const { added, skipped } = await importCredentials(buildMockCredentials());
+              hapticSuccess();
+              showToast(
+                added > 0
+                  ? `Added ${added} sample credentials · skipped ${skipped}`
+                  : 'Sample data already loaded',
+                added > 0 ? 'success' : 'info',
+              );
+            } catch (error) {
+              hapticWarning();
+              Alert.alert(
+                'Could not load samples',
+                error instanceof Error ? error.message : 'Please try again.',
+              );
+            }
+          },
+        },
+      ],
+    );
+  }
+
   function handleChangeMasterPassword() {
     router.push('/change-password');
   }
@@ -231,6 +274,7 @@ export function SettingsScreen() {
               <Toggle
                 value={settings.biometricEnabled && biometricSupported}
                 onChange={handleBiometricChange}
+                disabled={!biometricSupported}
                 label="Biometric unlock"
               />
             }
@@ -299,6 +343,13 @@ export function SettingsScreen() {
             label="Import Data"
             detail="Paste a backup from clipboard"
             onPress={handleImport}
+          />
+          <View style={styles.separator} />
+          <SettingsRow
+            icon={Sparkles}
+            label="Load Sample Data"
+            detail="Fill the vault with demo credentials"
+            onPress={handleLoadSampleData}
           />
           <View style={styles.separator} />
           <SettingsRow

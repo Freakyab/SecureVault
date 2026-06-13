@@ -2,14 +2,53 @@
 
 Track progress for building the **SecureVault** password manager as an **Expo (React Native)** app, using the UI/UX from `securevault.zip` as the design reference.
 
-**Last updated:** 2026-06-13 (Run 3)  
-**Overall status:** 🟡 In progress — **34%** project-wide (biometric unlock, HIBP breach monitor, brand logos + offline cache, custom logo upload, auto-lock, screen-capture protection, master-password change, inline risk badges)
+**Last updated:** 2026-06-14 (Run 9)  
+**Overall status:** 🟡 In progress — **52%** project-wide (Phase 7 premium pass: evolved tokens to a CRED-style blend, completed the motion-duration + haptic map, and shipped a redesigned **Dashboard** proof-of-concept)
 
-> **Status (2026-06-13, Run 3):** The earlier "UI-only prototype" audit note is **superseded**. The
-> `src/` tree now has real `services/`, `contexts/`, `types/`, AsyncStorage persistence, CRUD, live
-> health metrics, biometric unlock, breach monitoring, brand logos, auto-lock, and screen-capture
-> protection. Crypto is still a salted SHA-256 password gate with plaintext-at-rest credentials
-> (AES-GCM 3.5–3.7 remain open). Progress reflects actual implemented features.
+> **Status (2026-06-14, Run 9):** **Premium UI proof-of-concept (CRED-style blend).** Evolved the
+> `src/theme` tokens toward a premium dark look — deep aubergine background, violet accent, and new
+> `glass` + `gradients` token sets (resolved per scheme via `getTheme`). Added a reusable
+> `components/ui/PressableScale` (Reanimated press-scale + haptic) and redesigned the **Dashboard**
+> screen: glow-gradient backdrop, glass header/search, a 3-stat summary card with count-up health
+> score, premium category tiles, fade-in + staggered entrances, and a gradient Security-Health hero.
+> `useTheme` is now dark-first so the premium look holds on light-mode devices. Completed **7.13**
+> (durations) and **7.15** (haptic map); **7.14/7.20/7.21** advanced (partial). Lint clean; no new
+> `tsc` errors. Phase 7 → 27% (6/22); overall → 52% (78/150); Pre-Phase 3 gate unchanged at 50%.
+>
+> **Status (2026-06-14, Run 8):** Completed **Phase 7.4** — `useTheme()` now resolves the full
+> Fold-style token object (`colors`, `spacing`, `layout`, `radius`, `typography`, `shadows`, `motion`)
+> from `src/theme/getTheme(scheme)`, and `useHaptics()` provides named feedback actions for press,
+> success/warning/error, selection, card expansion, and pull-to-refresh. Updated starter themed
+> helpers to consume `theme.colors`. Lint clean; `tsc --noEmit` is still blocked by pre-existing
+> starter tab/SymbolView type issues and missing Jest globals. Phase 7 → 18% (4/22); overall → 51%
+> (76/150); Pre-Phase 3 gate unchanged at 50%. Next: reusable UI kit (7.5–7.12), starting with
+> `Button`.
+>
+> **Status (2026-06-14, Run 7):** Started **Phase 7 foundation (7.1–7.3)** — built the Fold-style
+> design-token system under `src/theme/` (`colors.ts`, `spacing.ts`, `radius.ts`, `typography.ts`,
+> `shadows.ts`, `animations.ts`) with a `getTheme(scheme)` barrel and a `Theme` type. Light + dark
+> color schemes share token names; brand accent stays `#5F61F6`. Lint clean, no new type errors.
+> Phase 7 → 14% (3/22); overall → 50% (75/150); Pre-Phase 3 gate unchanged at 50%. Next: 7.4
+> `useTheme`/`useHaptics` hooks, then the UI kit (7.5–7.12).
+>
+> **Status (2026-06-14, Run 6):** Added **Phase 7 — Premium UI overhaul (Fold-style)** as a parallel
+> polish track (22 tasks) plus a [Fold-style design-token reference](#fold-style-design-tokens-phase-7).
+> The track adopts the Fold Money design philosophy (clarity, space, motion, depth, consistency) via a
+> centralized token system, a reusable UI kit, and Reanimated/haptics motion — without cloning Fold.
+> Adding the new scope moves the project-wide denominator to 150 tasks; overall → 48% (72/150).
+> The Pre-Phase 3 gate is unaffected (still 50%).
+>
+> **Run 5:** Verified the Phase 2 Dashboard and Vault screens against the
+> shipped, data-wired implementations (`dashboard.tsx`, `main-vault.tsx`, `bottom-nav.tsx`):
+> greeting header, 6-category stat cards, Manage/Recently-Used sections, pill tab bar, vault
+> shield header, search, category chips, credential rows, security-alert card, and empty
+> states are all live. Phase 2 → 61%; overall → 56%; Pre-Phase 3 gate → 50%.
+>
+> **Run 4:** Credentials are encrypted at rest with AES-256-GCM (PBKDF2-SHA256, 120k iterations).
+> Legacy plaintext vaults migrate on first unlock. The Generator tab is live with
+> length/charset controls and save-to-vault. Categories are centralized in
+> `constants/categories.ts`. Wrong-password, corrupt-vault, and storage-full errors surface
+> actionable messages.
 
 ---
 
@@ -34,22 +73,23 @@ rg "^- \[x\]" ROADMAP.md | wc -l      # completed
 
 | Metric | Value |
 |--------|-------|
-| Tasks completed | **44** / **128** |
-| **Overall progress** | **34%** |
+| Tasks completed | **78** / **150** |
+| **Overall progress** | **52%** |
 
 ```
-[███████░░░░░░░░░░░░░] 34%
+[██████████░░░░░░░░░░] 52%
 ```
 
 | Phase | Done | Total | Progress | Status |
 |-------|------|-------|----------|--------|
 | 0 — Foundation | 5 | 6 | 83% | 🟡 |
 | 1 — Design system & shell | 0 | 11 | 0% | ⬜ |
-| 2 — UI (mock data) | 4 | 31 | 13% | 🟡 |
-| 3 — Local vault & security | 12 | 23 | 52% | 🟡 |
+| 2 — UI (mock data) | 19 | 31 | 61% | 🟡 |
+| 3 — Local vault & security | 22 | 23 | 96% | 🟡 |
 | 4 — Password health | 10 | 10 | 100% | ✅ |
 | 5 — Polish & release | 11 | 18 | 61% | 🟡 |
 | 6 — Backend & sync (optional) | 0 | 8 | 0% | ⬜ |
+| 7 — Premium UI (Fold-style) | 6 | 22 | 27% | 🟡 |
 
 *v1 feature lists (must-have / nice-to-have under Phase 0) are tracked separately below and are **not** included in the table above.*
 
@@ -61,11 +101,11 @@ rg "^- \[x\]" ROADMAP.md | wc -l      # completed
 
 | Metric | Value |
 |--------|-------|
-| Tasks completed | **9** / **48** |
-| **Pre-Phase 3 progress** | **19%** |
+| Tasks completed | **24** / **48** |
+| **Pre-Phase 3 progress** | **50%** |
 
 ```
-[████░░░░░░░░░░░░░░░░] 19%
+[██████████░░░░░░░░░░] 50%
 ```
 
 **Remaining before Phase 3 gate:** Phase 0.4 plus all Phase 1–2 tasks.
@@ -78,7 +118,7 @@ rg "^- \[x\]" ROADMAP.md | wc -l      # completed
 
 | Track | Done | Total | Progress |
 |-------|------|-------|----------|
-| Must-have | 0 | 8 | 0% |
+| Must-have | 2 | 8 | 25% |
 | Nice-to-have (deferred) | 0 | 5 | 0% |
 
 ---
@@ -88,12 +128,13 @@ rg "^- \[x\]" ROADMAP.md | wc -l      # completed
 | Milestone | Phases | Progress | Notes |
 |-----------|--------|----------|-------|
 | **M0 — Kickoff** | 0 | 83% | Scope/process documented; local `securevault.zip` extraction is blocked because the zip is absent |
-| **M1 — Walkable UI** | 1–2 | **7%** | Onboarding content + dashboard/vault screens wired to real data |
-| **M2 — Private beta** | 3–4 | **76%** | Biometric unlock, breach monitor, logos, auto-lock; Password Health 100%; AES encryption pending |
+| **M1 — Walkable UI** | 1–2 | **30%** | Dashboard + Vault UI verified live; Generator tab live; screens wired to real data |
+| **M2 — Private beta** | 3–4 | **98%** | AES-GCM encryption, Generator, categories; Password Health 100% |
 | **M3 — Store beta** | 5 | 61% | Accessibility, release metadata, screen-capture protection, loading/empty states |
 | **M4 — Cloud** | 6 | 0% | Optional |
+| **M5 — Premium UI** | 7 | 27% | Premium CRED-blend tokens + theme/haptics hooks + motion map shipped; Dashboard PoC migrated; UI kit & remaining screens next |
 
-**M1 formula:** average of Phase 1 (0%) and Phase 2 (13%) = **7%**.
+**M1 formula:** average of Phase 1 (0%) and Phase 2 (61%) = **30%**.
 
 ---
 
@@ -143,6 +184,44 @@ A mobile password manager that lets users:
 | Font | Plus Jakarta Sans |
 
 **Note:** The zip’s multi-phone `DeviceFrame` layout is for web marketing only. The mobile app uses **full-screen native screens**, not device chrome.
+
+---
+
+## Fold-style design tokens (Phase 7)
+
+Premium "Fold Money"–inspired token set for the [Phase 7 UI overhaul](#phase-7--premium-ui-overhaul-fold-style). Used to feed `theme/colors.ts`, `spacing.ts`, `radius.ts`, `typography.ts`, `animations.ts`. Brand accent stays the SecureVault purple (`#5F61F6`); accent should occupy **<10%** of any screen.
+
+**Neutral palette**
+
+| Token | Value |
+|-------|-------|
+| Background | `#F7F8FA` |
+| Surface | `#FFFFFF` |
+| Surface alt | `#F1F3F5` |
+| Border | `#E9ECEF` |
+| Primary text | `#121212` |
+| Secondary text | `#6C757D` |
+| Muted text | `#ADB5BD` |
+
+**Semantic colors**
+
+| Token | Value |
+|-------|-------|
+| Primary accent | Brand (`#5F61F6`) |
+| Success | `#2ECC71` |
+| Warning | `#F4B400` |
+| Error | `#FF4D4F` |
+| Info | `#4A90E2` |
+
+**Spacing (8-pt)** · `xs 4 · sm 8 · md 12 · lg 16 · xl 24 · xxl 32 · xxxl 48` — card padding 20–24, screen h-padding 20, section v-spacing 24–32.
+
+**Radius** · `chip 12 · button 16 · card 20 · sheet 24 · floating 28`.
+
+**Typography** · Display 32/Bold · Heading 24/SemiBold · Title 20/SemiBold · Body 16/Regular · Caption 13/Medium · Label 11/Medium.
+
+**Motion durations** · tap 120 · button 180 · card expand 250 · navigation 300 · modal 350 (ms).
+
+**Rules:** avoid pure-black backgrounds, low-saturation grays only; prefer whitespace over dividers; subtle shadows over heavy color; no arbitrary radius values.
 
 ---
 
@@ -207,14 +286,15 @@ contexts/                     # Auth, vault (Phase 3+)
 |-------|------|------|----------|--------|
 | 0 | Foundation | Repo ready, decisions documented | 83% | 🟡 In progress |
 | 1 | Design system & shell | Theme, navigation, dark mode, UI kit | 0% | ⬜ Not started |
-| 2 | UI screens (mock data) | All 5 screens match prototype | 13% | 🟡 In progress |
-| 3 | Local vault & security | Real CRUD, encryption, generator | 52% | 🟡 In progress |
+| 2 | UI screens (mock data) | All 5 screens match prototype | 61% | 🟡 In progress |
+| 3 | Local vault & security | Real CRUD, encryption, generator | 96% | 🟡 In progress |
 | 4 | Password health | Scoring, reuse, strength rules | 100% | ✅ Done |
 | 5 | Polish & release prep | A11y, errors, store assets | 61% | 🟡 In progress |
 | 6 | Backend & sync (optional) | Auth API, cloud vault, multi-device | 0% | ⬜ Not started |
-| — | **Project overall** | All phases | **34%** | 🟡 |
-| — | **Pre-Phase 3 gate** | Phases 0–2 only | **19%** | 🟡 |
-| — | **V1 must-have** | Product MVP | **0%** | ⬜ |
+| 7 | Premium UI (Fold-style) | Design tokens, UI kit, motion + haptics, screen migration | 27% | 🟡 In progress |
+| — | **Project overall** | All phases | **52%** | 🟡 |
+| — | **Pre-Phase 3 gate** | Phases 0–2 only | **50%** | 🟡 |
+| — | **V1 must-have** | Product MVP | **25%** | 🟡 |
 
 **Legend:** ⬜ Not started · 🟡 In progress · ✅ Done
 
@@ -241,9 +321,9 @@ contexts/                     # Auth, vault (Phase 3+)
 - [ ] Dashboard with category summary — mock data
 - [ ] Vault list + search + category filters — mock data
 - [ ] Add / edit / delete credential
-- [ ] Password generator + save to vault
+- [x] Password generator + save to vault *(Generator tab + Add Credential prefill — Run 4)*
 - [ ] Basic health score (weak + reused passwords)
-- [ ] Local encrypted storage (AES-GCM + PBKDF2, AsyncStorage + SecureStore)
+- [x] Local encrypted storage (AES-GCM + PBKDF2, AsyncStorage + SecureStore) *(Run 4)*
 - [ ] Master password (setup + unlock screens; biometrics deferred)
 
 ### Website branding & credential preview (v1.1)
@@ -314,29 +394,29 @@ contexts/                     # Auth, vault (Phase 3+)
 
 ### 2.2 Dashboard (Home)
 
-- [ ] Header with greeting / user area
-- [ ] Category stat cards (6 categories, theme-aware tints)
-- [ ] “Manage password” + Recently Used sections
-- [ ] Floating pill tab bar integrated with tabs layout
+- [x] Header with greeting / user area *(menu + avatar header, “Hello, SecureVault” greeting — `src/components/screens/dashboard.tsx`)*
+- [x] Category stat cards (6 categories, theme-aware tints) *(CategoryCard grid from `CREDENTIAL_CATEGORIES` with live counts)*
+- [x] “Manage password” + Recently Used sections *(MANAGE PASSWORDS grid + RECENTLY USED / SEARCH RESULTS list)*
+- [x] Floating pill tab bar integrated with tabs layout *(`BottomNav` pill bar on all tab screens)*
 
 ### 2.3 Vault
 
-- [ ] “My Vault” header + shield branding
-- [ ] Search input (UI only)
-- [ ] Category chips: All, Social, Mail, Design, Finance
-- [ ] Credential list rows (title, username, category, icon)
-- [ ] Security alerts section (compromised, reused)
-- [ ] “Import vault” entry point (UI stub)
-- [ ] Empty state when no items
+- [x] “My Vault” header + shield branding *(shield brand tile + “Main Vault” header — `src/components/screens/main-vault.tsx`)*
+- [x] Search input (UI only) *(live `filterCredentials` search field)*
+- [x] Category chips: All, Social, Mail, Design, Finance *(shared `CATEGORY_FILTERS` chips + Active/Favorites/Archived view chips)*
+- [x] Credential list rows (title, username, category, icon) *(`CredentialRow` with logo, copy, favorite, risk badges)*
+- [x] Security alerts section (compromised, reused) *(SECURITY PULSE alert card → Health)*
+- [ ] “Import vault” entry point (UI stub) *(import lives in Settings backup flow — TASK-012)*
+- [x] Empty state when no items *(`EmptyState` with view-aware messaging)*
 
 ### 2.4 Generator
 
-- [ ] Generated password display + copy button
-- [ ] Length slider
-- [ ] Toggles: uppercase, lowercase, numbers, symbols
-- [ ] Strength meter (weak → strong) with shield icon states
-- [ ] Regenerate control
-- [ ] “Save secure password” CTA (wired to vault)
+- [x] Generated password display + copy button
+- [x] Length slider *(stepper + presets 12–32, Roadmap 3.14)*
+- [x] Toggles: uppercase, lowercase, numbers, symbols
+- [x] Strength meter (weak → strong) with shield icon states
+- [x] Regenerate control
+- [x] “Save secure password” CTA (wired to vault) *(prefills Add Credential — 3.15)*
 
 ### 2.5 Health
 
@@ -368,26 +448,26 @@ contexts/                     # Auth, vault (Phase 3+)
 ### Data model
 
 - [x] **3.1** Define `Credential` type (`types/credential.ts`)
-- [ ] **3.2** Define categories enum/map (`constants/categories.ts`)
+- [x] **3.2** Define categories enum/map (`constants/categories.ts`)
 - [x] **3.3** Vault metadata (version in blob; `lastUnlockedAt` on setup/unlock)
 
 ### Storage & crypto
 
 - [x] **3.4** Master password flow (`setup-master-password`, `unlock`)
-- [ ] **3.5** Key derivation (PBKDF2-SHA256, 120k iterations)
-- [ ] **3.6** Encrypt vault blob at rest (AES-GCM via `@noble/ciphers`)
-- [ ] **3.7** Store encrypted blob + salt (AsyncStorage + SecureStore)
-- [ ] **3.8** In-memory decrypted cache only while app is unlocked
+- [x] **3.5** Key derivation (PBKDF2-SHA256, 120k iterations) *(services/crypto/vault-crypto.ts — Run 4)*
+- [x] **3.6** Encrypt vault blob at rest (AES-GCM via `@noble/ciphers`) *(Run 4)*
+- [x] **3.7** Store encrypted blob + salt (AsyncStorage + SecureStore) *(Run 4; biometric key in SecureStore)*
+- [x] **3.8** In-memory decrypted cache only while app is unlocked *(encryptionKeyRef cleared on lock — Run 4)*
 - [x] **3.9** Auto-lock after 5 min backgrounding *(configurable preset enforced on AppState background→active — TASK-033)*
 
 ### CRUD & generator
 
 - [x] **3.10** `VaultContext` for credentials
-- [ ] **3.11** Create, read, update, delete credentials
+- [x] **3.11** Create, read, update, delete credentials
 - [x] **3.12** Wire Vault screen to real list + search (client-side filter)
-- [ ] **3.13** Wire category chips to filter state
-- [ ] **3.14** Implement password generator service (`services/password-generator.ts`)
-- [ ] **3.15** Save generated password to new or existing entry
+- [x] **3.13** Wire category chips to filter state *(shared CATEGORY_FILTERS + Dashboard→Vault param — Run 4)*
+- [x] **3.14** Implement password generator service (`services/password-generator.ts`) *(Generator screen — Run 4)*
+- [x] **3.15** Save generated password to new or existing entry *(Generator→Add Credential param — Run 4)*
 - [x] **3.16** Wire Dashboard counts from real data
 - [x] **3.19** Support multiple credentials for the same account/site (e.g. two Instagram logins with different passwords)
 - [ ] **3.20** AI-assisted folders/tags for vault organization beyond fixed categories *(manual folder/tag filters done; AI deferred)*
@@ -398,7 +478,7 @@ contexts/                     # Auth, vault (Phase 3+)
 ### Quality
 
 - [x] **3.17** Unit tests for generator and crypto helpers
-- [ ] **3.18** Error handling: wrong master password *(corrupt vault / storage full pending)*
+- [x] **3.18** Error handling: wrong master password *(GCM auth failure + corrupt-vault reset path + storage-full message — Run 4)*
 
 ### Definition of done
 
@@ -500,6 +580,72 @@ contexts/                     # Auth, vault (Phase 3+)
 
 ---
 
+## Phase 7 — Premium UI overhaul (Fold-style)
+
+**Goal:** Upgrade the existing app into a calm, responsive, premium experience inspired by Fold Money — without cloning it. Adopt the design philosophy (clarity, space, motion, depth, consistency), a centralized design-token system, a reusable UI kit, and a Reanimated-based motion + haptics layer. Migrate screens incrementally.
+
+> This is a **parallel polish track**, not a v1 blocker. It can run alongside Phase 5 release prep. See the [Fold-style design tokens](#fold-style-design-tokens-phase-7) reference below for the values these tasks must use.
+
+**Core principle:** A premium app is defined by how effortlessly the user moves through it — prefer simplicity over complexity, consistency over novelty, smoothness over speed, clarity over decoration. Keep every animation under **350ms**; users should feel a fast, elegant app without noticing the animations themselves.
+
+### 7.1 Foundation — design tokens & theme
+
+- [x] **7.1** Build the design-token system under `theme/`: `colors.ts`, `spacing.ts`, `radius.ts`, `typography.ts`, `shadows.ts`, `animations.ts` *(token layer under `src/theme/` + `getTheme(scheme)` barrel — Run 7)*
+- [x] **7.2** 8-point spacing scale (`xs 4 · sm 8 · md 12 · lg 16 · xl 24 · xxl 32 · xxxl 48`) and radius scale (`chip 12 · button 16 · card 20 · sheet 24 · floating 28`) *(`theme/spacing.ts` + `theme/radius.ts` — Run 7)*
+- [x] **7.3** Typography scale (Display 32/Bold · Heading 24/SemiBold · Title 20/SemiBold · Body 16/Regular · Caption 13/Medium · Label 11/Medium); max three weights, one font family *(`theme/typography.ts` — Run 7)*
+- [x] **7.4** `useTheme` and `useHaptics` hooks; no screen defines its own colors/spacing/typography *(`src/hooks/use-theme.ts` resolves `getTheme(scheme)` + `src/hooks/use-haptics.ts` interaction map — Run 8)*
+
+### 7.2 Core components (reusable UI kit)
+
+Build under `components/ui/`; never duplicate UI logic, extract repeated patterns.
+
+- [ ] **7.5** `Button` (scale to 0.98 on press, spring return, immediate visual + light haptic)
+- [ ] **7.6** `Card` + `GlassCard` (radius 20, 20–24px padding, subtle shadow, elevated surface)
+- [ ] **7.7** `Input` (themed, focus/error states)
+- [ ] **7.8** `Avatar`
+- [ ] **7.9** `AnimatedNumber` (count up/down instead of instant change)
+- [ ] **7.10** `BottomSheet` (`@gorhom/bottom-sheet`, radius 24)
+- [ ] **7.11** `SectionHeader`
+- [ ] **7.12** `SkeletonLoader` (shimmer placeholder)
+
+### 7.3 Motion design system
+
+- [x] **7.13** Centralized animation durations in `theme/animations.ts` (tap 120 · button 180 · card expand 250 · navigation 300 · modal 350) *(+ easing/spring/stagger tokens — Run 9)*
+- [ ] **7.14** Reanimated micro-interactions: button press, card fade+slide-up entrance + press elevation, list stagger (20–40ms) *(partial: `PressableScale` press + Dashboard fade-in/stagger — Run 9)*
+- [x] **7.15** Haptic feedback map (press → Light · success → Success · error → Error · pull-to-refresh → Soft · card expand → Selection); avoid excessive vibration *(`hooks/use-haptics.ts` — Run 9)*
+- [ ] **7.16** Skeleton → fade-in loading transitions (skeleton → fetch → fade out → fade content in ~200ms); never blank screens or content pop-in
+
+### 7.4 Navigation experience
+
+- [ ] **7.17** Floating rounded bottom navigation (soft shadow, active tab slightly larger, active icon accent / inactive muted)
+- [ ] **7.18** Sticky headers that collapse slightly on scroll (no large fixed toolbars)
+- [ ] **7.19** Fade + slide screen transitions with shared visual continuity
+
+### 7.5 Screen migration & polish
+
+- [ ] **7.20** Migrate screens one at a time to card-based layout + design tokens (Dashboard, Vault, Generator, Health, Settings, entry detail) *(partial: **Dashboard** migrated to tokens + premium card layout — Run 9; Vault/Generator/Health/Settings/entry pending)*
+- [ ] **7.21** Background & depth pass: soft neutral background, subtle hero gradients, blur for floating elements, very light shadows (no heavy drop shadows / excessive glassmorphism) *(partial: Dashboard glow gradients + glass surfaces + light shadows — Run 9)*
+- [ ] **7.22** Final UI consistency audit + animation-timing fine-tune (Design QA checklist: visual, motion, code, UX)
+
+### Suggested libraries
+
+| Purpose | Library |
+|---------|---------|
+| Animation | `react-native-reanimated`, `react-native-gesture-handler`, `moti` |
+| Visual effects | `expo-blur`, `expo-linear-gradient` |
+| UI / sheets | `@gorhom/bottom-sheet`, `react-native-svg`, `lucide-react-native` |
+| Interaction | `expo-haptics` |
+
+### Definition of done
+
+- All buttons, cards, and inputs use shared UI-kit components and design tokens — no hardcoded colors/spacing/radius.
+- Every interactive element gives immediate feedback (animation + haptic); animations stay under 350ms.
+- Loading uses skeletons/shimmer with fade-in; no spinners, blank screens, or pop-in.
+- Bottom nav, headers, and screen transitions follow the navigation experience spec.
+- Design QA checklist passes for each migrated screen (visual quality, motion quality, code quality, UX).
+
+---
+
 ## Milestones (high level)
 
 | Milestone | Phases | User-visible outcome |
@@ -509,6 +655,7 @@ contexts/                     # Auth, vault (Phase 3+)
 | **M2 — Private beta** | 3–4 | Real vault, generator, health offline |
 | **M3 — Store beta** | 5 | Polished build on TestFlight / internal track |
 | **M4 — Cloud** | 6 | Account + sync (if in scope) |
+| **M5 — Premium UI** | 7 | Calm, responsive, Fold-style premium experience |
 
 ---
 
@@ -548,6 +695,12 @@ Add a row when you complete a phase or milestone.
 
 | Date | Phase / Milestone | Notes | Updated by |
 |------|-------------------|-------|------------|
+| 2026-06-14 | Phase 7 premium PoC (Run 9) | Evolved `src/theme` tokens to a **CRED-style premium blend** (deep aubergine bg, violet accent, new `glass` + `gradients` token sets resolved per scheme via `getTheme`). Added reusable `components/ui/PressableScale` (Reanimated press-scale + light haptic). Redesigned **Dashboard** as the proof-of-concept: glow-gradient backdrop, glass header/search, 3-stat summary card with count-up health score, premium category tiles, fade-in + staggered list entrances, gradient Security-Health hero, gradient FAB. Made `useTheme` dark-first so the look holds on light-mode devices. Completed **7.13** (motion durations) + **7.15** (haptic map); advanced **7.14/7.20/7.21** (partial). Lint clean; no new `tsc` errors. Phase 7 → 27% (6/22); overall → 52% (78/150); gate unchanged at 50%. | Cursor |
+| 2026-06-14 | Phase 7 hooks (Run 8) | Completed **7.4**: `useTheme()` now resolves the full Fold-style token object from `src/theme/getTheme(scheme)`, and `useHaptics()` centralizes named interaction feedback (`press`, `success`, `warning`, `error`, `selection`, `pullToRefresh`, `cardExpand`). Updated starter themed helpers to consume `theme.colors`. `npm run lint` passes with one existing warning in `src/app/setup.tsx`; `npx tsc --noEmit` remains blocked by pre-existing starter tab/SymbolView type issues and missing Jest globals. Phase 7 → 18% (4/22); overall → 51% (76/150). | Cursor |
+| 2026-06-14 | Phase 7 foundation (Run 7) | Built the Fold-style **design-token system** under `src/theme/`: `colors.ts` (light+dark neutral palette, semantic colors, brand `#5F61F6` accent), `spacing.ts` (8-pt scale + layout helpers), `radius.ts` (chip/button/card/sheet/floating/full), `typography.ts` (Display→Label scale, one family, ≤3 weights), `shadows.ts` (sm/md/lg subtle elevation), `animations.ts` (durations ≤350ms + easing/spring/stagger), and an `index.ts` barrel exposing `getTheme(scheme)` and a `Theme` type. Completes 7.1–7.3; lint clean, no new type errors. Phase 7 → 14% (3/22); overall → 50% (75/150); gate unchanged at 50%. | Cursor |
+| 2026-06-14 | Phase 7 added (Run 6) | Added **Phase 7 — Premium UI overhaul (Fold-style)**: 22 tasks across design tokens (7.1–7.4), reusable UI kit (7.5–7.12), motion + haptics (7.13–7.16), navigation experience (7.17–7.19), and screen migration/polish (7.20–7.22), plus a Fold-style design-token reference and milestone M5. Parallel polish track inspired by Fold Money (clarity, space, motion, depth, consistency). New scope: overall denominator → 150; overall → 48% (72/150); Pre-Phase 3 gate unchanged at 50%. | Cursor |
+| 2026-06-14 | Phase 2 UI verified (Run 5) | Verified 10 shipped Phase 2 tasks against real code: Dashboard greeting header, 6-category stat cards, Manage/Recently-Used sections, pill tab bar (2.2 ×4); Vault shield header, search, category chips, credential rows, security-alert card, empty states (2.3 ×6, import-stub deferred to Settings). Phase 2 → 61% (19/31); overall → 56% (72/128); Pre-Phase 3 gate → 50% (24/48); M1 → 30%. | Cursor |
+| 2026-06-13 | Phase 3 encryption + Generator (Run 4) | AES-GCM at rest (3.5–3.8), legacy migration, categories map (3.2), category filter wiring (3.13), Generator tab (2.4/3.14/3.15), CRUD confirmed (3.11), error handling (3.18). Phase 3 → 96%; overall → 48%. | Cursor |
 | 2026-06-13 | Phase 3–5 + Phase 4 complete (Run 3) | Biometric unlock (TASK-020/BUG-012), HIBP breach monitor (TASK-011, D6=Yes), brand logos + offline cache (W.7/TASK-006), custom logo upload (W.8/TASK-007), auto-lock (3.9/TASK-033), inline risk badges (4.8/TASK-032), screen-capture protection (5.7/TASK-035), loading/empty states (5.3/TASK-036), master-password change (TASK-034). Phase 4 → 100%; overall → 34%. | Cursor |
 | 2026-06-13 | Phase 3–5 batch | Added Jest tests (3.17), rebuilt Password Health (4.1–4.4, 4.7, 4.9), clipboard auto-clear (5.8), JSON backup import/export (5.10–5.11), a11y pass (5.5), release metadata (5.12). Overall → 28%. | Cursor |
 | 2026-06-13 | Phase 3 (3.22) | Password history captured on credential update with reveal/copy/restore UI in Edit Credential. Phase 3 → 48%. | Cursor |
@@ -607,13 +760,14 @@ npm run lint
 
 | Field | Current value |
 |-------|----------------|
-| Overall (all phases) | 44 / 128 = **34%** |
-| Pre-Phase 3 (phases 0–2) | 9 / 48 = **19%** |
-| V1 must-have | 0 / 8 = **0%** |
+| Overall (all phases) | 78 / 150 = **52%** |
+| Pre-Phase 3 (phases 0–2) | 24 / 48 = **50%** |
+| V1 must-have | 2 / 8 = **25%** |
 | Phase 0 | 5 / 6 |
 | Phase 1 | 0 / 11 |
-| Phase 2 | 4 / 31 |
-| Phase 3 | 12 / 23 |
+| Phase 2 | 19 / 31 |
+| Phase 3 | 22 / 23 |
 | Phase 4 | 10 / 10 |
 | Phase 5 | 11 / 18 |
 | Phase 6 | 0 / 8 |
+| Phase 7 | 6 / 22 |
