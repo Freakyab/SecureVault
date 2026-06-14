@@ -1,7 +1,8 @@
+import { BlurView } from 'expo-blur';
 import { useRouter } from 'expo-router';
 import { Activity, LayoutGrid, LucideIcon, Settings, Shield, Wand2 } from 'lucide-react-native';
 import { useMemo } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Platform, Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useVaultColors } from '@/contexts/color-theme-context';
@@ -42,7 +43,10 @@ function makeStyles(c: VaultColorsShape) {
       justifyContent: 'space-around',
       height: 66,
       borderRadius: 9999,
-      backgroundColor: c.headerBackground,
+      overflow: 'hidden',
+      // iOS layers a BlurView behind a thin translucent tint; Android uses the
+      // themed solid fill since blur there is costly and less reliable.
+      backgroundColor: Platform.OS === 'ios' ? c.glassBackgroundStrong : c.headerBackground,
       borderWidth: 1,
       borderColor: c.glassBorder,
       paddingHorizontal: 8,
@@ -86,6 +90,9 @@ export function BottomNav({ active }: BottomNavProps) {
   return (
     <View style={[styles.bar, { paddingBottom: insets.bottom + 8 }]}>
       <View style={styles.row}>
+        {Platform.OS === 'ios' && (
+          <BlurView intensity={40} tint="dark" style={StyleSheet.absoluteFill} />
+        )}
         {ITEMS.map((item) => {
           const isActive = item.key === active;
           const Icon = item.icon;

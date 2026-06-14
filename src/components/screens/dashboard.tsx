@@ -79,7 +79,7 @@ export function DashboardScreen() {
   }, [activeCredentials, query, searched]);
 
   function openCredential(id: string) {
-    runLocked(() => router.push({ pathname: '/edit-credential', params: { id } }));
+    runLocked(() => router.push({ pathname: '/entry/[id]', params: { id } }));
   }
 
   return (

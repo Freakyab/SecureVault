@@ -1,6 +1,6 @@
 import { Redirect, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { Alert, View } from 'react-native';
+import { Alert } from 'react-native';
 
 import { SetupMasterPasswordScreen } from '@/components/setup-master-password';
 import { RouteFallback } from '@/components/vault';

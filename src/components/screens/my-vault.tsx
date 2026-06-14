@@ -102,7 +102,7 @@ export function MyVaultScreen() {
                   detail={item.detail}
                   icon={item.icon}
                   accent={item.accent}
-                  onPress={() => router.push('/edit-credential')}
+                  onPress={() => router.push('/vault')}
                 />
               ))}
             </View>

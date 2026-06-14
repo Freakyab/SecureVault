@@ -149,7 +149,7 @@ export function PasswordHealthScreen() {
   );
 
   function openCredential(id: string) {
-    runLocked(() => router.push({ pathname: '/edit-credential', params: { id } }));
+    runLocked(() => router.push({ pathname: '/entry/[id]', params: { id } }));
   }
 
   function rescan() {

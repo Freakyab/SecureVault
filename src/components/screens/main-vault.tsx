@@ -122,7 +122,7 @@ export function MainVaultScreen() {
   const hasAdvancedFilters = category !== 'All' || folderTag !== 'All';
 
   function openCredential(id: string) {
-    runLocked(() => router.push({ pathname: '/edit-credential', params: { id } }));
+    runLocked(() => router.push({ pathname: '/entry/[id]', params: { id } }));
   }
 
   async function copyPassword(password: string, website: string) {

@@ -1,9 +1,9 @@
 # SecureVault — Development Roadmap
 
-Track progress for building the **SecureVault** password manager as an **Expo (React Native)** app, using the UI/UX from `securevault.zip` as the design reference.
+Track progress for building the **SecureVault** password manager as an **Expo (React Native)** app, using the UI/UX in the [`screenshots/`](../screenshots) folder as the design reference.
 
 **Last updated:** 2026-06-14 (Run 9)  
-**Overall status:** 🟡 In progress — **52%** project-wide (Phase 7 premium pass: evolved tokens to a CRED-style blend, completed the motion-duration + haptic map, and shipped a redesigned **Dashboard** proof-of-concept)
+**Overall status:** 🟡 In progress — **55%** project-wide (Phase 7 premium pass: evolved tokens to a CRED-style blend, completed the motion-duration + haptic map, and shipped a redesigned **Dashboard** proof-of-concept)
 
 > **Status (2026-06-14, Run 9):** **Premium UI proof-of-concept (CRED-style blend).** Evolved the
 > `src/theme` tokens toward a premium dark look — deep aubergine background, violet accent, and new
@@ -73,17 +73,17 @@ rg "^- \[x\]" ROADMAP.md | wc -l      # completed
 
 | Metric | Value |
 |--------|-------|
-| Tasks completed | **78** / **150** |
-| **Overall progress** | **52%** |
+| Tasks completed | **82** / **150** |
+| **Overall progress** | **55%** |
 
 ```
-[██████████░░░░░░░░░░] 52%
+[███████████░░░░░░░░░] 55%
 ```
 
 | Phase | Done | Total | Progress | Status |
 |-------|------|-------|----------|--------|
-| 0 — Foundation | 5 | 6 | 83% | 🟡 |
-| 1 — Design system & shell | 0 | 11 | 0% | ⬜ |
+| 0 — Foundation | 6 | 6 | 100% | ✅ |
+| 1 — Design system & shell | 3 | 11 | 27% | 🟡 |
 | 2 — UI (mock data) | 19 | 31 | 61% | 🟡 |
 | 3 — Local vault & security | 22 | 23 | 96% | 🟡 |
 | 4 — Password health | 10 | 10 | 100% | ✅ |
@@ -101,16 +101,16 @@ rg "^- \[x\]" ROADMAP.md | wc -l      # completed
 
 | Metric | Value |
 |--------|-------|
-| Tasks completed | **24** / **48** |
-| **Pre-Phase 3 progress** | **50%** |
+| Tasks completed | **28** / **48** |
+| **Pre-Phase 3 progress** | **58%** |
 
 ```
-[██████████░░░░░░░░░░] 50%
+[████████████░░░░░░░░] 58%
 ```
 
-**Remaining before Phase 3 gate:** Phase 0.4 plus all Phase 1–2 tasks.
+**Remaining before Phase 3 gate:** all Phase 1–2 tasks.
 
-*Phase 3 V1 core has started early by exception to clear P0 auth/vault-save bugs; Phase 0 gate items are still not complete.*
+*Phase 3 V1 core has started early by exception to clear P0 auth/vault-save bugs; Phase 0 is now complete.*
 
 ---
 
@@ -127,14 +127,14 @@ rg "^- \[x\]" ROADMAP.md | wc -l      # completed
 
 | Milestone | Phases | Progress | Notes |
 |-----------|--------|----------|-------|
-| **M0 — Kickoff** | 0 | 83% | Scope/process documented; local `securevault.zip` extraction is blocked because the zip is absent |
-| **M1 — Walkable UI** | 1–2 | **30%** | Dashboard + Vault UI verified live; Generator tab live; screens wired to real data |
+| **M0 — Kickoff** | 0 | 100% | Scope/process documented; design reference now lives in the `screenshots/` folder |
+| **M1 — Walkable UI** | 1–2 | **44%** | Dashboard + Vault UI verified live; Generator tab live; screens wired to real data; app fonts loaded; route groups `(auth)`/`(tabs)` + `entry/[id]`; starter Explore tab removed |
 | **M2 — Private beta** | 3–4 | **98%** | AES-GCM encryption, Generator, categories; Password Health 100% |
 | **M3 — Store beta** | 5 | 61% | Accessibility, release metadata, screen-capture protection, loading/empty states |
 | **M4 — Cloud** | 6 | 0% | Optional |
 | **M5 — Premium UI** | 7 | 27% | Premium CRED-blend tokens + theme/haptics hooks + motion map shipped; Dashboard PoC migrated; UI kit & remaining screens next |
 
-**M1 formula:** average of Phase 1 (0%) and Phase 2 (61%) = **30%**.
+**M1 formula:** average of Phase 1 (27%) and Phase 2 (61%) = **44%**.
 
 ---
 
@@ -164,8 +164,8 @@ A mobile password manager that lets users:
 
 | Source | Purpose |
 |--------|---------|
-| `securevault.zip` | Screen layouts, colors, typography, component patterns |
-| Web prototype screens | Onboarding, Dashboard, Vault, Generator, Health |
+| [`screenshots/`](../screenshots) | Screen layouts, colors, typography, component patterns |
+| Screenshot set | Onboarding, Unlock/Setup Master Password, Dashboard, Vault (Main/My), Add/Edit Credential, Password Health, Settings |
 
 **Design tokens (from prototype):**
 
@@ -181,7 +181,8 @@ A mobile password manager that lets users:
 | Border | `#ECECEC` |
 | Danger | `#FF4D5E` |
 | App background | `#F8F9FF` |
-| Font | Plus Jakarta Sans |
+| Font (body) | System sans (`system-ui` / platform default) |
+| Font (headings) | Playfair Display (serif, via `@expo-google-fonts/playfair-display`) |
 
 **Note:** The zip’s multi-phone `DeviceFrame` layout is for web marketing only. The mobile app uses **full-screen native screens**, not device chrome.
 
@@ -284,16 +285,16 @@ contexts/                     # Auth, vault (Phase 3+)
 
 | Phase | Name | Goal | Progress | Status |
 |-------|------|------|----------|--------|
-| 0 | Foundation | Repo ready, decisions documented | 83% | 🟡 In progress |
-| 1 | Design system & shell | Theme, navigation, dark mode, UI kit | 0% | ⬜ Not started |
+| 0 | Foundation | Repo ready, decisions documented | 100% | ✅ Done |
+| 1 | Design system & shell | Theme, navigation, dark mode, UI kit | 27% | 🟡 In progress |
 | 2 | UI screens (mock data) | All 5 screens match prototype | 61% | 🟡 In progress |
 | 3 | Local vault & security | Real CRUD, encryption, generator | 96% | 🟡 In progress |
 | 4 | Password health | Scoring, reuse, strength rules | 100% | ✅ Done |
 | 5 | Polish & release prep | A11y, errors, store assets | 61% | 🟡 In progress |
 | 6 | Backend & sync (optional) | Auth API, cloud vault, multi-device | 0% | ⬜ Not started |
 | 7 | Premium UI (Fold-style) | Design tokens, UI kit, motion + haptics, screen migration | 27% | 🟡 In progress |
-| — | **Project overall** | All phases | **52%** | 🟡 |
-| — | **Pre-Phase 3 gate** | Phases 0–2 only | **50%** | 🟡 |
+| — | **Project overall** | All phases | **53%** | 🟡 |
+| — | **Pre-Phase 3 gate** | Phases 0–2 only | **52%** | 🟡 |
 | — | **V1 must-have** | Product MVP | **25%** | 🟡 |
 
 **Legend:** ⬜ Not started · 🟡 In progress · ✅ Done
@@ -309,7 +310,7 @@ contexts/                     # Auth, vault (Phase 3+)
 - [x] **0.1** Confirm product scope for v1 → **offline-only** for v1
 - [x] **0.2** Choose styling approach → **StyleSheet + `securevault-theme.ts`**
 - [x] **0.3** Choose icon library → **lucide-react-native**
-- [ ] **0.4** Extract `securevault.zip` locally as read-only design reference (do not commit `node_modules` from zip)
+- [x] **0.4** Use the [`screenshots/`](../screenshots) folder as the read-only design reference
 - [x] **0.5** Document v1 feature list (must-have vs nice-to-have)
 - [x] **0.6** Set up branch strategy / issue labels if using GitHub
 
@@ -361,14 +362,14 @@ contexts/                     # Auth, vault (Phase 3+)
 ### Tasks
 
 - [ ] **1.1** Add `constants/securevault-theme.ts` with **light + dark** palettes
-- [ ] **1.2** Load Plus Jakarta Sans via `expo-font`
+- [x] **1.2** Load app fonts via `expo-font` — **keep current fonts**: system sans for body + Playfair Display serif headings (`@expo-google-fonts/playfair-display` in `app/_layout.tsx`)
 - [ ] **1.3** Update root `app/_layout.tsx` (theme provider, fonts, splash)
-- [ ] **1.4** Create route groups: `(auth)`, `(tabs)` — `entry/[id]` pending
+- [x] **1.4** Create route groups: `(auth)` (onboarding/unlock/setup), `(tabs)` (dashboard/vault/my-vault/generator/health/settings) + `entry/[id]` credential detail *(custom `BottomNav` kept; `add-credential`/`change-password` remain root routes)*
 - [ ] **1.5** Implement auth gate (onboarding flag in `expo-secure-store`)
 - [ ] **1.6** Build custom **pill tab bar** (blur on iOS, themed on Android)
 - [ ] **1.7** Wire tab routes: Home, Vault, Generator, Health
 - [ ] **1.8** Create shared UI primitives: `Button`, `Card`, `Input`, `Badge`, `Progress`, `Screen`
-- [ ] **1.9** Remove default Expo Explore tab
+- [x] **1.9** Remove default Expo Explore tab *(deleted unused starter `components/app-tabs.tsx` + `app-tabs.web.tsx` with their Home/Explore triggers — app uses the custom `BottomNav`)*
 - [ ] **1.10** Configure status bar / safe areas (`Screen` + `SafeAreaView`)
 - [ ] **1.11** `SecureVaultThemeProvider` — all screens use `useSecureVaultTheme()`
 
@@ -695,6 +696,10 @@ Add a row when you complete a phase or milestone.
 
 | Date | Phase / Milestone | Notes | Updated by |
 |------|-------------------|-------|------------|
+| 2026-06-14 | Phase 1 (1.9) remove Explore tab (Run 13) | Removed the default Expo starter **Explore tab** by deleting the unused `components/app-tabs.tsx` and `app-tabs.web.tsx` scaffolding (Home/Explore triggers + "Expo Starter" branding). No imports referenced them — the app uses the custom `BottomNav` — so no other code changed. Lint clean. Completed **1.9**. Phase 1 → 27% (3/11); overall → 55% (82/150); Pre-Phase 3 gate → 58% (28/48); M1 → 44%. | Cursor |
+| 2026-06-14 | Phase 1 (1.4) route groups (Run 12) | Restructured `src/app/` routing to match the planned architecture: added **`(auth)`** group (onboarding `index` + `unlock` + `setup`), **`(tabs)`** group (dashboard/vault/my-vault/generator/health/settings with a nested no-animation stack `_layout`), and **`entry/[id]`** for credential detail/edit (replaces `/edit-credential`). Updated root `_layout.tsx` to reference the groups and repointed nav calls (`/edit-credential` → `/entry/[id]`). Route groups keep existing URLs, so the custom `BottomNav` and all `href`s still work; `add-credential`/`change-password` remain root routes. Completed **1.4**. Lint clean. Phase 1 → 18% (2/11); overall → 54% (81/150); Pre-Phase 3 gate → 56% (27/48); M1 → 40%. | Cursor |
+| 2026-06-14 | Phase 1 (1.2) font decision (Run 11) | Decided to **keep the current fonts** instead of switching to Plus Jakarta Sans: system sans for body + **Playfair Display** serif headings (loaded via `@expo-google-fonts/playfair-display` in `app/_layout.tsx`). Updated the design-reference Font token and completed **1.2**. Phase 1 → 9% (1/11); overall → 53% (80/150); Pre-Phase 3 gate → 54% (26/48); M1 → 35%. | Cursor |
+| 2026-06-14 | Phase 0 complete (Run 10) | Replaced the `securevault.zip` extraction task with the **`screenshots/`** folder as the read-only design reference (11 reference screens). Completed **0.4**; Phase 0 → 100% (6/6); overall → 53% (79/150); Pre-Phase 3 gate → 52% (25/48); M0 → 100%. | Cursor |
 | 2026-06-14 | Phase 7 premium PoC (Run 9) | Evolved `src/theme` tokens to a **CRED-style premium blend** (deep aubergine bg, violet accent, new `glass` + `gradients` token sets resolved per scheme via `getTheme`). Added reusable `components/ui/PressableScale` (Reanimated press-scale + light haptic). Redesigned **Dashboard** as the proof-of-concept: glow-gradient backdrop, glass header/search, 3-stat summary card with count-up health score, premium category tiles, fade-in + staggered list entrances, gradient Security-Health hero, gradient FAB. Made `useTheme` dark-first so the look holds on light-mode devices. Completed **7.13** (motion durations) + **7.15** (haptic map); advanced **7.14/7.20/7.21** (partial). Lint clean; no new `tsc` errors. Phase 7 → 27% (6/22); overall → 52% (78/150); gate unchanged at 50%. | Cursor |
 | 2026-06-14 | Phase 7 hooks (Run 8) | Completed **7.4**: `useTheme()` now resolves the full Fold-style token object from `src/theme/getTheme(scheme)`, and `useHaptics()` centralizes named interaction feedback (`press`, `success`, `warning`, `error`, `selection`, `pullToRefresh`, `cardExpand`). Updated starter themed helpers to consume `theme.colors`. `npm run lint` passes with one existing warning in `src/app/setup.tsx`; `npx tsc --noEmit` remains blocked by pre-existing starter tab/SymbolView type issues and missing Jest globals. Phase 7 → 18% (4/22); overall → 51% (76/150). | Cursor |
 | 2026-06-14 | Phase 7 foundation (Run 7) | Built the Fold-style **design-token system** under `src/theme/`: `colors.ts` (light+dark neutral palette, semantic colors, brand `#5F61F6` accent), `spacing.ts` (8-pt scale + layout helpers), `radius.ts` (chip/button/card/sheet/floating/full), `typography.ts` (Display→Label scale, one family, ≤3 weights), `shadows.ts` (sm/md/lg subtle elevation), `animations.ts` (durations ≤350ms + easing/spring/stagger), and an `index.ts` barrel exposing `getTheme(scheme)` and a `Theme` type. Completes 7.1–7.3; lint clean, no new type errors. Phase 7 → 14% (3/22); overall → 50% (75/150); gate unchanged at 50%. | Cursor |
@@ -747,7 +752,7 @@ npm run lint
 
 | File | Description |
 |------|-------------|
-| `securevault.zip` | Web UI prototype (design reference) |
+| `screenshots/` | Reference screens (design reference) |
 | `constants/theme.ts` | Current Expo starter theme (to be replaced/extended) |
 | `.cursor/rules/expo-ts.mdc` | Expo / RN coding standards |
 | `.cursor/rules/backend-mongodb.mdc` | Backend standards (Phase 6) |
@@ -760,11 +765,11 @@ npm run lint
 
 | Field | Current value |
 |-------|----------------|
-| Overall (all phases) | 78 / 150 = **52%** |
-| Pre-Phase 3 (phases 0–2) | 24 / 48 = **50%** |
+| Overall (all phases) | 82 / 150 = **55%** |
+| Pre-Phase 3 (phases 0–2) | 28 / 48 = **58%** |
 | V1 must-have | 2 / 8 = **25%** |
-| Phase 0 | 5 / 6 |
-| Phase 1 | 0 / 11 |
+| Phase 0 | 6 / 6 |
+| Phase 1 | 3 / 11 |
 | Phase 2 | 19 / 31 |
 | Phase 3 | 22 / 23 |
 | Phase 4 | 10 / 10 |

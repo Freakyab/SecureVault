@@ -49,11 +49,8 @@ function AppNavigation() {
             contentStyle: { backgroundColor: colors.background },
             animation: 'slide_from_right',
           }}>
-          <Stack.Screen name="dashboard" options={{ animation: 'none' }} />
-          <Stack.Screen name="vault" options={{ animation: 'none' }} />
-          <Stack.Screen name="generator" options={{ animation: 'none' }} />
-          <Stack.Screen name="health" options={{ animation: 'none' }} />
-          <Stack.Screen name="settings" options={{ animation: 'none' }} />
+          <Stack.Screen name="(auth)" options={{ animation: 'none' }} />
+          <Stack.Screen name="(tabs)" options={{ animation: 'none' }} />
         </Stack>
       </ToastProvider>
     </ThemeProvider>

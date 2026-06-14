@@ -4,7 +4,7 @@ import { View } from 'react-native';
 import { EditCredentialScreen } from '@/components/screens/edit-credential';
 import { useVault } from '@/contexts/vault-context';
 
-export default function EditCredential() {
+export default function EntryDetail() {
   const { isInitialized, isLoading, isUnlocked } = useVault();
 
   if (isLoading) return <View />;
