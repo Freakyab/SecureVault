@@ -43,7 +43,7 @@ Suggested issue labels:
 - `type:bug`, `type:feature`, `type:task`, `type:security`, `type:docs`
 - `area:auth`, `area:vault`, `area:health`, `area:ui`, `area:release`
 
-Use `ROADMAP.md` and `BUGS-AND-TASKS.md` as the source of truth. Update both files whenever a feature or fix ships.
+Use `ROADMAP.md`, `TASKS.md`, and `BUGS.md` as the source of truth. Update them whenever a feature or fix ships.
 
 ## Verify
 

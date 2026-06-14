@@ -24,12 +24,8 @@ import {
   VaultSettings,
 } from '@/types/credential';
 
-/**
- * Temporarily off — set to `true` to block screenshots while unlocked (TASK-035).
- * PRODUCTION REMINDER: this is disabled only for development convenience.
- * Flip back to `true` before any production / store build.
- */
-const SCREEN_CAPTURE_PROTECTION_ENABLED = false;
+/** Blocks screenshots and screen recording while the vault is unlocked. */
+const SCREEN_CAPTURE_PROTECTION_ENABLED = true;
 
 interface CredentialInput {
   website: string;

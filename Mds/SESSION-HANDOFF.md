@@ -24,7 +24,8 @@ Use `screenshots/` (11 PNGs) as visual spec when no Figma link is provided.
 
 | Tracker | Progress |
 |---------|----------|
-| **BUGS-AND-TASKS.md** | **55 / 59 done (93%)** — 4 open (all P3, backend-gated) |
+| **TASKS.md** | **45 / 79 done (57%)** — 34 open (4 P3 backend-gated; Phase 6/7 remainder) |
+| **BUGS.md** | **15 / 15 bugs done (100%)** — 0 open; 8 potential-bug backlog items |
 | **ROADMAP.md** | **78 / 150 (52%)** — Phase 2 at 61%, Phase 3 at 96%, Phase 4 at 100% ✅, Phase 7 at 27% (7.1–7.4, 7.13, 7.15 done; Dashboard premium PoC migrated); Pre-Phase 3 gate 50% |
 
 ### Remaining open items (4 — all backend/cloud, out of scope for offline-first v1)

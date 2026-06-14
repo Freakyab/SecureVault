@@ -242,6 +242,14 @@ export function DashboardScreen() {
                   ? 'No credentials match your search. Try a different keyword.'
                   : 'Tap the plus button to save your first credential.'
               }
+              actionLabel={searched ? 'Clear search' : 'Add credential'}
+              onAction={() => {
+                if (searched) {
+                  setQuery('');
+                  return;
+                }
+                runLocked(() => router.push('/add-credential'));
+              }}
             />
           )}
         </View>

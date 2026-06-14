@@ -2,8 +2,8 @@
 
 Track progress for building the **SecureVault** password manager as an **Expo (React Native)** app, using the UI/UX in the [`screenshots/`](../screenshots) folder as the design reference.
 
-**Last updated:** 2026-06-14 (Run 14)  
-**Overall status:** 🟡 In progress — **49%** project-wide (added **Phase 8 — Modern Animation & UX**: an advanced motion track for gesture-driven interactions, shared-element transitions, delight animations, and reduced-motion accessibility)
+**Last updated:** 2026-06-14 (TASK-047 / Roadmap 2.6 read-only entry detail completed)  
+**Overall status:** 🟡 In progress — **61%** project-wide (entry detail now defaults to read-only view mode)
 
 > **Status (2026-06-14, Run 14):** Added **Phase 8 — Modern Animation & UX** as a second polish track
 > (18 tasks) that extends Phase 7's token + motion foundation toward a best-in-class feel: gesture-driven
@@ -82,21 +82,21 @@ rg "^- \[x\]" ROADMAP.md | wc -l      # completed
 
 | Metric | Value |
 |--------|-------|
-| Tasks completed | **99** / **167** |
-| **Overall progress** | **59%** |
+| Tasks completed | **102** / **167** |
+| **Overall progress** | **61%** |
 
 ```
-[████████████░░░░░░░░] 59%
+[████████████░░░░░░░░] 61%
 ```
 
 | Phase | Done | Total | Progress | Status |
 |-------|------|-------|----------|--------|
 | 0 — Foundation | 6 | 6 | 100% | ✅ |
 | 1 — Design system & shell | 11 | 11 | 100% | ✅ |
-| 2 — UI (mock data) | 28 | 30 | 93% | 🟡 |
+| 2 — UI (mock data) | 29 | 30 | 97% | 🟡 |
 | 3 — Local vault & security | 22 | 22 | 100% | ✅ |
 | 4 — Password health | 10 | 10 | 100% | ✅ |
-| 5 — Polish & release | 11 | 15 | 73% | 🟡 |
+| 5 — Polish & release | 13 | 15 | 87% | 🟡 |
 | 6 — Premium UI (Fold-style) | 6 | 22 | 27% | 🟡 |
 | 7 — Modern Animation & UX | 0 | 18 | 0% | ⬜ |
 | 8 — Testing | 0 | 1 | 0% | ⬜ |
@@ -114,14 +114,14 @@ rg "^- \[x\]" ROADMAP.md | wc -l      # completed
 
 | Metric | Value |
 |--------|-------|
-| Tasks completed | **45** / **47** |
-| **Pre-Phase 3 progress** | **96%** |
+| Tasks completed | **46** / **47** |
+| **Pre-Phase 3 progress** | **98%** |
 
 ```
-[███████████████████░] 96%
+[████████████████████] 98%
 ```
 
-**Remaining before Phase 3 gate:** all Phase 1–2 tasks.
+**Remaining before Phase 3 gate:** 1 Phase 2 task.
 
 *Phase 3 V1 core has started early by exception to clear P0 auth/vault-save bugs; Phase 0 is now complete.*
 
@@ -141,14 +141,14 @@ rg "^- \[x\]" ROADMAP.md | wc -l      # completed
 | Milestone | Phases | Progress | Notes |
 |-----------|--------|----------|-------|
 | **M0 — Kickoff** | 0 | 100% | Scope/process documented; design reference now lives in the `screenshots/` folder |
-| **M1 — Walkable UI** | 1–2 | **96%** | Phase 1 app shell complete; Dashboard + Vault UI verified live; Generator tab live; screens wired to real data; Password Health screen verified live; entry detail edit/copy/delete verified live (read-only view mode pending); app fonts loaded; route groups `(auth)`/`(tabs)` + `entry/[id]`; starter Explore tab removed |
+| **M1 — Walkable UI** | 1–2 | **99%** | Phase 1 app shell complete; Dashboard + Vault UI verified live; Generator tab live; screens wired to real data; Password Health screen verified live; entry detail read-only view plus edit/copy/delete flow verified live; app fonts loaded; route groups `(auth)`/`(tabs)` + `entry/[id]`; starter Explore tab removed |
 | **M2 — Private beta** | 3–4 | **98%** | AES-GCM encryption, Generator, categories; Password Health 100% |
-| **M3 — Store beta** | 5 | 61% | Accessibility, release metadata, screen-capture protection, loading/empty states |
+| **M3 — Store beta** | 5 | 87% | Accessibility, release metadata, screen-capture protection, loading/empty states, security review checklist, lock/logout polish |
 | **M4 — Cloud** | 9 | 0% | Optional |
 | **M5 — Premium UI** | 6 | 27% | Premium CRED-blend tokens + theme/haptics hooks + motion map shipped; Dashboard PoC migrated; UI kit & remaining screens next |
 | **M6 — Living UI** | 7 | 0% | Advanced motion: gesture interactions, shared-element transitions, delight animations, reduce-motion + 60fps pass |
 
-**M1 formula:** average of Phase 1 (100%) and Phase 2 (93%) = **96%**.
+**M1 formula:** average of Phase 1 (100%) and Phase 2 (97%) = **99%**.
 
 ---
 
@@ -301,18 +301,18 @@ contexts/                     # Auth, vault (Phase 3+)
 |-------|------|------|----------|--------|
 | 0 | Foundation | Repo ready, decisions documented | 100% | ✅ Done |
 | 1 | Design system & shell | Theme, navigation, dark mode, UI kit | 100% | ✅ Done |
-| 2 | UI screens (mock data) | All 5 screens match prototype | 93% | 🟡 In progress |
+| 2 | UI screens (mock data) | All 5 screens match prototype | 97% | 🟡 In progress |
 | 3 | Local vault & security | Real CRUD, encryption, generator | 100% | ✅ Done |
 | 4 | Password health | Scoring, reuse, strength rules | 100% | ✅ Done |
-| 5 | Polish & release prep | A11y, errors, store assets | 73% | 🟡 In progress |
+| 5 | Polish & release prep | A11y, errors, store assets | 87% | 🟡 In progress |
 | 6 | Premium UI (Fold-style) | Design tokens, UI kit, motion + haptics, screen migration | 27% | 🟡 In progress |
 | 7 | Modern Animation & UX | Gestures, shared transitions, delight motion, reduce-motion + 60fps | 0% | ⬜ Not started |
 | 8 | Testing | Beta distribution, real-device QA | 0% | ⬜ Not started |
 | 9 | Backend & sync (optional) | Auth API, cloud vault, multi-device | 0% | ⬜ Not started |
 | 10 | Maintenance | Legal/compliance docs, ongoing upkeep | 0% | ⬜ Not started |
 | 11 | Optional Advancement *(not counted)* | Store listing copy, growth — excluded from totals | — | ⬜ Not started |
-| — | **Project overall** | All phases *(excl. Phase 11)* | **59%** | 🟡 |
-| — | **Pre-Phase 3 gate** | Phases 0–2 only | **96%** | 🟡 |
+| — | **Project overall** | All phases *(excl. Phase 11)* | **61%** | 🟡 |
+| — | **Pre-Phase 3 gate** | Phases 0–2 only | **98%** | 🟡 |
 | — | **V1 must-have** | Product MVP | **25%** | 🟡 |
 
 **Legend:** ⬜ Not started · 🟡 In progress · ✅ Done
@@ -446,7 +446,7 @@ contexts/                     # Auth, vault (Phase 3+)
 
 ### 2.6 Entry detail (new screen)
 
-- [ ] View mode: site, username, password (masked), notes, category — **read-only detail view** *(pending: `entry/[id]` currently mounts the always-editable `EditCredentialScreen`; expected: a dedicated read-only mode that displays website/URL, username, masked password, notes, and category with no editable inputs, plus an explicit “Edit” affordance to switch into edit mode)*
+- [x] View mode: site, username, password (masked), notes, category — **read-only detail view** *(`/entry/[id]` now defaults to a static detail view with masked password reveal/copy and an explicit Edit affordance — TASK-047)*
 - [x] Edit mode with form validation (UI) *(`EditCredentialScreen` edits website/URL/username/password/notes/folder/tags/category + favorite/archive/logo; requires website+username+password before save)* — *follow-up: inline field-level validation instead of a single `Alert`*
 - [x] Show / hide password, copy actions *(`secureTextEntry` + Eye/EyeOff toggle; copy username + `copySensitiveToClipboard` for password with 30s auto-clear)*
 - [x] Delete with confirmation dialog *(`handleDelete` → `Alert.alert` with Cancel + destructive Delete before `deleteCredential`)*
@@ -542,7 +542,7 @@ contexts/                     # Auth, vault (Phase 3+)
 - [x] **5.3** Loading and skeleton states *(branded RouteFallback spinner + EmptyState — TASK-036)*
 - [x] **5.4** Toast / snackbar for copy confirmation and errors
 - [x] **5.5** Accessibility labels, contrast checks, dynamic type where possible
-- [ ] **5.6** Empty states and onboarding skip / logout flows
+- [x] **5.6** Empty states and onboarding skip / logout flows *(shared empty-state CTAs across Dashboard/Vault/Health, persisted Skip path verified, confirmed Lock flow routes to unlock — TASK-048)*
 - [x] **5.17** Settings page: change master password, disable biometrics, reset local data, app theme, auto-lock timeout
 
 ### Security hardening
@@ -550,7 +550,7 @@ contexts/                     # Auth, vault (Phase 3+)
 - [x] **5.7** Screenshot / screen capture policy (`expo-screen-capture` blocks capture while unlocked — TASK-035)
   - ⚠️ **PRODUCTION REMINDER:** currently **disabled for development** via `SCREEN_CAPTURE_PROTECTION_ENABLED = false` in `src/contexts/vault-context.tsx`. Set it back to `true` before any production/store build so screenshots are blocked while the vault is unlocked.
 - [x] **5.8** Clipboard auto-clear for copied passwords
-- [ ] **5.9** Security review checklist completed
+- [x] **5.9** Security review checklist completed *(`Mds/SECURITY-REVIEW.md` documents the code-verified checklist; screen-capture protection is enabled while unlocked — TASK-049)*
 - [x] **5.18** App lock controls: manual lock button and configurable auto-lock timeout
 
 ### Import / export (optional for v1)
@@ -842,6 +842,9 @@ Add a row when you complete a phase or milestone.
 
 | Date | Phase / Milestone | Notes | Updated by |
 |------|-------------------|-------|------------|
+| 2026-06-14 | Phase 2 (2.6) entry detail view mode | Completed Roadmap **2.6 / TASK-047**: `/entry/[id]` now lands on a read-only credential detail view with static website/URL/username/password/category/notes, masked password reveal, copy actions using sensitive clipboard auto-clear, and an explicit Edit action into the existing edit/delete flow. Phase 2 → 29/30 (97%); Pre-Phase 3 gate → 46/47 (98%); M1 → 99%; overall → 102/167 (61%). | Cursor |
+| 2026-06-14 | Phase 5 (5.6) empty states / lock flow | Completed Roadmap **5.6 / TASK-048**: `EmptyState` now supports CTA actions, Dashboard/Vault/Health have actionable empty states, onboarding Skip persistence was verified and labeled for accessibility, and the Vault lock action now confirms, clears the unlocked session, shows feedback, and routes to unlock. Phase 5 → 13/15 (87%); overall → 101/167 (60%). | Cursor |
+| 2026-06-14 | Phase 5 (5.9) security review | Completed Roadmap **5.9 / TASK-049**: added `Mds/SECURITY-REVIEW.md` with verified evidence for AES-GCM/PBKDF2, key/session clearing, SecureStore biometrics, encrypted storage, clipboard auto-clear, HIBP k-anonymity, auto-lock, ID-only navigation params, and input validation. Re-enabled screen-capture protection while the vault is unlocked. Phase 5 → 12/15 (80%); overall → 100/167 (60%). | Cursor |
 | 2026-06-14 | Phases renumbered/reranked | Reranked the later phases for a more logical order. Mapping (old → new): **Premium UI 7 → 6**, **Modern Animation & UX 8 → 7**, **Testing 10 → 8**, **Backend & sync 6 → 9**, **Maintenance 9 → 10**; Optional Advancement stays 11. Renumbered all section headers, sub-headings, and task IDs (e.g. 7.x→6.x, 8.x→7.x, 6.x→9.x, 9.1→10.1, 10.1→8.1), reordered the body sections, and updated the progress/overview/milestone/quick-reference tables, the Fold-style token anchor (now `phase-6`), and risk/reference phase refs. Counts unchanged; overall still 99/167 = 59%. **Note:** earlier progress-log rows and dated status notes keep their original phase numbers as a historical record. | Cursor |
 | 2026-06-14 | Phase 11 — Optional Advancement added (5.16 moved, not counted) | Created **Phase 11 — Optional Advancement** for nice-to-have/go-to-market work and moved **5.16 Play Store / App Store listing copy** there as **11.1**. Phase 11 is **excluded from overall progress calculations**. Phase 5 → 11/15 (73%, was 11/16); overall denominator → 167 (also reconciled the stale top metric that read 169 — both overall figures now 99/167 = 59%). | Cursor |
 | 2026-06-14 | Phase 10 — Testing added (5.15 moved) | Created **Phase 10 — Testing** for real-device beta validation and QA, and moved **5.15 TestFlight / internal testing track** there as **10.1**. Phase 5 → 11/16 (69%, was 11/17); Phase 10 → 0/1. Overall scope unchanged (task moved, not removed): 99/168 = 59%. | Cursor |
@@ -918,15 +921,15 @@ npm run lint
 
 | Field | Current value |
 |-------|----------------|
-| Overall (all phases, excl. Phase 11) | 99 / 167 = **59%** |
-| Pre-Phase 3 (phases 0–2) | 45 / 47 = **96%** |
+| Overall (all phases, excl. Phase 11) | 102 / 167 = **61%** |
+| Pre-Phase 3 (phases 0–2) | 46 / 47 = **98%** |
 | V1 must-have | 2 / 8 = **25%** |
 | Phase 0 | 6 / 6 |
 | Phase 1 | 11 / 11 |
-| Phase 2 | 28 / 30 |
+| Phase 2 | 29 / 30 |
 | Phase 3 | 22 / 22 |
 | Phase 4 | 10 / 10 |
-| Phase 5 | 11 / 15 |
+| Phase 5 | 13 / 15 |
 | Phase 6 | 6 / 22 |
 | Phase 7 | 0 / 18 |
 | Phase 8 | 0 / 1 |

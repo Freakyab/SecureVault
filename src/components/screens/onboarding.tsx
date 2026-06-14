@@ -78,7 +78,11 @@ export function OnboardingScreen({ onFinish }: OnboardingScreenProps) {
   return (
     <ScreenBackground>
       <View style={[styles.skipRow, { paddingTop: insets.top + 12 }]}>
-        <Pressable accessibilityRole="button" hitSlop={12} onPress={onFinish}>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Skip onboarding and set up vault"
+          hitSlop={12}
+          onPress={onFinish}>
           <Text style={styles.skip}>Skip</Text>
         </Pressable>
       </View>
@@ -114,7 +118,11 @@ export function OnboardingScreen({ onFinish }: OnboardingScreenProps) {
 
         <View style={styles.signInRow}>
           <Text style={styles.signInText}>Already have an account?</Text>
-          <Pressable accessibilityRole="button" hitSlop={8} onPress={onFinish}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Sign in or continue to vault setup"
+            hitSlop={8}
+            onPress={onFinish}>
             <Text style={styles.signInLink}>Sign in</Text>
           </Pressable>
         </View>

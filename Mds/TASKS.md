@@ -1,11 +1,12 @@
-# SecureVault — Bugs & Pending Tasks
+# SecureVault — Pending Tasks
 
-Track known issues and work not yet done. Update **Status** and **Progress** as items are fixed.
+Track pending feature/engineering work not yet done. Update **Status** and **Progress** as items are fixed.
+Bugs and suspected issues are tracked separately in [BUGS.md](./BUGS.md).
 
-**Last updated:** 2026-06-14 (TASK-051–TASK-061 added — P1 Phase 6 page migrations, onboarding first)  
-**Open:** 19 · **In progress:** 0 · **Done:** 57
+**Last updated:** 2026-06-14 (TASK-062–TASK-079 added — Phase 7 Modern Animation & UX tasks)  
+**Open:** 34 · **In progress:** 0 · **Done:** 45
 
-> **Status (2026-06-14, Run 5):** No bug/task items changed — the 4 open items remain backend-gated
+> **Status (2026-06-14, Run 5):** No task items changed — the 4 open items remain backend-gated
 > (out of scope for offline-first v1). This run verified the ROADMAP Phase 2 Dashboard and Vault
 > UI tasks (10 of them) against the shipped, data-wired screens and checked them off in
 > `ROADMAP.md` (Phase 2 → 61%, overall → 56%). See the ROADMAP Progress log for details.
@@ -21,29 +22,27 @@ Track known issues and work not yet done. Update **Status** and **Progress** as 
 
 | Status | Count |
 |--------|-------|
-| Open | 19 |
+| Open | 34 |
 | In progress | 0 |
 | Blocked | 0 |
-| Done | 57 |
-| **Total** | **76** |
+| Done | 45 |
+| **Total** | **79** |
 
 ```
-[███████████████░░░░░] 75% resolved
+[███████████░░░░░░░░░] 57% resolved
 ```
 
 | Priority | Open |
 |----------|------|
 | P0 — Critical | 0 |
-| P1 — High | 12 |
-| P2 — Medium | 3 |
+| P1 — High | 11 |
+| P2 — Medium | 19 |
 | P3 — Low / Optional | 4 |
 
 4 of the open items (TASK-017 backend/cloud sync, TASK-018 sharing, TASK-019 browser
 extension, TASK-022 Google login) depend on a backend that is **out of scope** for the
-offline-first v1 (Open decision D1 = *Offline only*). The remaining 4 open items —
-TASK-047 (read-only entry View mode), TASK-048 (empty states / onboarding skip / logout
-flows), TASK-049 (security review checklist), and TASK-050 (EAS Build profiles) — are
-Phase 2/5 work that can ship offline.
+offline-first v1 (Open decision D1 = *Offline only*). The remaining offline open item
+is TASK-050 (EAS Build profiles), which is Phase 5 work that can ship offline.
 
 **TASK-051–TASK-061 (P1)** are the **Phase 6 page migrations**: each remaining screen
 must move off the legacy `useVaultColors` / `VaultType` / hardcoded-style system onto the
@@ -51,13 +50,21 @@ completed Phase 6 foundation (`useTheme`, `useThemePresets`, `theme.spacing/radi
 `theme.motion`, and `useHaptics`). Dashboard is already migrated (reference). Do these in
 order, **onboarding first**.
 
+**TASK-062–TASK-079 (P2)** are the **Phase 7 — Modern Animation & UX** track (ROADMAP 7.1–7.18):
+advanced, gesture-driven, physics-based motion (swipe rows, drag-to-reorder, bottom sheets,
+shared-element transitions, delight/celebration animations, ambient motion, reduced-motion +
+60fps pass). This is a **second polish track and not a v1 blocker** — it builds on the Phase 6
+tokens/UI kit. A deep code scan found it largely unimplemented; the few partials (Dashboard
+entrances, `PressableScale`, `AnimatedBlobs`, motion tokens) are noted per task.
+
 ---
 
 ## Recommended Fix Order
 
-✅ done: TASK-009 → … → TASK-036 → TASK-037 → TASK-038 → TASK-039 → TASK-040 → TASK-041 → TASK-042 → TASK-043 → TASK-044 → TASK-045 → TASK-046
-⏳ remaining (offline, do first): TASK-049 (security review checklist) → TASK-048 (empty states / onboarding skip / logout) → TASK-047 (read-only entry View mode) → TASK-050 (EAS Build profiles)
+✅ done: TASK-009 → … → TASK-036 → TASK-037 → TASK-038 → TASK-039 → TASK-040 → TASK-041 → TASK-042 → TASK-043 → TASK-044 → TASK-045 → TASK-046 → TASK-049 → TASK-048 → TASK-047
+⏳ remaining (offline, do first): TASK-050 (EAS Build profiles)
 ⏳ Phase 6 page migrations (P1, do onboarding first): TASK-051 (Onboarding) → TASK-052 (Setup master password) → TASK-053 (Unlock) → TASK-054 (Main Vault) → TASK-055 (My Vault) → TASK-056 (Generator) → TASK-057 (Password Health) → TASK-058 (Settings) → TASK-059 (Add Credential) → TASK-060 (Entry detail/Edit) → TASK-061 (Change Password)
+⏳ Phase 7 animation track (P2, after Phase 6 migrations; foundation first): TASK-074 (ambient backdrops) → TASK-076 (spring tab bar) → TASK-062 (swipe rows) → TASK-065 (bottom sheets) → TASK-063 (drag-to-reorder) → TASK-064 (pull-to-refresh) → TASK-066 (shared element) → TASK-067 (collapsing headers) → TASK-068 (Dashboard↔Health) → TASK-069 (success states) → TASK-070 (empty states) → TASK-071 (strength meter) → TASK-072 (health ring) → TASK-073 (milestone) → TASK-075 (skeleton morph) → TASK-077 (reduced-motion) → TASK-078 (60fps perf) → TASK-079 (motion audit)
 ⏳ remaining (backend-gated): TASK-017 → TASK-022 → TASK-018 → TASK-019
 
 ---
@@ -72,45 +79,6 @@ order, **onboarding first**.
 **Status values:** `open` · `in_progress` · `blocked` · `done` · `wont_fix`
 
 ---
-
-## Active Bug Index
-
-_No open bugs._
-
-## Completed Bug Index
-
-| ID | Title | Priority | Status |
-|----|-------|----------|--------|
-| [BUG-016](#bug-016) | Biometric unlock switch not working (setup + settings) | P1 | done |
-| [BUG-015](#bug-015) | Create Vault button does not work on setup screen | P0 | done |
-| [BUG-012](#bug-012) | Biometric enable switch cannot be toggled | P1 | done |
-| [BUG-007](#bug-007) | Home menu icon locks app with master password | P1 | done |
-| [BUG-002](#bug-002) | No master password after onboarding | P0 | done |
-| [BUG-003](#bug-003) | No close (X) on Add Credential | P1 | done |
-| [BUG-004](#bug-004) | Website suggestion buttons don’t update URL | P2 | done |
-| [BUG-005](#bug-005) | Save credential fails | P0 | done |
-| [BUG-006](#bug-006) | Create vault fails | P0 | done |
-| [BUG-008](#bug-008) | Vault header icon is on wrong side | P2 | done |
-| [BUG-009](#bug-009) | Security alerts are not clickable | P2 | done |
-| [BUG-010](#bug-010) | Multiple Edit Credential dialogs open | P1 | done |
-| [BUG-011](#bug-011) | Health score does not update after add/delete | P1 | done |
-| [BUG-013](#bug-013) | Onboarding back swipe exposes SecureVault before setup | P1 | done |
-| [BUG-014](#bug-014) | White screen flash when switching tabs | P2 | done |
-
-## Potential Bug Backlog
-
-Track suspected issues before they are fully reproduced and converted into formal `BUG-xxx` items.
-
-| ID | Potential bug | Risk | Trigger area | Status | Related item |
-|----|---------------|------|--------------|--------|--------------|
-| POT-001 | Auto-lock timer may race with active save and force unlock flow unexpectedly | High | App lifecycle / vault lock | potential_open | TASK-027 |
-| POT-002 | CSV export may create duplicate entries when imported back without stronger identity checks | Medium | Vault import/export | mitigated | TASK-012 |
-| POT-003 | Search + rapid tap on grouped credentials may open stale account after filter updates | High | Home/Vault grouped list | mitigated | BUG-010 |
-| POT-004 | Password health counts may drift after bulk import and not refresh badges instantly | Medium | Health metrics | mitigated | BUG-011 |
-| POT-005 | Theme override from settings may not apply consistently after cold app restart | Medium | App preferences/theme | potential_open | TASK-026 |
-| POT-006 | Copy password action in nested dialogs may copy wrong account when dialog list rerenders | High | Credential picker dialog | potential_open | TASK-003 |
-| POT-007 | Generated password passed to new entry may be lost if route params are trimmed by navigation replace | Medium | Generator to entry flow | potential_open | TASK-024 |
-| POT-008 | Site logo cache fallback may show wrong brand icon for uncommon domains | Low | Site branding/cache | mitigated | TASK-006 |
 
 ## Pending Tasks Index
 
@@ -127,10 +95,25 @@ Track suspected issues before they are fully reproduced and converted into forma
 | [TASK-059](#task-059) | Migrate Add Credential to Phase 6 tokens/hooks | P1 | open |
 | [TASK-060](#task-060) | Migrate Entry detail / Edit Credential to Phase 6 tokens/hooks | P1 | open |
 | [TASK-061](#task-061) | Migrate Change Password to Phase 6 tokens/hooks | P1 | open |
+| [TASK-062](#task-062) | Swipe-to-action vault rows (copy/edit/delete) | P2 | open |
+| [TASK-063](#task-063) | Long-press context menu + drag-to-reorder favorites | P2 | open |
+| [TASK-064](#task-064) | Custom branded pull-to-refresh | P2 | open |
+| [TASK-065](#task-065) | Velocity-aware bottom sheet gestures | P2 | open |
+| [TASK-066](#task-066) | Shared-element transition: vault row → entry detail | P2 | open |
+| [TASK-067](#task-067) | Scroll-driven collapsing headers + parallax hero | P2 | open |
+| [TASK-068](#task-068) | Spatial continuity between Dashboard and Health | P2 | open |
+| [TASK-069](#task-069) | Lottie / Reanimated success states | P2 | open |
+| [TASK-070](#task-070) | Animated empty-state illustrations | P2 | open |
+| [TASK-071](#task-071) | Generator strength meter spring fill + color interpolation | P2 | open |
+| [TASK-072](#task-072) | Health score ring draw-on synced with count-up | P2 | open |
+| [TASK-073](#task-073) | Celebratory moment on health-score milestone | P2 | open |
+| [TASK-074](#task-074) | Perf-budgeted animated gradient/glow backdrops | P2 | open |
+| [TASK-075](#task-075) | Shimmer skeleton → content morph | P2 | open |
+| [TASK-076](#task-076) | Spring-animated tab bar | P2 | open |
+| [TASK-077](#task-077) | Reduced-motion variants (`useReducedMotion`) | P2 | open |
+| [TASK-078](#task-078) | 60fps worklet budget + perf profiling | P2 | open |
+| [TASK-079](#task-079) | Motion consistency audit via `theme/animations.ts` | P2 | open |
 | [TASK-050](#task-050) | EAS Build profiles (development, preview, production) | P2 | open |
-| [TASK-049](#task-049) | Security review checklist completed | P1 | open |
-| [TASK-048](#task-048) | Empty states, onboarding skip & logout/lock flows | P2 | open |
-| [TASK-047](#task-047) | Read-only credential View mode (entry detail) | P2 | open |
 | [TASK-017](#task-017) | Backend and cloud sync | P3 | open |
 | [TASK-018](#task-018) | Credential sharing | P3 | open |
 | [TASK-019](#task-019) | Browser extension | P3 | open |
@@ -141,6 +124,9 @@ Track suspected issues before they are fully reproduced and converted into forma
 
 | ID | Title | Priority | Status |
 |----|-------|----------|--------|
+| [TASK-047](#task-047) | Read-only credential View mode (entry detail) | P2 | done |
+| [TASK-048](#task-048) | Empty states, onboarding skip & logout/lock flows | P2 | done |
+| [TASK-049](#task-049) | Security review checklist completed | P1 | done |
 | [TASK-037](#task-037) | PBKDF2-SHA256 key derivation | P0 | done |
 | [TASK-038](#task-038) | AES-GCM encrypt vault at rest | P0 | done |
 | [TASK-039](#task-039) | Encrypted blob + salt storage | P0 | done |
@@ -648,6 +634,705 @@ Change Password uses `useVaultColors` / `VaultType` with hardcoded style values 
 
 ---
 
+<a id="task-062"></a>
+
+## TASK-062: Swipe-to-action vault rows (copy/edit/delete)
+
+| Field | Value |
+|-------|--------|
+| **ID** | TASK-062 |
+| **Type** | Pending task |
+| **Priority** | P2 — Medium |
+| **Status** | open |
+| **Area** | Phase 7 Animation / Vault list |
+| **Reported** | 2026-06-14 |
+
+### Description
+
+Vault rows are plain `Pressable` — no swipe actions. Add gesture-driven swipe-to-action (reveal copy / edit / delete) with spring snap, haptic detents, and a full-swipe shortcut. (ROADMAP 7.1)
+
+### Scope
+
+- Use `react-native-gesture-handler` + Reanimated for an interruptible, reversible swipe.
+- Reveal copy / edit / delete actions; spring snap to open/closed; haptic detent at threshold.
+- Full-swipe triggers the primary action; source spring/timing from `theme/animations.ts`.
+
+### Related files
+
+- `src/components/vault/credential-row.tsx`
+- `src/theme/animations.ts`, `src/hooks/use-haptics.ts`
+
+### Acceptance criteria
+
+- Rows swipe with spring physics, are interruptible/reversible, and fire haptic detents.
+- Full-swipe shortcut works; reduced-motion variant respected (see TASK-077).
+- Runs on the UI thread at 60fps; lint clean; no new `tsc` errors.
+
+### Related
+
+- ROADMAP Phase 7.1. Deep scan: **not implemented**.
+
+---
+
+<a id="task-063"></a>
+
+## TASK-063: Long-press context menu + drag-to-reorder favorites
+
+| Field | Value |
+|-------|--------|
+| **ID** | TASK-063 |
+| **Type** | Pending task |
+| **Priority** | P2 — Medium |
+| **Status** | open |
+| **Area** | Phase 7 Animation / Vault list |
+| **Reported** | 2026-06-14 |
+
+### Description
+
+Add long-press → context menu and drag-to-reorder for favorites. Requires a favorite-order field in the data model (currently only an `isFavorite` boolean). (ROADMAP 7.2)
+
+### Scope
+
+- Long-press opens a context menu (`react-native-gesture-handler`); drag-to-reorder via Reanimated layout animations.
+- Add an explicit favorite order to `Credential` + persist via vault context.
+- Haptic on long-press activation and drop.
+
+### Related files
+
+- `src/components/vault/credential-row.tsx`, `src/components/screens/my-vault.tsx`
+- `src/types/credential.ts`, `src/contexts/vault-context.tsx`
+- `src/hooks/use-haptics.ts`, `src/theme/animations.ts`
+
+### Acceptance criteria
+
+- Long-press menu works; favorites reorder by drag and persist across restarts.
+- Reorder uses layout animations at 60fps; reduced-motion variant respected.
+- Lint clean; no new `tsc` errors.
+
+### Related
+
+- ROADMAP Phase 7.2. Deep scan: **not implemented** (no favorite-order field).
+
+---
+
+<a id="task-064"></a>
+
+## TASK-064: Custom branded pull-to-refresh
+
+| Field | Value |
+|-------|--------|
+| **ID** | TASK-064 |
+| **Type** | Pending task |
+| **Priority** | P2 — Medium |
+| **Status** | open |
+| **Area** | Phase 7 Animation / Vault & Dashboard |
+| **Reported** | 2026-06-14 |
+
+### Description
+
+No pull-to-refresh exists. Add a custom branded animated indicator (shield/progress) instead of the default spinner. (ROADMAP 7.3)
+
+### Scope
+
+- Gesture-driven pull with an animated shield/progress drawn via Reanimated/SVG.
+- Soft haptic at the refresh threshold (map already has `pullToRefresh`).
+- Apply on the scrollable list screens (Vault, Dashboard).
+
+### Related files
+
+- `src/components/screens/main-vault.tsx`, `src/components/screens/dashboard.tsx`
+- `src/hooks/use-haptics.ts`, `src/theme/animations.ts`
+
+### Acceptance criteria
+
+- Custom indicator animates with the pull; soft haptic at threshold.
+- No default spinner; reduced-motion variant respected; 60fps.
+- Lint clean; no new `tsc` errors.
+
+### Related
+
+- ROADMAP Phase 7.3. Deep scan: **not implemented**.
+
+---
+
+<a id="task-065"></a>
+
+## TASK-065: Velocity-aware bottom sheet gestures
+
+| Field | Value |
+|-------|--------|
+| **ID** | TASK-065 |
+| **Type** | Pending task |
+| **Priority** | P2 — Medium |
+| **Status** | open |
+| **Area** | Phase 7 Animation / Sheets |
+| **Reported** | 2026-06-14 |
+
+### Description
+
+No bottom sheet exists. Add velocity-aware sheets with snap points, fling-to-dismiss, and a backdrop that fades with drag. (ROADMAP 7.4)
+
+### Scope
+
+- Add `@gorhom/bottom-sheet` (or equivalent Reanimated sheet); configure snap points.
+- Fling-to-dismiss honoring gesture velocity; backdrop opacity interpolates with drag.
+- Use for contextual actions (e.g. row actions, filters).
+
+### Related files
+
+- New `src/components/ui/bottom-sheet.tsx` (UI kit)
+- `package.json` (add `@gorhom/bottom-sheet`)
+- `src/theme/animations.ts`
+
+### Acceptance criteria
+
+- Sheet snaps to points, flings to dismiss by velocity, backdrop fades with drag.
+- Gestures interruptible/reversible at 60fps; reduced-motion variant respected.
+- Lint clean; no new `tsc` errors.
+
+### Related
+
+- ROADMAP Phase 7.4. Deep scan: **not implemented** (no sheet dependency).
+
+---
+
+<a id="task-066"></a>
+
+## TASK-066: Shared-element transition — vault row → entry detail
+
+| Field | Value |
+|-------|--------|
+| **ID** | TASK-066 |
+| **Type** | Pending task |
+| **Priority** | P2 — Medium |
+| **Status** | open |
+| **Area** | Phase 7 Animation / Navigation |
+| **Reported** | 2026-06-14 |
+
+### Description
+
+Tapping a row routes to `/entry/[id]` with no shared element. Add a shared-element transition so the logo + title morph in place into the detail screen. (ROADMAP 7.5)
+
+### Scope
+
+- Use Reanimated shared element transitions / `expo-router` transitions.
+- Morph credential logo + title from the row into the detail header.
+- Reverse cleanly on back navigation.
+
+### Related files
+
+- `src/components/vault/credential-row.tsx`, `src/app/entry/[id].tsx`, `src/components/screens/edit-credential.tsx`
+- `src/app/(tabs)/_layout.tsx` (transition config)
+
+### Acceptance criteria
+
+- Logo/title morph in/out on push/pop with spatial continuity at 60fps.
+- Reduced-motion variant falls back to a crossfade.
+- Lint clean; no new `tsc` errors.
+
+### Related
+
+- ROADMAP Phase 7.5. Deep scan: **not implemented**.
+
+---
+
+<a id="task-067"></a>
+
+## TASK-067: Scroll-driven collapsing headers + parallax hero
+
+| Field | Value |
+|-------|--------|
+| **ID** | TASK-067 |
+| **Type** | Pending task |
+| **Priority** | P2 — Medium |
+| **Status** | open |
+| **Area** | Phase 7 Animation / Headers |
+| **Reported** | 2026-06-14 |
+
+### Description
+
+Screens use normal `ScrollView` with no scroll-driven motion. Add collapsing headers with a parallax hero (header shrinks/blurs as content scrolls). (ROADMAP 7.6)
+
+### Scope
+
+- Drive header height/opacity/blur from `useAnimatedScrollHandler` + `interpolate`.
+- Parallax hero on Dashboard / Health; keep work on the UI thread.
+
+### Related files
+
+- `src/components/screens/dashboard.tsx`, `src/components/screens/password-health.tsx`, `src/components/screens/main-vault.tsx`
+- `src/theme/animations.ts`
+
+### Acceptance criteria
+
+- Header collapses/blurs smoothly with scroll; hero parallaxes at 60fps.
+- Reduced-motion variant respected; lint clean; no new `tsc` errors.
+
+### Related
+
+- ROADMAP Phase 7.6. Deep scan: **not implemented**.
+
+---
+
+<a id="task-068"></a>
+
+## TASK-068: Spatial continuity between Dashboard and Health
+
+| Field | Value |
+|-------|--------|
+| **ID** | TASK-068 |
+| **Type** | Pending task |
+| **Priority** | P2 — Medium |
+| **Status** | open |
+| **Area** | Phase 7 Animation / Navigation |
+| **Reported** | 2026-06-14 |
+
+### Description
+
+Dashboard has an animated health card but navigates to `/health` via `router.push` with no shared/spatial transition (tab transitions are disabled). Make the score/number morph across screens for spatial continuity. (ROADMAP 7.7)
+
+### Scope
+
+- Morph the health score/number from the Dashboard card into the Health screen ring.
+- Coordinate with TASK-066 transition approach and TASK-072 ring animation.
+
+### Related files
+
+- `src/components/screens/dashboard.tsx`, `src/components/screens/password-health.tsx`
+- `src/app/(tabs)/_layout.tsx`, `src/theme/animations.ts`
+
+### Acceptance criteria
+
+- Score/number visually carries between Dashboard and Health at 60fps.
+- Reduced-motion variant respected; lint clean; no new `tsc` errors.
+
+### Related
+
+- ROADMAP Phase 7.7. Deep scan: **partial** (animated card exists; no shared/spatial transition).
+
+---
+
+<a id="task-069"></a>
+
+## TASK-069: Lottie / Reanimated success states
+
+| Field | Value |
+|-------|--------|
+| **ID** | TASK-069 |
+| **Type** | Pending task |
+| **Priority** | P2 — Medium |
+| **Status** | open |
+| **Area** | Phase 7 Animation / Feedback |
+| **Reported** | 2026-06-14 |
+
+### Description
+
+Success feedback is mostly toast + haptics. Add animated success states (animated checkmark on save, copy-confirm pulse) via Lottie or Reanimated. (ROADMAP 7.8)
+
+### Scope
+
+- Animated checkmark on save; copy-confirm pulse on copy actions.
+- Either add `lottie-react-native` or build with Reanimated/SVG.
+- Reuse across add/edit credential, generator, settings.
+
+### Related files
+
+- New `src/components/ui/success-check.tsx`
+- `src/components/screens/add-credential.tsx`, `src/components/screens/edit-credential.tsx`, `src/components/screens/generator.tsx`
+- `package.json` (optional `lottie-react-native`)
+
+### Acceptance criteria
+
+- Save shows an animated success; copy shows a confirm pulse; < 350ms / tasteful.
+- Reduced-motion variant falls back to static; lint clean; no new `tsc` errors.
+
+### Related
+
+- ROADMAP Phase 7.8. Deep scan: **partial** (toast/haptics only; no dedicated animation).
+
+---
+
+<a id="task-070"></a>
+
+## TASK-070: Animated empty-state illustrations
+
+| Field | Value |
+|-------|--------|
+| **ID** | TASK-070 |
+| **Type** | Pending task |
+| **Priority** | P2 — Medium |
+| **Status** | open |
+| **Area** | Phase 7 Animation / Empty states |
+| **Reported** | 2026-06-14 |
+
+### Description
+
+`empty-state.tsx` is static icon + text. Add subtle looping motion to empty-state illustrations (reduce-motion safe). (ROADMAP 7.9)
+
+### Scope
+
+- Add a subtle, low-cost looping animation to the empty-state illustration.
+- Pause when offscreen; provide a static reduced-motion variant.
+
+### Related files
+
+- `src/components/vault/empty-state.tsx`
+- `src/theme/animations.ts`, `src/hooks` (reduced-motion)
+
+### Acceptance criteria
+
+- Empty states animate subtly and loop without jank; pause offscreen.
+- Reduced-motion variant is static; lint clean; no new `tsc` errors.
+
+### Related
+
+- ROADMAP Phase 7.9. Deep scan: **not implemented**.
+
+---
+
+<a id="task-071"></a>
+
+## TASK-071: Generator strength meter spring fill + color interpolation
+
+| Field | Value |
+|-------|--------|
+| **ID** | TASK-071 |
+| **Type** | Pending task |
+| **Priority** | P2 — Medium |
+| **Status** | open |
+| **Area** | Phase 7 Animation / Generator |
+| **Reported** | 2026-06-14 |
+
+### Description
+
+The generator strength meter changes width/color instantly via styles. Animate the fill with `withSpring` and interpolate color as strength changes. (ROADMAP 7.10)
+
+### Scope
+
+- Spring-animate the meter fill width; `interpolateColor` between weak→strong colors.
+- Drive from the strength score; source spring config from `theme/animations.ts`.
+
+### Related files
+
+- `src/components/screens/generator.tsx`
+- `src/theme/animations.ts`
+
+### Acceptance criteria
+
+- Meter fill springs and color interpolates smoothly with strength; 60fps.
+- Reduced-motion variant snaps instantly; lint clean; no new `tsc` errors.
+
+### Related
+
+- ROADMAP Phase 7.10. Deep scan: **not implemented**.
+
+---
+
+<a id="task-072"></a>
+
+## TASK-072: Health score ring draw-on synced with count-up
+
+| Field | Value |
+|-------|--------|
+| **ID** | TASK-072 |
+| **Type** | Pending task |
+| **Priority** | P2 — Medium |
+| **Status** | open |
+| **Area** | Phase 7 Animation / Health |
+| **Reported** | 2026-06-14 |
+
+### Description
+
+`ScoreRing` renders the SVG dash offset statically; the Health screen ring does not draw on or sync with a count-up. Animate the ring draw-on synced with the number count-up. (ROADMAP 7.11)
+
+### Scope
+
+- Animate SVG `strokeDashoffset` draw-on with Reanimated; sync to the count-up number.
+- Reuse the `AnimatedNumber` pattern (Phase 6 7.9) for the count-up.
+
+### Related files
+
+- `src/components/vault/score-ring.tsx`, `src/components/screens/password-health.tsx`
+- `src/theme/animations.ts`
+
+### Acceptance criteria
+
+- Ring draws on in sync with the count-up number at 60fps.
+- Reduced-motion variant renders final state instantly; lint clean; no new `tsc` errors.
+
+### Related
+
+- ROADMAP Phase 7.11. Deep scan: **partial** (static ring; Dashboard has a JS count-up only).
+
+---
+
+<a id="task-073"></a>
+
+## TASK-073: Celebratory moment on health-score milestone
+
+| Field | Value |
+|-------|--------|
+| **ID** | TASK-073 |
+| **Type** | Pending task |
+| **Priority** | P2 — Medium |
+| **Status** | open |
+| **Area** | Phase 7 Animation / Health |
+| **Reported** | 2026-06-14 |
+
+### Description
+
+No milestone celebration exists. Add a subtle, tasteful, dismissible celebratory moment (light confetti / glow) when the health score crosses a milestone. (ROADMAP 7.12)
+
+### Scope
+
+- Trigger on crossing a milestone threshold (e.g. reaching a target score).
+- Light confetti / glow; dismissible; success haptic; not repeated annoyingly.
+
+### Related files
+
+- `src/components/screens/password-health.tsx`
+- `src/hooks/use-haptics.ts`, `src/theme/animations.ts`
+
+### Acceptance criteria
+
+- Celebration fires once per milestone crossing; tasteful and dismissible.
+- Reduced-motion variant degrades gracefully; lint clean; no new `tsc` errors.
+
+### Related
+
+- ROADMAP Phase 7.12. Deep scan: **not implemented**.
+
+---
+
+<a id="task-074"></a>
+
+## TASK-074: Perf-budgeted animated gradient/glow backdrops
+
+| Field | Value |
+|-------|--------|
+| **ID** | TASK-074 |
+| **Type** | Pending task |
+| **Priority** | P2 — Medium |
+| **Status** | open |
+| **Area** | Phase 7 Animation / Ambient |
+| **Reported** | 2026-06-14 |
+
+### Description
+
+`AnimatedBlobs` loops ambient blobs but never pauses offscreen or caps resource use. Make animated gradient/glow backdrops perf-budgeted (slow drift, paused when offscreen). (ROADMAP 7.13)
+
+### Scope
+
+- Pause/cancel the loop when the screen is unfocused / blobs are offscreen (`useIsFocused`).
+- Slow drift only; cap GPU/CPU cost; resume on focus.
+
+### Related files
+
+- `src/components/ui/animated-blobs.tsx`, `src/components/vault/screen-background.tsx`
+- `src/theme/animations.ts`
+
+### Acceptance criteria
+
+- Backdrops pause when offscreen/unfocused and resume on focus; no wasted frames.
+- Reduced-motion variant is static; lint clean; no new `tsc` errors.
+
+### Related
+
+- ROADMAP Phase 7.13. Deep scan: **partial** (loops, but no offscreen pause).
+
+---
+
+<a id="task-075"></a>
+
+## TASK-075: Shimmer skeleton → content morph
+
+| Field | Value |
+|-------|--------|
+| **ID** | TASK-075 |
+| **Type** | Pending task |
+| **Priority** | P2 — Medium |
+| **Status** | open |
+| **Area** | Phase 7 Animation / Loading |
+| **Reported** | 2026-06-14 |
+
+### Description
+
+No skeleton/shimmer exists; loading uses `RouteFallback`. Add shimmer skeletons that morph into content via Reanimated layout animations (no hard pop-in). (ROADMAP 7.14)
+
+### Scope
+
+- Build a `SkeletonLoader` (Phase 6 7.12) shimmer; morph skeleton → content with layout animations.
+- Apply to list/detail loading states; never blank-screen or pop-in.
+
+### Related files
+
+- New `src/components/ui/skeleton-loader.tsx`
+- `src/components/vault/route-fallback.tsx`, list/detail screens
+- `src/theme/animations.ts`
+
+### Acceptance criteria
+
+- Loading shows shimmer that fades/morphs into content (~200ms); no pop-in.
+- Reduced-motion variant crossfades; lint clean; no new `tsc` errors.
+
+### Related
+
+- ROADMAP Phase 7.14 (depends on Phase 6 7.12). Deep scan: **not implemented**.
+
+---
+
+<a id="task-076"></a>
+
+## TASK-076: Spring-animated tab bar
+
+| Field | Value |
+|-------|--------|
+| **ID** | TASK-076 |
+| **Type** | Pending task |
+| **Priority** | P2 — Medium |
+| **Status** | open |
+| **Area** | Phase 7 Animation / Navigation |
+| **Reported** | 2026-06-14 |
+
+### Description
+
+`bottom-nav.tsx` uses static active styling. Add a spring-animated active pill that slides between tabs, with icon morph/scale on selection. (ROADMAP 7.15)
+
+### Scope
+
+- Reanimated spring for the active pill slide; icon scale/morph on selection.
+- Selection haptic; source spring config from `theme/animations.ts`.
+
+### Related files
+
+- `src/components/vault/bottom-nav.tsx`
+- `src/hooks/use-haptics.ts`, `src/theme/animations.ts`
+
+### Acceptance criteria
+
+- Active pill slides with spring; selected icon scales/morphs; selection haptic fires.
+- Reduced-motion variant snaps; 60fps; lint clean; no new `tsc` errors.
+
+### Related
+
+- ROADMAP Phase 7.15. Deep scan: **partial** (static active styling only).
+
+---
+
+<a id="task-077"></a>
+
+## TASK-077: Reduced-motion variants (`useReducedMotion`)
+
+| Field | Value |
+|-------|--------|
+| **ID** | TASK-077 |
+| **Type** | Pending task |
+| **Priority** | P2 — Medium |
+| **Status** | open |
+| **Area** | Phase 7 Animation / Accessibility |
+| **Reported** | 2026-06-14 |
+
+### Description
+
+No reduced-motion handling exists. Respect `useReducedMotion()` and provide crossfade/instant variants for every Phase 7 animation; nothing should convey meaning by motion alone. (ROADMAP 7.16)
+
+### Scope
+
+- Add a reduced-motion hook/wrapper; branch each animation (TASK-062–076) to a crossfade/instant variant.
+- Verify no information is conveyed by motion alone.
+
+### Related files
+
+- New `src/hooks/use-reduced-motion.ts`
+- All Phase 7 animated components/screens
+
+### Acceptance criteria
+
+- With Reduce Motion enabled, every animation has a verified static/crossfade variant.
+- No meaning lost; lint clean; no new `tsc` errors.
+
+### Related
+
+- ROADMAP Phase 7.16 (cross-cutting). Deep scan: **not implemented**.
+
+---
+
+<a id="task-078"></a>
+
+## TASK-078: 60fps worklet budget + perf profiling
+
+| Field | Value |
+|-------|--------|
+| **ID** | TASK-078 |
+| **Type** | Pending task |
+| **Priority** | P2 — Medium |
+| **Status** | open |
+| **Area** | Phase 7 Animation / Performance |
+| **Reported** | 2026-06-14 |
+
+### Description
+
+No perf profiling / FPS instrumentation exists. Ensure all animation runs on the UI thread (Reanimated worklets), avoid JS layout thrash, and profile on a mid-range device. (ROADMAP 7.17)
+
+### Scope
+
+- Audit Phase 7 animations for UI-thread execution; remove JS-driven/layout-thrash paths.
+- Profile with the perf monitor on a mid-range device; record results.
+
+### Related files
+
+- All Phase 7 animated components/screens
+- `src/theme/animations.ts`
+
+### Acceptance criteria
+
+- All animations hold 60fps on a mid-range device; no JS-thread bottlenecks.
+- Profiling results recorded; lint clean; no new `tsc` errors.
+
+### Related
+
+- ROADMAP Phase 7.17. Deep scan: **partial** (worklet-capable libs present; no profiling).
+
+---
+
+<a id="task-079"></a>
+
+## TASK-079: Motion consistency audit via `theme/animations.ts`
+
+| Field | Value |
+|-------|--------|
+| **ID** | TASK-079 |
+| **Type** | Pending task |
+| **Priority** | P2 — Medium |
+| **Status** | open |
+| **Area** | Phase 7 Animation / QA |
+| **Reported** | 2026-06-14 |
+
+### Description
+
+Final audit: all springs/durations must source from `theme/animations.ts`; fine-tune timing + easing and run design QA. (ROADMAP 7.18)
+
+### Scope
+
+- Sweep all animated code for hardcoded durations/springs; route them through `theme/animations.ts`.
+- Final timing/easing fine-tune; design QA (visual, motion, code, UX) per migrated screen.
+
+### Related files
+
+- All Phase 7 animated components/screens
+- `src/theme/animations.ts`
+
+### Acceptance criteria
+
+- No hardcoded motion values remain; all sourced from `theme/animations.ts`.
+- Design QA checklist passes; lint clean; no new `tsc` errors.
+
+### Related
+
+- ROADMAP Phase 7.18 (final, after TASK-062–078). Deep scan: **partial** (tokens exist; not enforced).
+
+---
+
 <a id="task-001"></a>
 
 ## TASK-001: Onboarding same content on all 3 steps
@@ -695,811 +1380,6 @@ The starting (onboarding) flow shows the **same hero image and copy** on every s
 ### Resolution
 
 1. `OnboardingScreen` uses a `SLIDES` array with three distinct icons, badges, titles, and descriptions (`src/components/screens/onboarding.tsx`).
-
----
-
-<a id="bug-002"></a>
-
-## BUG-002: No master password after onboarding
-
-| Field | Value |
-|-------|--------|
-| **ID** | BUG-002 |
-| **Type** | Bug |
-| **Priority** | P0 — Critical |
-| **Status** | done |
-| **Area** | Auth / Vault setup |
-| **Reported** | 2026-05-16 |
-| **Blocks** | BUG-005, BUG-006 (downstream) |
-
-### Description
-
-After completing onboarding, the app **does not show** the **Create master password** screen. User lands in the main app without setting up or unlocking the vault.
-
-### Steps to reproduce
-
-1. Complete onboarding (3 steps → **Get started**).
-2. Observe navigation goes straight to tabs/home.
-3. Master password setup screen never appears.
-
-### Expected
-
-1. Onboarding complete → redirect to `/(auth)/setup-master-password` (or `index` routes there).
-2. User creates master password, then enters the app.
-
-### Actual
-
-- Onboarding calls `router.replace('/(tabs)')` and skips vault setup.
-
-### Likely cause
-
-```31:31:app/(auth)/onboarding.tsx
-    router.replace('/(tabs)');
-```
-
-Should use `router.replace('/')` so `app/index.tsx` can route to `setup-master-password` when `!isInitialized`, **or** navigate directly to `/(auth)/setup-master-password`.
-
-`app/index.tsx` already has correct logic when hit:
-
-```25:27:app/index.tsx
-  if (!isInitialized) {
-    return <Redirect href="/(auth)/setup-master-password" />;
-  }
-```
-
-### Related files
-
-- `app/(auth)/onboarding.tsx`
-- `app/index.tsx`
-- `app/(auth)/setup-master-password.tsx`
-
-### Suggested fix
-
-- Replace `router.replace('/(tabs)')` with `router.replace('/')` or `router.replace('/(auth)/setup-master-password')`.
-
----
-
-<a id="bug-003"></a>
-
-## BUG-003: No close button on Add Credential screen
-
-| Field | Value |
-|-------|--------|
-| **ID** | BUG-003 |
-| **Type** | Bug |
-| **Priority** | P1 — High |
-| **Status** | done |
-| **Area** | Entry / UX |
-| **Reported** | 2026-05-16 |
-
-### Description
-
-The **Add Credential** modal/screen has no **close (X)** or cancel control. User must use system back gesture only.
-
-### Steps to reproduce
-
-1. Unlock vault → Vault → **+** or **Add credential**.
-2. Modal opens (`entry/new`).
-3. Look for close/dismiss control in header.
-
-### Expected
-
-- Header with **X** (or “Cancel”) that calls `router.back()` without saving.
-
-### Actual
-
-- No header close button; only scroll content and **Save credential** at bottom.
-
-### Likely cause
-
-- `app/entry/[id].tsx` — modal presentation in `app/_layout.tsx` but no header UI component.
-
-### Related files
-
-- `app/entry/[id].tsx`
-- `app/_layout.tsx` (`entry/[id]` modal options)
-
-### Suggested fix
-
-- Add top row: `X` button + title; optional `headerShown: true` with custom header on stack screen.
-
----
-
-<a id="bug-004"></a>
-
-## BUG-004: Website suggestion buttons don’t update URL
-
-| Field | Value |
-|-------|--------|
-| **ID** | BUG-004 |
-| **Type** | Bug |
-| **Priority** | P2 — Medium |
-| **Status** | done |
-| **Area** | Add credential / UX |
-| **Reported** | 2026-05-16 |
-
-### Description
-
-Tapping website suggestion buttons/chips (**Google**, **Instagram**, etc.) sets the **Website** name but often **does not update** the **Website URL** field after clicking, especially when URL already has text.
-
-### Steps to reproduce
-
-1. Open Add credential.
-2. Enter any text in **Website URL** (or complete onboarding flow that pre-fills URL).
-3. Tap **Google** (or another website suggestion button/chip).
-4. **Website** updates; **Website URL** may stay unchanged.
-
-### Expected
-
-- Selecting a chip updates **both** website name and the correct URL (e.g. `https://google.com`).
-
-### Actual
-
-- URL only set when field is empty:
-
-```131:135:app/entry/[id].tsx
-  function applyQuickSite(site: string) {
-    setWebsite(site);
-    if (!url.trim()) {
-      setUrl(`https://${site.toLowerCase().replace(/\s+/g, '')}.com`);
-```
-
-### Likely cause
-
-- Conditional `if (!url.trim())` prevents overwriting existing URL.
-
-### Related files
-
-- `app/entry/[id].tsx`
-- `services/site-branding.ts` (`KNOWN_DOMAINS` for accurate URLs)
-
-### Suggested fix
-
-- Always set URL from chip using `resolveSiteDomain` / known-domain map; or ask confirm before overwrite.
-
----
-
-<a id="bug-005"></a>
-
-## BUG-005: Save credential fails with error
-
-| Field | Value |
-|-------|--------|
-| **ID** | BUG-005 |
-| **Type** | Bug |
-| **Priority** | P0 — Critical |
-| **Status** | done |
-| **Area** | Vault / CRUD |
-| **Reported** | 2026-05-16 |
-| **Related** | BUG-002, BUG-006 |
-
-### Description
-
-On **Add credential**, tapping **Save credential** shows alert: **“Could not save credential.”**
-
-### Steps to reproduce
-
-1. Open app (especially if onboarding skipped master password — see BUG-002).
-2. Add credential → fill Website, Username, Password.
-3. Tap **Save credential**.
-
-### Expected
-
-- Credential saved, modal closes, appears in Vault list.
-
-### Actual
-
-- `Alert.alert('Error', 'Could not save credential.')` from catch block in `handleSave`.
-
-### Likely cause
-
-- **Vault locked** — `addCredential` → `persist` throws `Vault is locked` if `encryptionKeyRef` is null (no successful setup/unlock).
-- Chain from **BUG-002** / **BUG-006**: user never has unlocked vault.
-- Other: validation, encrypt/persist failure (less common if vault unlocked).
-
-### Related files
-
-- `app/entry/[id].tsx` (`handleSave` catch)
-- `contexts/vault-context.tsx` (`addCredential`, `persist`)
-- `services/vault-storage.ts`
-
-### Suggested fix
-
-1. Fix **BUG-002** and **BUG-006** first.
-2. Surface real error message in alert (e.g. `error.message`) for debugging.
-3. Guard: disable Save or redirect to unlock if `!isUnlocked`.
-
----
-
-<a id="bug-006"></a>
-
-## BUG-006: Create vault / master password fails
-
-| Field | Value |
-|-------|--------|
-| **ID** | BUG-006 |
-| **Type** | Bug |
-| **Priority** | P0 — Critical |
-| **Status** | done |
-| **Area** | Vault setup / Crypto |
-| **Reported** | 2026-05-16 |
-| **Related** | BUG-002, BUG-005 |
-
-### Description
-
-On **Create master password**, after entering password + confirm and tapping **Create vault**, setup **fails** (generic or secure-storage error). User cannot initialize vault.
-
-### Steps to reproduce
-
-1. Reach `/(auth)/setup-master-password` (may require manual navigation if BUG-002 unfixed).
-2. Enter master password (≥ 8 chars) + confirm.
-3. Tap **Create vault**.
-4. Observe error message or no navigation to app.
-
-### Expected
-
-- Vault created, user navigated to main app, vault unlocked.
-
-### Actual
-
-- Error shown (e.g. “Could not create vault” / secure storage message) or hang then failure.
-
-### Likely cause (investigate)
-
-- `expo-secure-store` / native module mismatch (mitigated in recent fix — verify Expo Go after `npx expo install expo-secure-store`).
-- PBKDF2 blocking UI / timeout on slow devices.
-- Partial vault state from failed prior attempt.
-- Device secure storage permissions.
-
-### Related files
-
-- `app/(auth)/setup-master-password.tsx`
-- `services/vault-storage.ts`
-- `services/crypto/vault-crypto.ts`
-- `contexts/vault-context.tsx` (`setup`)
-
-### Suggested fix
-
-- Confirm SDK 54-compatible `expo-secure-store` installed; clear app data and retest.
-- Log and display `error.message` from `setup()`.
-- Add dev-only “Reset vault” if corrupted state.
-
----
-
-<a id="bug-007"></a>
-
-## BUG-007: Home menu icon locks app with master password
-
-| Field | Value |
-|-------|--------|
-| **ID** | BUG-007 |
-| **Type** | Bug |
-| **Priority** | P1 — High |
-| **Status** | done |
-| **Area** | Home / Navigation / Auth |
-| **Reported** | 2026-05-17 |
-
-### Description
-
-On the Home page, tapping the menu icon currently locks the app and sends the user back to master password unlock. The icon/action should be changed so users do not accidentally lock the app when trying to open the menu.
-
-### Steps to reproduce
-
-1. Unlock SecureVault.
-2. Open the Home page.
-3. Tap the menu icon.
-4. App locks and requires the master password again.
-
-### Expected
-
-- The Home menu icon opens the intended menu/profile/actions UI, or uses a different icon if the action is lock.
-- Locking the app should be explicit and clearly labeled.
-
-### Actual
-
-- Tapping the menu icon locks the app unexpectedly.
-
-### Related files
-
-- `app/(tabs)/index.tsx`
-- `contexts/vault-context.tsx`
-- `components/ui/button.tsx`
-
-### Suggested fix
-
-1. Replace the Home menu icon/action with the correct menu behavior.
-2. If lock remains available, move it to an explicit **Lock vault** action with a matching icon.
-3. Confirm the Home header icon matches the intended UI.
-
-### Resolution
-
-1. Dashboard menu icon and avatar now navigate to `/settings` instead of locking the vault (`src/components/screens/dashboard.tsx`).
-
----
-
-<a id="bug-008"></a>
-
-## BUG-008: Vault header icon is on wrong side
-
-| Field | Value |
-|-------|--------|
-| **ID** | BUG-008 |
-| **Type** | Bug |
-| **Priority** | P2 — Medium |
-| **Status** | done |
-| **Area** | Vault / Header UI |
-| **Reported** | 2026-05-17 |
-
-### Description
-
-On the My Vault page, the right-most Vault header icon should be moved to the left side and updated to match the intended UI.
-
-### Steps to reproduce
-
-1. Open SecureVault.
-2. Go to the My Vault page.
-3. Check the header icon placement.
-4. Notice the Vault icon is on the right side instead of the left.
-
-### Expected
-
-- Vault header icon appears on the left side.
-- Header spacing, icon style, and alignment match the reference UI.
-
-### Actual
-
-- The Vault header icon appears at the right-most side and does not match the desired UI.
-
-### Related files
-
-- `app/(tabs)/vault.tsx`
-- `components/vault/credential-list-item.tsx`
-- `constants/securevault-theme.ts`
-
-### Suggested fix
-
-1. Move the Vault header icon to the left side of the header.
-2. Adjust spacing and typography to match the reference UI.
-3. Verify the header still works in light and dark mode.
-
-### Resolution
-
-1. Rebuilt the Main Vault header so a shield icon tile + **Main Vault** title + password count sit on the **left** (`src/components/screens/main-vault.tsx`), matching the screenshot. The right side keeps the Sort-by control only.
-
----
-
-<a id="bug-009"></a>
-
-## BUG-009: Security alerts are not clickable
-
-| Field | Value |
-|-------|--------|
-| **ID** | BUG-009 |
-| **Type** | Bug |
-| **Priority** | P2 — Medium |
-| **Status** | done |
-| **Area** | Home / Vault / Password Health |
-| **Reported** | 2026-05-17 |
-
-### Description
-
-Security alerts are visible but not clickable. When a user taps an alert, the app should show the affected accounts and allow the user to open the relevant credential details.
-
-### Steps to reproduce
-
-1. Unlock SecureVault.
-2. Open a page that shows security alerts.
-3. Tap a weak/reused/compromised password alert.
-4. Nothing useful happens, or the affected accounts are not shown.
-
-### Expected
-
-- Tapping a security alert opens a list/dialog/screen of affected accounts.
-- Each affected account can be tapped to redirect to its credential detail page.
-- Alert behavior is consistent between Home, Vault, and Health where applicable.
-
-### Actual
-
-- Security alerts are not clickable and do not guide the user to affected accounts.
-
-### Related files
-
-- `app/(tabs)/index.tsx`
-- `app/(tabs)/vault.tsx`
-- `app/(tabs)/health.tsx`
-- `services/health-checks.ts`
-- `components/vault/credential-list-item.tsx`
-
-### Suggested fix
-
-1. Wrap security alert rows/cards in pressable controls.
-2. Pass affected credential IDs from health metrics to the alert UI.
-3. Show affected accounts on tap.
-4. Navigate selected account to `app/entry/[id].tsx`.
-5. Add accessible labels for each alert action.
-
-### Resolution
-
-1. Dashboard "Security Health" banner is a single accessible `Pressable` → `/health` (`src/components/screens/dashboard.tsx`).
-2. Main Vault "Security Pulse" alert card is now a `Pressable` → `/health` with an accessibility label (`src/components/screens/main-vault.tsx`); the Health screen lists the affected weak/reused/old accounts and links to each credential.
-
----
-
-<a id="bug-010"></a>
-
-## BUG-010: Multiple Edit Credential dialogs open
-
-| Field | Value |
-|-------|--------|
-| **ID** | BUG-010 |
-| **Type** | Bug |
-| **Priority** | P1 — High |
-| **Status** | done |
-| **Area** | Entry / Edit credential / Navigation |
-| **Reported** | 2026-05-17 |
-
-### Description
-
-Multiple Edit Credential dialogs/screens can open at the same time. This can confuse users and risks editing or saving the wrong credential state.
-
-### Steps to reproduce
-
-1. Unlock SecureVault.
-2. Open a credential edit flow.
-3. Tap edit/open actions repeatedly or from multiple credential rows.
-4. Observe more than one Edit Credential dialog/screen opening.
-
-### Expected
-
-- Only one Edit Credential dialog/screen can be open at a time.
-- Repeated taps are ignored while navigation/dialog opening is in progress.
-- Opening a different credential closes or replaces the current edit dialog cleanly.
-
-### Actual
-
-- Multiple Edit Credential dialogs/screens can stack or appear together.
-
-### Related files
-
-- `app/entry/[id].tsx`
-- `app/(tabs)/vault.tsx`
-- `app/(tabs)/index.tsx`
-- `components/vault/credential-list-item.tsx`
-
-### Suggested fix
-
-1. Debounce or disable edit/open actions while navigation is pending.
-2. Keep a single active edit route/dialog state.
-3. Ensure grouped account pickers close before navigating to edit.
-4. Add guards against duplicate `router.push` / modal open calls.
-
-### Resolution
-
-1. Added `useNavigationLock()` (`src/hooks/use-navigation-lock.ts`) — blocks duplicate navigation for 800ms and resets on focus.
-2. Both Dashboard and Main Vault rows open the editor through `runLocked(() => router.push({ pathname: '/edit-credential', params: { id } }))`, so rapid taps can no longer stack edit screens, and edit now targets the correct credential by `id`.
-
----
-
-<a id="bug-011"></a>
-
-## BUG-011: Health score does not update after add/delete
-
-| Field | Value |
-|-------|--------|
-| **ID** | BUG-011 |
-| **Type** | Bug |
-| **Priority** | P1 — High |
-| **Status** | done |
-| **Area** | Password Health / Vault state |
-| **Reported** | 2026-05-17 |
-| **Related** | POT-004 |
-
-### Description
-
-The Health score is not working reliably and does not update instantly when an account is added or deleted. Password Health should react immediately to vault changes so the score, counts, alerts, and affected-account lists stay accurate.
-
-### Steps to reproduce
-
-1. Unlock SecureVault.
-2. Check the current Health score.
-3. Add a new account/credential, or delete an existing account.
-4. Return to the Health page or dashboard health widgets.
-5. Observe the score/counts do not update immediately.
-
-### Expected
-
-- Health score recalculates immediately after adding, editing, importing, or deleting credentials.
-- Weak/reused/safe counts update instantly.
-- Home, Vault, and Health screens all show the same fresh health state.
-- No app restart or manual refresh is required.
-
-### Actual
-
-- Health score or related health counts can stay stale after account add/delete.
-
-### Related files
-
-- `contexts/vault-context.tsx`
-- `services/health-checks.ts`
-- `app/(tabs)/health.tsx`
-- `app/(tabs)/index.tsx`
-- `app/(tabs)/vault.tsx`
-
-### Suggested fix
-
-1. Ensure health metrics derive from the latest `credentials` state.
-2. Recompute health synchronously whenever credentials change.
-3. Verify add, edit, delete, import, and reset flows all trigger updated health state.
-4. Avoid separate cached health state unless it is invalidated on every vault mutation.
-
----
-
-<a id="bug-012"></a>
-
-## BUG-012: Biometric enable switch cannot be toggled
-
-| Field | Value |
-|-------|--------|
-| **ID** | BUG-012 |
-| **Type** | Bug |
-| **Priority** | P1 — High |
-| **Status** | done |
-| **Area** | Auth / Setup / Biometric UX |
-| **Reported** | 2026-05-17 |
-| **Related** | TASK-020 |
-
-### Description
-
-On Create master password, users reported the biometric enable switch was not clickable (or appeared permanently disabled), so they could not enable biometric unlock during setup.
-
-### Steps to reproduce
-
-1. Open `/(auth)/setup-master-password`.
-2. Reach the biometric option row.
-3. Try to toggle the switch.
-4. Observe the control appears unresponsive on unsupported/misconfigured devices.
-
-### Expected
-
-- Biometric option is interactive and understandable.
-- If unavailable, user receives a clear reason instead of a silent dead toggle.
-- On supported devices, the toggle can be enabled and defaults to on.
-
-### Actual
-
-- Switch felt unclickable in some states due to strict disabled gating.
-
-### Related files
-
-- `app/(auth)/setup-master-password.tsx`
-- `services/biometric-unlock.ts`
-- `contexts/vault-context.tsx`
-
-### Resolution (Run 3)
-
-1. `setup-master-password.tsx` now calls `getBiometricAvailability()` (real `expo-local-authentication`) on mount and shows a context-aware subtitle (`Use Face ID` / `No biometrics enrolled` / `Not available on this device`).
-2. The biometric card is fully pressable; tapping it when unsupported shows a clear explanation instead of a silent dead toggle.
-3. The opt-in defaults **on** only when hardware exists **and** is enrolled (`canUseBiometrics`); otherwise it stays off and the track renders disabled.
-4. Settings biometric toggle is also gated on availability with matching messaging.
-
----
-
-<a id="bug-013"></a>
-
-## BUG-013: Onboarding back swipe exposes SecureVault before setup
-
-| Field | Value |
-|-------|--------|
-| **ID** | BUG-013 |
-| **Type** | Bug |
-| **Priority** | P1 — High |
-| **Status** | done |
-| **Area** | Onboarding / Auth gate / Vault setup |
-| **Reported** | 2026-05-17 |
-| **Related** | BUG-002, BUG-005 |
-
-### Description
-
-During onboarding, swiping back can reveal the SecureVault app page before onboarding and master-password setup are complete. If the app becomes inactive/deactivated and opens again before setup is complete, it should start from onboarding/auth setup, not from SecureVault.
-
-No credentials should be addable until the master password has been created and the vault is initialized/unlocked.
-
-### Steps to reproduce
-
-1. Fresh install or reset local app data.
-2. Start onboarding.
-3. Swipe back during onboarding or background/deactivate the app and reopen it.
-4. Observe SecureVault/main app content can appear before setup is finished.
-5. Try to add a credential before creating the master password.
-
-### Expected
-
-- Onboarding cannot be bypassed with swipe-back/navigation history.
-- If onboarding/setup is incomplete, reopening the app returns to onboarding or master-password setup.
-- Tabs, Vault, Home, and Add Credential routes are blocked until master password setup is complete.
-- No credential can be added until the master password exists and the vault is unlocked.
-
-### Actual
-
-- SecureVault/main app page can appear before onboarding/master-password setup is complete.
-- Credential entry may be reachable before the vault is initialized.
-
-### Related files
-
-- `app/_layout.tsx`
-- `app/index.tsx`
-- `app/(auth)/onboarding.tsx`
-- `app/(auth)/setup-master-password.tsx`
-- `app/(tabs)/_layout.tsx`
-- `app/entry/[id].tsx`
-- `contexts/auth-context.tsx`
-- `contexts/vault-context.tsx`
-
-### Suggested fix
-
-1. Make the root auth gate the single source of truth for onboarding, initialization, and unlock routing.
-2. Replace onboarding navigation so completed/incomplete flows cannot leave stale main-app routes in history.
-3. Guard tab and entry routes when `!isInitialized` or `!isUnlocked`.
-4. Disable Add Credential actions until master-password setup is complete.
-5. Test fresh launch, swipe-back, app inactive/active resume, and direct route access.
-
----
-
-<a id="bug-014"></a>
-
-## BUG-014: White screen flash when switching tabs
-
-| Field | Value |
-|-------|--------|
-| **ID** | BUG-014 |
-| **Type** | Bug |
-| **Priority** | P2 — Medium |
-| **Status** | done |
-| **Area** | Navigation / Bottom nav / UX |
-| **Reported** | 2026-06-13 |
-
-### Description
-
-Switching between the bottom-nav tabs (Dashboard / Vault / Health / Settings) shows a brief **white screen flash** during the transition, breaking the dark glassmorphic feel.
-
-### Steps to reproduce
-
-1. Unlock the vault.
-2. Tap between the Dashboard, Vault, Health, and Settings tabs.
-3. Observe a white flash as each screen transitions in.
-
-### Expected
-
-- Tab switches are instant with no white flash; the dark aubergine background is continuous.
-
-### Actual
-
-- A white frame appears mid-transition.
-
-### Root cause
-
-- `BottomNav` navigates with `router.replace()` while the root `Stack` applies `animation: 'slide_from_right'` to every route. The slide animation momentarily reveals the white native window root behind the incoming screen.
-- The route guards (`app/dashboard.tsx`, `vault.tsx`, `health.tsx`, `settings.tsx`) render a bare `<View />` with no background while `isLoading`, which can also flash white.
-
-### Related files
-
-- `src/app/_layout.tsx`
-- `src/components/vault/bottom-nav.tsx`
-- `src/app/{dashboard,vault,health,settings}.tsx`
-
-### Resolution
-
-1. Declared explicit `Stack.Screen` entries for the four tab routes in `src/app/_layout.tsx` with `animation: 'none'`, so tab swaps are instant and never reveal the white window root.
-2. Added a shared dark `RouteFallback` (background `#190e27`) replacing the bare `<View />` loading placeholders in all tab route guards.
-
----
-
-<a id="bug-015"></a>
-
-## BUG-015: Create Vault button does not work on setup screen
-
-| Field | Value |
-|-------|--------|
-| **ID** | BUG-015 |
-| **Type** | Bug (regression) |
-| **Priority** | P0 — Critical |
-| **Status** | done |
-| **Area** | Vault setup / UX |
-| **Reported** | 2026-06-14 |
-| **Related** | BUG-006 |
-
-### Description
-
-On the **Initialize Your Vault** setup screen, tapping **CREATE VAULT** after entering matching passwords appears to do nothing. Users cannot complete vault initialization.
-
-### Steps to reproduce
-
-1. Complete onboarding → reach setup screen.
-2. Enter master password (≥ 12 chars) and confirm.
-3. Tap **CREATE VAULT** while the keyboard is still open (or immediately after typing).
-4. Observe no action on first tap, or no feedback during the ~3s PBKDF2 derivation.
-
-### Expected
-
-- Button responds on first tap even with keyboard open.
-- Loading feedback while vault is being created.
-- Navigate to Dashboard on success; show alert on failure.
-
-### Actual
-
-- First tap often dismissed the keyboard instead of firing the button (`ScrollView` default `keyboardShouldPersistTaps`).
-- Custom gradient `Pressable` could fail to receive touches on some Android builds.
-- No loading state during async vault creation.
-
-### Root cause
-
-1. `ScrollView` missing `keyboardShouldPersistTaps` — classic RN tap-swallow bug.
-2. Setup screen used a bespoke gradient button instead of the shared `PrimaryButton`.
-3. `onCreate` was fire-and-forget with no `isCreating` guard.
-4. **Regression (2026-06-14):** `setupMasterPassword` **awaited** `storeBiometricKey()` (expo-secure-store) after vault creation. On Android Expo Go this call can **hang indefinitely** when biometric unlock is enabled, leaving the screen stuck on "CREATING VAULT…" and never navigating away.
-
-### Resolution
-
-1. Added `keyboardShouldPersistTaps="always"` to setup `ScrollView`.
-2. Replaced bespoke button with shared `PrimaryButton` (+ `pointerEvents="none"` on gradient child, `width: '100%'`).
-3. Await async `onCreate`, show **CREATING VAULT…** label, disable button while creating.
-4. **Do not await** `storeBiometricKey` during setup/unlock — run in background so SecureStore cannot block vault creation.
-5. Navigate via `useEffect` after `isInitialized && isUnlocked` flush (avoids router race with React state).
-
-### Related files
-
-- `src/components/setup-master-password.tsx`
-- `src/components/vault/primary-button.tsx`
-- `src/app/setup.tsx`
-
----
-
-<a id="bug-016"></a>
-
-## BUG-016: Biometric unlock switch not working (setup + settings)
-
-| Field | Value |
-|-------|--------|
-| **ID** | BUG-016 |
-| **Type** | Bug (regression) |
-| **Priority** | P1 — High |
-| **Status** | done |
-| **Area** | Auth / Setup / Settings / Biometric UX |
-| **Reported** | 2026-06-14 |
-| **Related** | BUG-012, TASK-020 |
-
-### Description
-
-The **Enable Biometric Unlock** switch on the setup screen and the **Biometric Unlock** toggle in Settings do not respond to taps.
-
-### Steps to reproduce
-
-1. Open setup screen → try toggling biometric switch.
-2. Or unlock vault → Settings → Security → try toggling Biometric Unlock.
-3. Observe switch does not change state.
-
-### Expected
-
-- Toggle responds immediately on supported devices.
-- Clear alert when biometrics unavailable.
-- Settings toggle persists via `updateSettings`.
-
-### Actual
-
-- Setup: whole-card `Pressable` with decorative toggle `View` — taps lost when keyboard open (same `ScrollView` issue as BUG-015).
-- Settings: `SettingsRow` wrapped trailing `Toggle` in an outer `Pressable` even when `onPress` was undefined, blocking nested switch presses.
-
-### Resolution
-
-1. Setup: replaced card-level `Pressable` + fake toggle with shared `Toggle` component; added `keyboardShouldPersistTaps`.
-2. Settings: `SettingsRow` renders a plain `View` when no `onPress` is provided so trailing toggles receive touches.
-3. Added `disabled` prop to shared `Toggle` for unsupported devices.
-
-### Related files
-
-- `src/components/setup-master-password.tsx`
-- `src/components/screens/settings.tsx`
-- `src/components/vault/toggle.tsx`
 
 ---
 
@@ -3228,7 +3108,7 @@ Replace bare loading frames and plain-text empty states with polished, branded U
 | **ID** | TASK-047 |
 | **Type** | Pending task / UI |
 | **Priority** | P2 — Medium |
-| **Status** | open |
+| **Status** | done |
 | **Area** | Entry detail / Vault |
 | **Reported** | 2026-06-14 |
 | **Roadmap** | 2.6 (Entry detail — View mode) |
@@ -3258,6 +3138,13 @@ Opening a credential from the Dashboard, Vault, or Health lists routes to `entry
 3. Keep show/hide + copy in view mode; route Delete through the existing confirmation `Alert`.
 4. Mark ROADMAP 2.6 "View mode" complete once shipped.
 
+### Resolution (2026-06-14)
+
+1. Reworked `src/app/entry/[id].tsx` so credential routes default to a read-only detail view with static website, URL, username, masked password, category, and notes.
+2. Added password reveal/hide plus username/password/URL copy actions, with password copies using the existing 30s sensitive clipboard auto-clear path.
+3. Added an explicit `EDIT CREDENTIAL` action that switches into the existing `EditCredentialScreen`; delete remains behind that existing edit-mode confirmation flow.
+4. Verified the entry route with focused ESLint.
+
 ---
 
 <a id="task-048"></a>
@@ -3269,7 +3156,7 @@ Opening a credential from the Dashboard, Vault, or Health lists routes to `entry
 | **ID** | TASK-048 |
 | **Type** | Pending task / UX |
 | **Priority** | P2 — Medium |
-| **Status** | open |
+| **Status** | done |
 | **Area** | Onboarding / Dashboard / Vault / Health / Auth |
 | **Reported** | 2026-06-14 |
 | **Roadmap** | 5.6 (Empty states and onboarding skip / logout flows) |
@@ -3341,6 +3228,13 @@ the in-memory decrypted session.
    `(auth)/unlock`; keep it visually separate from destructive reset.
 4. Mark ROADMAP 5.6 complete once all three are shipped.
 
+### Resolution (2026-06-14)
+
+1. Extended the shared `EmptyState` with optional CTA actions and wired them on Dashboard search/empty-vault, Main Vault empty/filter states, and Password Health zero-credential state.
+2. Verified the existing onboarding Skip path persists `setOnboardingComplete()` through `src/app/(auth)/index.tsx`; added clearer accessibility labels to Skip and sign-in affordances.
+3. Replaced the unconfirmed Vault lock FAB behavior with a confirmed lock action that clears the unlocked session, shows feedback, and routes to `/unlock`.
+4. Verified touched UI files with focused ESLint.
+
 ---
 
 <a id="task-049"></a>
@@ -3352,7 +3246,7 @@ the in-memory decrypted session.
 | **ID** | TASK-049 |
 | **Type** | Pending task / Security |
 | **Priority** | P1 — High |
-| **Status** | open |
+| **Status** | done |
 | **Area** | Security / Release readiness |
 | **Reported** | 2026-06-14 |
 | **Roadmap** | 5.9 (Security review checklist completed) |
@@ -3422,6 +3316,12 @@ tasks/bugs.
 3. Fix failures or open follow-up TASK/BUG entries; re-flip the screen-capture flag for
    production builds.
 4. Mark ROADMAP 5.9 complete once the checklist is fully verified.
+
+### Resolution (2026-06-14)
+
+1. Added `Mds/SECURITY-REVIEW.md` with verified evidence for cryptography, key/session handling, storage, clipboard/screen protection, HIBP network privacy, auto-lock, navigation params, and input validation.
+2. Re-enabled unlocked-session screen-capture protection by setting `SCREEN_CAPTURE_PROTECTION_ENABLED = true` in `src/contexts/vault-context.tsx`.
+3. Verified the edited TypeScript file with `npx eslint "src/contexts/vault-context.tsx"`.
 
 ---
 
@@ -3501,18 +3401,7 @@ Update, and signing credentials handling.
 
 ```mermaid
 flowchart TD
-  BUG002[BUG-002 Skip master password after onboarding]
-  BUG006[BUG-006 Create vault fails]
-  BUG005[BUG-005 Save credential fails]
   TASK001[TASK-001 Onboarding content]
-  BUG003[BUG-003 Close button]
-  BUG004[BUG-004 Quick chips URL]
-  BUG007[BUG-007 Home menu locks app]
-  BUG008[BUG-008 Vault icon placement]
-  BUG009[BUG-009 Security alerts navigation]
-  BUG010[BUG-010 Multiple edit dialogs]
-  BUG011[BUG-011 Health score stale]
-  BUG013[BUG-013 Onboarding auth gate]
   TASK002[TASK-002 Password show/hide UI]
   TASK003[TASK-003 Multiple credentials per account]
   TASK004[TASK-004 Password Health reference UI]
@@ -3544,9 +3433,6 @@ flowchart TD
   TASK030[TASK-030 Password history]
   TASK031[TASK-031 Duplicate password warnings]
 
-  BUG002 --> BUG006
-  BUG002 --> BUG005
-  BUG006 --> BUG005
   TASK008 --> TASK025
   TASK008 --> TASK015
   TASK008 --> TASK026
@@ -3576,8 +3462,9 @@ flowchart TD
 
 | Date | ID | Resolution | By |
 |------|-----|------------|-----|
-| 2026-06-14 | BUG-015 | Follow-up: stop awaiting SecureStore biometric key write (was hanging setup on Android); state-driven navigation after unlock. | Cursor |
-| 2026-06-14 | BUG-016 | Biometric toggles: shared `Toggle` on setup, `SettingsRow` no longer wraps toggles in dead `Pressable`, `Toggle.disabled` prop. | Cursor |
+| 2026-06-14 | TASK-047 | Added default read-only `/entry/[id]` detail mode with masked password reveal/copy and explicit Edit handoff to the existing editable flow. | Cursor |
+| 2026-06-14 | TASK-048 | Added CTA-capable shared empty states across Dashboard/Vault/Health, confirmed onboarding Skip persistence, and changed the Vault lock FAB into a confirmed lock/logout flow that routes to unlock. | Cursor |
+| 2026-06-14 | TASK-049 | Added `Mds/SECURITY-REVIEW.md`, verified the release security checklist against crypto/storage/session/clipboard/HIBP code, and re-enabled screen-capture protection while unlocked. | Cursor |
 | 2026-06-14 | ROADMAP 2.2/2.3 | Verified 10 Phase 2 UI tasks against shipped code (`dashboard.tsx`, `main-vault.tsx`, `bottom-nav.tsx`): Dashboard greeting header, 6-category stat cards, Manage/Recently-Used, pill tab bar; Vault shield header, search, category chips, credential rows, security-alert card, empty states. Checked in ROADMAP; no BUG/TASK counts changed. | Cursor |
 | 2026-06-13 | TASK-037 | PBKDF2-SHA256 key derivation (120k iter) in `services/crypto/vault-crypto.ts`. | Cursor |
 | 2026-06-13 | TASK-038 | AES-256-GCM encrypt/decrypt for credential blob at rest via `@noble/ciphers`. | Cursor |
@@ -3589,7 +3476,6 @@ flowchart TD
 | 2026-06-13 | TASK-044 | Generator wired to password-generator service (length, charset, strength, copy). | Cursor |
 | 2026-06-13 | TASK-045 | Save secure password → Add Credential with prefilled password param. | Cursor |
 | 2026-06-13 | TASK-046 | Wrong-password/corrupt-vault/storage-full error handling on unlock + storage layer. | Cursor |
-| 2026-06-13 | BUG-012 | Setup biometric toggle wired to real `expo-local-authentication` availability with context-aware messaging; defaults on only when supported+enrolled. | Cursor |
 | 2026-06-13 | TASK-020 | Real biometric unlock: `services/biometric.ts`, auto-prompt + fingerprint button on unlock screen, `unlockWithBiometrics` via `touchVaultUnlock`, master-password fallback. | Cursor |
 | 2026-06-13 | TASK-011 | HIBP k-anonymity breach monitor (`services/breach-check.ts`) + Password Health Breach Monitor card with loading/error/result states. | Cursor |
 | 2026-06-13 | TASK-006 | Brand logos via `services/site-branding.ts` + `CredentialAvatar` using expo-image disk cache and a persisted per-domain status map. | Cursor |
@@ -3599,7 +3485,6 @@ flowchart TD
 | 2026-06-13 | TASK-034 | Real master-password change screen/route wired to `changeMasterPassword` (re-salt + re-hash, credentials intact). | Cursor |
 | 2026-06-13 | TASK-035 | `expo-screen-capture` prevents screenshots/recording while the vault is unlocked (allow on lock). | Cursor |
 | 2026-06-13 | TASK-036 | Branded `RouteFallback` spinner + reusable `EmptyState` on Dashboard/Vault. | Cursor |
-| 2026-06-13 | POT-008 | Mitigated: per-domain logo status cache + icon fallback prevents wrong/again-fetched brand icons for uncommon domains. | Cursor |
 | 2026-06-13 | TASK-009 | Added jest-expo + 19 unit tests for password-generator and health-checks; `npm test` script documented in README. | Cursor |
 | 2026-06-13 | TASK-015 | Implemented `copySensitiveToClipboard` with 30s auto-clear on Dashboard, Vault, and Edit Credential password copies. | Cursor |
 | 2026-06-13 | TASK-010 | Health screen surfaces Old stat card + old-password advisory banner using `isOldCredential` (180-day threshold). | Cursor |
@@ -3608,10 +3493,8 @@ flowchart TD
 | 2026-06-13 | TASK-028 | Main Vault shows dynamic folder/tag filter chips derived from credential metadata (manual org; AI deferred). | Cursor |
 | 2026-06-13 | TASK-014 | Accessibility pass: labels on search, quick-site chips, category chips, health rows, vault filters. | Cursor |
 | 2026-06-13 | TASK-012 | JSON vault backup export/import via clipboard with website+username dedupe (`vault-backup.ts` + Settings). | Cursor |
-| 2026-06-13 | POT-002 | Mitigated by `mergeCredentials` identity-key dedupe on import. | Cursor |
 | 2026-06-13 | TASK-005 | README documents v1 scope, decisions, branch naming, and issue labels. | Cursor |
 | 2026-06-13 | TASK-016 | Updated app.json metadata (SecureVault name, description, aubergine splash) + README release checklist. | Cursor |
-| 2026-06-13 | BUG-007 | Dashboard menu icon routes to `/settings` instead of locking the vault (`dashboard.tsx`). | Cursor |
 | 2026-06-13 | TASK-001 | Onboarding uses three distinct slides with unique icons, badges, titles, and descriptions. | Cursor |
 | 2026-06-13 | TASK-008 | Vault metadata v2 includes `lastUnlockedAt`; setup/unlock persist timestamp in `vault-storage.ts`. | Cursor |
 | 2026-06-13 | TASK-013 | Toast + haptic feedback wired on Add Credential save/validation; infra used across Dashboard/Vault/Edit. | Cursor |
@@ -3620,42 +3503,21 @@ flowchart TD
 | 2026-06-13 | TASK-026 | Settings wired to vault context: biometric, theme, password history toggle, lock, auto-lock presets. | Cursor |
 | 2026-06-13 | TASK-027 | Manual **Lock Vault Now** + configurable auto-lock presets persisted in Settings. | Cursor |
 | 2026-06-13 | TASK-030 | Password history captured on credential update; Edit Credential shows reveal/copy/restore UI. | Cursor |
-| 2026-06-13 | BUG-008 | Rebuilt Main Vault header with a left-aligned shield icon + "Main Vault" title + password count (`main-vault.tsx`). | Cursor |
-| 2026-06-13 | BUG-009 | Made the Main Vault "Security Pulse" alert card a pressable that opens `/health` (Dashboard banner already pressable). | Cursor |
-| 2026-06-13 | BUG-010 | Main Vault rows now open edit via `useNavigationLock` + `{ params: { id } }`, preventing duplicate edit screens and fixing untargeted edits. | Cursor |
 | 2026-06-13 | TASK-021 | Added Active/Favorites/Archived view pills + per-row favorite star toggle on Main Vault; archived excluded from default list and Dashboard. | Cursor |
 | 2026-06-13 | TASK-024 | Main Vault rows now copy passwords to clipboard with toast/haptic feedback and show readable usernames (passwords stay masked). | Cursor |
 | 2026-06-13 | TASK-029 | Main Vault now reuses the shared `filterCredentials` helper so search matches the same fields as Dashboard. | Cursor |
-| 2026-06-13 | POT-003 | Mitigated by `useNavigationLock` + id-based edit routing on Home and Vault rows, preventing stale-account navigation on rapid taps. | Cursor |
-| 2026-06-13 | BUG-002 | Root routing now sends new users through onboarding to master-password setup, and initialized users to unlock/dashboard based on vault state. | Cursor |
-| 2026-06-13 | BUG-006 | Added AsyncStorage-backed vault setup with salted master-password hash, metadata, and unlocked session state after creation. | Cursor |
-| 2026-06-13 | BUG-005 | Add Credential now validates and persists credentials through `VaultContext`, then shows saved entries in the Vault list. | Cursor |
-| 2026-06-13 | BUG-003 | Confirmed Add Credential uses a back/close header control via `VaultHeader showBack`, preserving a cancel path before save. | Cursor |
-| 2026-06-13 | BUG-004 | Quick-site chips now set both website name and canonical URL every time they are tapped. | Cursor |
-| 2026-06-13 | BUG-011 | Health metrics now derive from live credentials in shared context and update on Dashboard, Vault, and Health after saves. | Cursor |
-| 2026-06-13 | BUG-013 | Added protected route guards across setup, unlock, dashboard, vault, health, settings, my-vault, add, and edit routes. | Cursor |
-| 2026-06-13 | POT-004 | Mitigated by deriving health counts from current `credentials` state instead of static mock values. | Cursor |
 | 2026-06-13 | TASK-002 | Password fields on setup, unlock, and add credential now provide accessible show/hide controls. | Cursor |
 | 2026-06-13 | TASK-003 | Credentials are stored with unique IDs, allow duplicate websites, and show usernames in Vault/Home rows so same-site accounts remain distinguishable. | Cursor |
-| 2026-05-17 | BUG-002 | Onboarding now returns to the root auth gate, which redirects uninitialized users to master password setup. | Cursor |
-| 2026-05-17 | BUG-006 | Vault setup/unlock metadata now uses local AsyncStorage persistence instead of SecureStore for the current app build. | Cursor |
-| 2026-05-17 | BUG-003 | Added an accessible close button to the credential editor header so users can dismiss add/edit credential without saving. | Cursor |
-| 2026-05-17 | BUG-004 | Website suggestion chips now always set the matching canonical URL using the shared site-domain resolver. | Cursor |
-| 2026-05-17 | BUG-005 | Save credential flow is resolved by the BUG-006 vault setup/storage fix, which allows the vault to initialize and unlock before persisting credentials. | Cursor |
 | 2026-05-17 | TASK-002 | Added a shared password input with an accessible eye toggle and applied it to setup, unlock, and credential password fields. | Cursor |
 | 2026-05-17 | TASK-003 | Added support for multiple credentials per site with account labels, grouped duplicate-site rows, avatar count badges, and a blurred account-picker dialog on Vault and Home. | Cursor |
 | 2026-05-17 | TASK-012 | Added Google Password Manager CSV import with storage file picker, filename-only selection UI, duplicate detection, and vault persistence. | Cursor |
 | 2026-05-17 | TASK-020 | Added explicit setup-time biometric opt-in, SecureStore-protected vault-key unlock, unlock-screen biometric fallback, and a menu action to disable biometric unlock. | Cursor |
 | 2026-05-17 | TASK-025 | Added a destructive local data reset that clears SecureVault AsyncStorage keys, biometric SecureStore data, in-memory vault state, and returns the app to onboarding. | Cursor |
-| 2026-05-17 | BUG-007 | Home menu icon now opens a side navigation panel; locking the vault is an explicit labeled action inside the menu. | Cursor |
-| 2026-05-17 | BUG-008 | Moved the vault icon/title to the left header and replaced the old right vault action with dedicated Import CSV and Export CSV controls. | Cursor |
 | 2026-05-17 | TASK-005 | Completed Phase 0 foundation docs/process by extracting `securevault.zip` to a local ignored reference folder and documenting V1 scope plus branch/label conventions in project docs. | Cursor |
 | 2026-05-17 | TASK-008 | Added `metadata` and versioned vault payload migration, and now setup/unlock/biometric unlock persist `lastUnlockedAt` updates in the encrypted vault blob. | Cursor |
 | 2026-05-17 | TASK-026 | Added a dedicated Settings screen from the Home menu with sections for master-password change (safe re-encryption), biometric disable, local-data reset, theme preference override, and persisted auto-lock timeout options. | Cursor |
-| 2026-05-17 | BUG-010 | Added an edit-navigation lock in Home and Vault lists plus disabled row actions during route transition, preventing duplicate `entry/[id]` screens/dialogs from repeated taps. | Cursor |
 | 2026-05-17 | TASK-027 | Added explicit manual lock controls and finalized configurable auto-lock timeout behavior via persisted safe presets in Settings and app-state lock handling. | Cursor |
 | 2026-05-17 | TASK-029 | Added a shared credential search helper and reused it across Home and Vault so search consistently matches website, URL/domain, username, notes, category, and account label (including grouped account pickers). | Cursor |
-| 2026-05-17 | BUG-011 | Made vault persistence optimistic (with rollback on failure) so credential mutations update in-memory state immediately, keeping Health/Home/Vault metrics in sync after add/edit/delete/import. | Cursor |
 | 2026-05-17 | TASK-028 | Added folder/tag fields with migration-safe normalization, Vault folder/tag filtering, and optional OpenAI-assisted organization suggestions on Entry with explicit apply confirmation and offline fallback. | Cursor |
 | 2026-05-17 | TASK-030 | Added password history entries with vault migration to v4, tracked previous passwords on change with capped retention, and exposed secure history reveal/copy/restore UI in credential detail with optional recording toggle in Settings. | Cursor |
 | 2026-05-17 | TASK-021 | Added favorite/archive fields with migration-safe defaults, Vault and Entry actions, filtered archive/favorites views, and a new My Space tab; archived credentials are excluded from Home and Health summaries by design. | Cursor |
@@ -3666,18 +3528,12 @@ flowchart TD
 | 2026-05-17 | TASK-004 | Completed Password Health reference-UI alignment with updated theme colors, improved score-state styling, consistent section spacing, and right-side visual accent polish. | Cursor |
 | 2026-05-17 | TASK-014 | Completed an accessibility and dynamic-type pass across shared UI and primary app flows with clearer labels/hints, better tab and section semantics, and larger touch targets for icon-heavy actions. | Cursor |
 | 2026-05-17 | TASK-001 | Added a per-step onboarding content map so each of the three steps now shows distinct title, subtitle, and hero image while preserving existing skip/login/navigation behavior. | Cursor |
-| 2026-05-17 | BUG-012 | Fixed biometric setup toggle UX by replacing silent disabled gating with explicit availability feedback, making the row pressable, and defaulting supported devices to biometric enabled. | Cursor |
-| 2026-05-17 | BUG-009 | Security alert cards are now pressable and open an affected-accounts dialog (weak/reused/old) with direct account actions to open credential details. | Cursor |
-| 2026-05-17 | BUG-013 | Added auth-route hard guards and disabled auth-stack back gestures so onboarding/setup cannot be bypassed via swipe-back, history, or direct access to tabs/settings/entry before unlock. | Cursor |
-| 2026-05-17 | POT-001 | Mitigated auto-lock vs save race by tracking in-flight persists, deferring lock until save completion, and preventing stale rollback after a lock session change. | Cursor |
-| 2026-05-17 | POT-002 | Verified CSV import dedupe already blocks re-import duplicates using normalized domain+username identity keys from existing and incoming credentials. | Cursor |
-| 2026-05-17 | POT-003 | Switched grouped-account dialog selection to key-based live lookup in Home and Vault, preventing stale account routing after rapid search/filter updates. | Cursor |
-| 2026-05-17 | POT-004 | Verified bulk CSV import writes through optimistic `persist`, and Home/Vault/Health badges recalculate from current `credentials` via shared health metrics without delayed refresh drift. | Cursor |
 
 ---
 
 ## Related docs
 
+- [BUGS.md](./BUGS.md) — bug tracker and potential-bug backlog
 - [ROADMAP.md](./ROADMAP.md) — feature phases and overall progress
 - [README.md](./README.md) — run instructions
 

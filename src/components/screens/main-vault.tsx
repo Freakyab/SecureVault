@@ -4,9 +4,9 @@ import {
   AlertTriangle,
   ArrowRight,
   Download,
-  Fingerprint,
   Inbox,
   KeyRound,
+  Lock,
   Plus,
   Search,
   Shield,
@@ -14,7 +14,7 @@ import {
   Upload,
 } from 'lucide-react-native';
 import { useMemo, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Alert, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { BottomNav, CredentialRow, EmptyState, GlassCard, ScreenBackground } from '@/components/vault';
@@ -27,7 +27,7 @@ import { useToast } from '@/contexts/toast-context';
 import { useVault } from '@/contexts/vault-context';
 import { useNavigationLock } from '@/hooks/use-navigation-lock';
 import { filterCredentials } from '@/services/credential-search';
-import { copySensitiveToClipboard } from '@/services/feedback';
+import { copySensitiveToClipboard, hapticSuccess } from '@/services/feedback';
 import { computeHealthMetrics } from '@/services/health-checks';
 
 const VIEW_FILTERS = ['Active', 'Favorites', 'Archived'] as const;
@@ -133,6 +133,29 @@ export function MainVaultScreen() {
   async function onToggleFavorite(id: string, website: string, isFavorite: boolean) {
     await toggleFavorite(id);
     showToast(isFavorite ? `${website} removed from favorites` : `${website} added to favorites`, 'info');
+  }
+
+  function clearFilters() {
+    setQuery('');
+    setCategory('All');
+    setFolderTag('All');
+    setView('Active');
+  }
+
+  function handleLockVault() {
+    Alert.alert('Lock vault?', 'This clears the decrypted session and returns to unlock. Your encrypted vault stays on this device.', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Lock',
+        style: 'destructive',
+        onPress: () => {
+          lockVault();
+          hapticSuccess();
+          showToast('Vault locked', 'info');
+          router.replace('/unlock');
+        },
+      },
+    ]);
   }
 
   return (
@@ -369,22 +392,34 @@ export function MainVaultScreen() {
           ))
         ) : (
           <View style={styles.group}>
-            <EmptyState icon={Inbox} title="Nothing here yet" description={emptyMessage(view, credentials.length, query)} />
+            <EmptyState
+              icon={Inbox}
+              title="Nothing here yet"
+              description={emptyMessage(view, credentials.length, query)}
+              actionLabel={credentials.length === 0 ? 'Add credential' : 'Clear filters'}
+              onAction={() => {
+                if (credentials.length === 0) {
+                  runLocked(() => router.push('/add-credential'));
+                  return;
+                }
+                clearFilters();
+              }}
+            />
           </View>
         )}
       </ScrollView>
 
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel="Lock vault"
-        onPress={() => runLocked(() => lockVault())}
+        accessibilityLabel="Lock vault and return to unlock"
+        onPress={handleLockVault}
         style={({ pressed }) => [styles.fab, { bottom: insets.bottom + 90 }, pressed && styles.pressed]}>
         <LinearGradient
           colors={[c.accentStrong, c.accent]}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
           style={styles.fabInner}>
-          <Fingerprint size={24} color={c.buttonText} strokeWidth={2.25} />
+          <Lock size={24} color={c.buttonText} strokeWidth={2.25} />
         </LinearGradient>
       </Pressable>
 

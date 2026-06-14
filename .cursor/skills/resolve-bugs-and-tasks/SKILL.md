@@ -1,23 +1,23 @@
 ---
 name: resolve-bugs-and-tasks
-description: Find BUGS-AND-TASKS.md, then for every feature/task and bug in it, check whether it already exists in the codebase, build any missing feature, fix any bug, and update the file's statuses, indices, and resolution log. Loops until every item is fully implemented and marked done. Use when the user names this skill or asks to work through, resolve, or build out the bugs-and-tasks file.
+description: Find TASKS.md and BUGS.md, then for every feature/task and bug in them, check whether it already exists in the codebase, build any missing feature, fix any bug, and update each file's statuses, indices, and resolution log. Loops until every item is fully implemented and marked done. Use when the user names this skill or asks to work through, resolve, or build out the tasks and bugs files.
 disable-model-invocation: true
 ---
 
 # Resolve Bugs and Tasks
 
-Drive `BUGS-AND-TASKS.md` to a fully-resolved state. For each `TASK-xxx` and `BUG-xxx`: confirm whether it already exists in the code, build it if missing, fix it if broken, verify, then update the file. Loop until every open item is `done`.
+Drive `TASKS.md` and `BUGS.md` to a fully-resolved state. For each `TASK-xxx` and `BUG-xxx`: confirm whether it already exists in the code, build it if missing, fix it if broken, verify, then update the relevant file. Loop until every open item is `done`.
 
-## Step 0: Locate and read the tracker
+## Step 0: Locate and read the trackers
 
-1. Find the file (root or nested): search for `BUGS-AND-TASKS.md`.
-2. Read it fully. It is the single source of truth. Note its structure:
+1. Find the files (root or nested): search for `TASKS.md` (tasks) and `BUGS.md` (bugs).
+2. Read both fully. They are the single source of truth. Note their structure:
    - **Progress tracker** + counts (Open / In progress / Blocked / Done / Total) and the progress bar.
-   - **Recommended Fix Order** — work items in this order unless a dependency forces otherwise.
-   - **Active Bug Index** / **Completed Bug Index** / **Pending Tasks Index** / **Completed Tasks** tables.
-   - **Potential Bug Backlog** (`POT-xxx`).
-   - Per-item detail sections anchored as `#task-xxx` / `#bug-xxx`.
-   - **Resolution log** at the bottom.
+   - **Recommended Fix Order** (`TASKS.md`) — work items in this order unless a dependency forces otherwise.
+   - **Pending Tasks Index** / **Completed Tasks** tables (`TASKS.md`).
+   - **Active Bug Index** / **Completed Bug Index** / **Potential Bug Backlog** (`POT-xxx`) tables (`BUGS.md`).
+   - Per-item detail sections anchored as `#task-xxx` (`TASKS.md`) / `#bug-xxx` (`BUGS.md`).
+   - **Resolution log** at the bottom of each file.
 3. Build the work queue from every item whose status is `open`, `in_progress`, or `blocked`, ordered by **Recommended Fix Order**, then by priority (P0 → P3).
 
 **Status values:** `open` · `in_progress` · `blocked` · `done` · `wont_fix`.
@@ -42,7 +42,7 @@ Repeat for each item in the work queue until none remain:
 
 ## Updating the tracker
 
-After each item, edit `BUGS-AND-TASKS.md` so it stays internally consistent:
+After each item, edit the relevant tracker (`TASKS.md` for `TASK-xxx`, `BUGS.md` for `BUG-xxx`/`POT-xxx`) so it stays internally consistent:
 
 - Set the item's **Status** in its index table AND its detail section to `done`.
 - Move it from the active index to the **Completed** index/section (e.g. Active Bug Index → Completed Bug Index; Pending Tasks Index → Completed Tasks).
@@ -60,7 +60,7 @@ After each item, edit `BUGS-AND-TASKS.md` so it stays internally consistent:
 
 ## Context / memory notes
 
-- Treat `BUGS-AND-TASKS.md` as durable memory — re-read it to resume; don't re-scan the whole repo.
+- Treat `TASKS.md` and `BUGS.md` as durable memory — re-read them to resume; don't re-scan the whole repo.
 - Read each item's detail section for scope before coding; read targeted files/line ranges, not whole files.
 - Prefer scoped checks over full rebuilds each cycle.
 - Follow the workspace rules (Expo/TS, React Native icons) for any UI you build.

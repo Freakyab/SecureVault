@@ -21,6 +21,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   BottomNav,
   CredentialAvatar,
+  EmptyState,
   GlassCard,
   ScoreRing,
   ScreenBackground,
@@ -352,6 +353,14 @@ export function PasswordHealthScreen() {
               );
             })}
           </View>
+        ) : metrics.total === 0 ? (
+          <EmptyState
+            icon={KeyRound}
+            title="No passwords to review"
+            description="Add your first credential to unlock health scoring, breach checks, and security recommendations."
+            actionLabel="Add credential"
+            onAction={() => router.push('/add-credential')}
+          />
         ) : (
           <GlassCard style={styles.safeCard}>
             <ShieldCheck size={20} color={c.success} strokeWidth={2} />

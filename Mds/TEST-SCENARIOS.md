@@ -1158,7 +1158,8 @@ Use before each beta build:
 | File | Purpose |
 |------|---------|
 | `Mds/ROADMAP.md` | Feature tracker & phase status |
-| `Mds/BUGS-AND-TASKS.md` | Bug/task backlog |
+| `Mds/TASKS.md` | Pending task backlog |
+| `Mds/BUGS.md` | Bug tracker & potential-bug backlog |
 | `Mds/SESSION-HANDOFF.md` | Latest implementation notes |
 | `src/services/__tests__/` | Automated unit tests |
 | `screenshots/` | Visual design reference |
