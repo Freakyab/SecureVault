@@ -61,7 +61,18 @@ function makeStyles(c: VaultColorsShape) {
       justifyContent: 'center',
     },
     iconWrapActive: {
-      backgroundColor: c.accentStrong,
+      width: 56,
+      height: 56,
+      borderRadius: 28,
+      borderWidth: 1.5,
+      borderColor: c.glassBorder,
+      backgroundColor: c.background,
+      transform: [{ translateY: -18 }],
+      shadowColor: c.accentStrong,
+      shadowOpacity: 0.55,
+      shadowRadius: 12,
+      shadowOffset: { width: 0, height: 6 },
+      elevation: 10,
     },
   });
 }
@@ -88,8 +99,8 @@ export function BottomNav({ active }: BottomNavProps) {
               style={styles.item}>
               <View style={[styles.iconWrap, isActive && styles.iconWrapActive]}>
                 <Icon
-                  size={22}
-                  color={isActive ? c.heading : c.muted}
+                  size={isActive ? 24 : 22}
+                  color={isActive ? c.accent : c.muted}
                   strokeWidth={isActive ? 2.25 : 1.75}
                 />
               </View>

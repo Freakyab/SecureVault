@@ -23,14 +23,14 @@ Based on `Mds/Password-Health-Figma-vs-Build.md`.
 - `src/components/vault/index.ts` — export `ScoreRing`
 - `src/components/screens/password-health.tsx` — full layout restyle
 
-## Phase 2 — Remaining gaps (not yet implemented)
+## Phase 2 — Remaining gaps ✅ (implemented)
 
 | # | Task | Priority | Notes |
 |---|------|----------|-------|
-| 11 | Secure Tips → bulleted checklist with tick icons (single block) | Medium | Design uses inline list, not per-tip cards |
-| 12 | Reused Groups → circular member avatars instead of full rows | Low | Functional rows kept for navigation |
-| 13 | Score ring glow / shadow effect on arc | Low | SVG gradient arc done; glow filter optional |
-| 14 | Bottom nav active indicator → circle instead of rounded square | Low | App-wide nav pattern |
+| 11 | Secure Tips → bulleted checklist with tick icons (single block) | Medium | ✅ Single glass block with tick rows |
+| 12 | Reused Groups → circular member avatars instead of full rows | Low | ✅ Tappable avatar cluster preserves navigation |
+| 13 | Score ring glow / shadow effect on arc | Low | ✅ Soft duplicate arc glow added |
+| 14 | Bottom nav active indicator → raised circle button | Low | ✅ App-wide lifted circle filled with bg color + accent icon + glow |
 | 15 | Header → menu + avatar (design) vs back button (sub-screen) | N/A | Sub-screen pattern is correct for routed page |
 
 ## Phase 3 — Intentionally preserved (build-only features)

@@ -3,6 +3,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import {
   AlertTriangle,
   ChevronRight,
+  CheckCircle2,
   Clock,
   Copy,
   KeyRound,
@@ -17,7 +18,14 @@ import { useMemo, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { BottomNav, GlassCard, ScoreRing, ScreenBackground, VaultHeader } from '@/components/vault';
+import {
+  BottomNav,
+  CredentialAvatar,
+  GlassCard,
+  ScoreRing,
+  ScreenBackground,
+  VaultHeader,
+} from '@/components/vault';
 import { SerifFont } from '@/constants/theme';
 import { VaultType } from '@/constants/vault-theme';
 import { useVaultColors } from '@/contexts/color-theme-context';
@@ -371,20 +379,35 @@ export function PasswordHealthScreen() {
                     These {group.members.length} accounts use an identical password. Change one to
                     improve health.
                   </Text>
-                  {group.members.map((member) => (
-                    <Pressable
-                      key={member.id}
-                      accessibilityRole="button"
-                      accessibilityLabel={`Open ${member.website} to change its reused password`}
-                      onPress={() => openCredential(member.id)}
-                      style={({ pressed }) => [styles.reusedMember, pressed && styles.pressed]}>
-                      <KeyRound size={15} color={c.accent} strokeWidth={1.75} />
-                      <Text style={styles.reusedMemberText} numberOfLines={1}>
-                        {member.website} · {member.username || 'No username'}
-                      </Text>
-                      <ChevronRight size={15} color={c.muted} strokeWidth={2} />
-                    </Pressable>
-                  ))}
+                  <View style={styles.reusedAvatars}>
+                    {group.members.slice(0, 5).map((member, memberIndex) => (
+                      <Pressable
+                        key={member.id}
+                        accessibilityRole="button"
+                        accessibilityLabel={`Open ${member.website} to change its reused password`}
+                        onPress={() => openCredential(member.id)}
+                        style={({ pressed }) => [
+                          styles.reusedAvatarButton,
+                          memberIndex > 0 && styles.reusedAvatarOverlap,
+                          pressed && styles.pressed,
+                        ]}>
+                        <CredentialAvatar
+                          icon={KeyRound}
+                          website={member.website}
+                          url={member.url}
+                          customLogoUri={member.customLogoUri}
+                          size={38}
+                          iconSize={16}
+                          accent={c.accent}
+                        />
+                      </Pressable>
+                    ))}
+                    {group.members.length > 5 ? (
+                      <View style={[styles.reusedAvatarMore, styles.reusedAvatarOverlap]}>
+                        <Text style={styles.reusedAvatarMoreText}>+{group.members.length - 5}</Text>
+                      </View>
+                    ) : null}
+                  </View>
                 </GlassCard>
               ))}
             </View>
@@ -406,12 +429,14 @@ export function PasswordHealthScreen() {
           <Lightbulb size={20} color={c.muted} strokeWidth={1.75} />
         </View>
         <View style={styles.tips}>
-          {TIPS.map((tip) => (
-            <GlassCard key={tip} style={styles.tipCard}>
-              <Lightbulb size={18} color={c.accent} strokeWidth={1.75} />
-              <Text style={styles.tipText}>{tip}</Text>
-            </GlassCard>
-          ))}
+          <GlassCard style={styles.tipsCard}>
+            {TIPS.map((tip) => (
+              <View key={tip} style={styles.tipRow}>
+                <CheckCircle2 size={18} color={c.success} strokeWidth={1.75} />
+                <Text style={styles.tipText}>{tip}</Text>
+              </View>
+            ))}
+          </GlassCard>
         </View>
 
         <Pressable
@@ -659,6 +684,34 @@ function makeStyles(c: VaultColorsShape) {
     lineHeight: 19,
     color: c.muted,
   },
+  reusedAvatars: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingTop: 2,
+  },
+  reusedAvatarButton: {
+    borderRadius: 9999,
+    borderWidth: 2,
+    borderColor: c.glassBackgroundStrong,
+  },
+  reusedAvatarOverlap: {
+    marginLeft: -10,
+  },
+  reusedAvatarMore: {
+    width: 38,
+    height: 38,
+    borderRadius: 9999,
+    borderWidth: 2,
+    borderColor: c.glassBackgroundStrong,
+    backgroundColor: c.accentSoft,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  reusedAvatarMoreText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: c.accent,
+  },
   reusedMember: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -689,9 +742,12 @@ function makeStyles(c: VaultColorsShape) {
   tips: {
     gap: 12,
   },
-  tipCard: {
+  tipsCard: {
+    gap: 14,
+  },
+  tipRow: {
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     gap: 12,
   },
   tipText: {

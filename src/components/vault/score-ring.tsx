@@ -59,6 +59,19 @@ export function ScoreRing({
           cx={center}
           cy={center}
           r={radius}
+          stroke={color}
+          strokeWidth={strokeWidth + 8}
+          strokeLinecap="round"
+          strokeDasharray={circumference}
+          strokeDashoffset={dashOffset}
+          opacity={0.28}
+          fill="none"
+          transform={`rotate(-90 ${center} ${center})`}
+        />
+        <Circle
+          cx={center}
+          cy={center}
+          r={radius}
           stroke="url(#scoreArc)"
           strokeWidth={strokeWidth}
           strokeLinecap="round"
