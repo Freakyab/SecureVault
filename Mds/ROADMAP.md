@@ -41,7 +41,7 @@ Track progress for building the **SecureVault** password manager as an **Expo (R
 > `useTheme`/`useHaptics` hooks, then the UI kit (7.5–7.12).
 >
 > **Status (2026-06-14, Run 6):** Added **Phase 7 — Premium UI overhaul (Fold-style)** as a parallel
-> polish track (22 tasks) plus a [Fold-style design-token reference](#fold-style-design-tokens-phase-7).
+> polish track (22 tasks) plus a [Fold-style design-token reference](#fold-style-design-tokens-phase-6).
 > The track adopts the Fold Money design philosophy (clarity, space, motion, depth, consistency) via a
 > centralized token system, a reusable UI kit, and Reanimated/haptics motion — without cloning Fold.
 > Adding the new scope moves the project-wide denominator to 150 tasks; overall → 48% (72/150).
@@ -82,26 +82,29 @@ rg "^- \[x\]" ROADMAP.md | wc -l      # completed
 
 | Metric | Value |
 |--------|-------|
-| Tasks completed | **90** / **168** |
-| **Overall progress** | **54%** |
+| Tasks completed | **99** / **167** |
+| **Overall progress** | **59%** |
 
 ```
-[███████████░░░░░░░░░] 54%
+[████████████░░░░░░░░] 59%
 ```
 
 | Phase | Done | Total | Progress | Status |
 |-------|------|-------|----------|--------|
 | 0 — Foundation | 6 | 6 | 100% | ✅ |
 | 1 — Design system & shell | 11 | 11 | 100% | ✅ |
-| 2 — UI (mock data) | 19 | 31 | 61% | 🟡 |
-| 3 — Local vault & security | 22 | 23 | 96% | 🟡 |
+| 2 — UI (mock data) | 28 | 30 | 93% | 🟡 |
+| 3 — Local vault & security | 22 | 22 | 100% | ✅ |
 | 4 — Password health | 10 | 10 | 100% | ✅ |
-| 5 — Polish & release | 11 | 18 | 61% | 🟡 |
-| 6 — Backend & sync (optional) | 0 | 8 | 0% | ⬜ |
-| 7 — Premium UI (Fold-style) | 6 | 22 | 27% | 🟡 |
-| 8 — Modern Animation & UX | 0 | 18 | 0% | ⬜ |
+| 5 — Polish & release | 11 | 15 | 73% | 🟡 |
+| 6 — Premium UI (Fold-style) | 6 | 22 | 27% | 🟡 |
+| 7 — Modern Animation & UX | 0 | 18 | 0% | ⬜ |
+| 8 — Testing | 0 | 1 | 0% | ⬜ |
+| 9 — Backend & sync (optional) | 0 | 10 | 0% | ⬜ |
+| 10 — Maintenance | 0 | 1 | 0% | ⬜ |
+| 11 — Optional Advancement *(not counted)* | 0 | 1 | — | ⬜ |
 
-*v1 feature lists (must-have / nice-to-have under Phase 0) are tracked separately below and are **not** included in the table above.*
+*v1 feature lists (must-have / nice-to-have under Phase 0) are tracked separately below and are **not** included in the table above. **Phase 11 — Optional Advancement is also excluded** from the overall totals/denominator.*
 
 ---
 
@@ -111,11 +114,11 @@ rg "^- \[x\]" ROADMAP.md | wc -l      # completed
 
 | Metric | Value |
 |--------|-------|
-| Tasks completed | **36** / **48** |
-| **Pre-Phase 3 progress** | **75%** |
+| Tasks completed | **45** / **47** |
+| **Pre-Phase 3 progress** | **96%** |
 
 ```
-[███████████████░░░░░] 75%
+[███████████████████░] 96%
 ```
 
 **Remaining before Phase 3 gate:** all Phase 1–2 tasks.
@@ -138,14 +141,14 @@ rg "^- \[x\]" ROADMAP.md | wc -l      # completed
 | Milestone | Phases | Progress | Notes |
 |-----------|--------|----------|-------|
 | **M0 — Kickoff** | 0 | 100% | Scope/process documented; design reference now lives in the `screenshots/` folder |
-| **M1 — Walkable UI** | 1–2 | **81%** | Phase 1 app shell complete; Dashboard + Vault UI verified live; Generator tab live; screens wired to real data; app fonts loaded; route groups `(auth)`/`(tabs)` + `entry/[id]`; starter Explore tab removed |
+| **M1 — Walkable UI** | 1–2 | **96%** | Phase 1 app shell complete; Dashboard + Vault UI verified live; Generator tab live; screens wired to real data; Password Health screen verified live; entry detail edit/copy/delete verified live (read-only view mode pending); app fonts loaded; route groups `(auth)`/`(tabs)` + `entry/[id]`; starter Explore tab removed |
 | **M2 — Private beta** | 3–4 | **98%** | AES-GCM encryption, Generator, categories; Password Health 100% |
 | **M3 — Store beta** | 5 | 61% | Accessibility, release metadata, screen-capture protection, loading/empty states |
-| **M4 — Cloud** | 6 | 0% | Optional |
-| **M5 — Premium UI** | 7 | 27% | Premium CRED-blend tokens + theme/haptics hooks + motion map shipped; Dashboard PoC migrated; UI kit & remaining screens next |
-| **M6 — Living UI** | 8 | 0% | Advanced motion: gesture interactions, shared-element transitions, delight animations, reduce-motion + 60fps pass |
+| **M4 — Cloud** | 9 | 0% | Optional |
+| **M5 — Premium UI** | 6 | 27% | Premium CRED-blend tokens + theme/haptics hooks + motion map shipped; Dashboard PoC migrated; UI kit & remaining screens next |
+| **M6 — Living UI** | 7 | 0% | Advanced motion: gesture interactions, shared-element transitions, delight animations, reduce-motion + 60fps pass |
 
-**M1 formula:** average of Phase 1 (100%) and Phase 2 (61%) = **81%**.
+**M1 formula:** average of Phase 1 (100%) and Phase 2 (93%) = **96%**.
 
 ---
 
@@ -199,9 +202,9 @@ A mobile password manager that lets users:
 
 ---
 
-## Fold-style design tokens (Phase 7)
+## Fold-style design tokens (Phase 6)
 
-Premium "Fold Money"–inspired token set for the [Phase 7 UI overhaul](#phase-7--premium-ui-overhaul-fold-style). Used to feed `theme/colors.ts`, `spacing.ts`, `radius.ts`, `typography.ts`, `animations.ts`. Brand accent stays the SecureVault purple (`#5F61F6`); accent should occupy **<10%** of any screen.
+Premium "Fold Money"–inspired token set for the [Phase 6 UI overhaul](#phase-6--premium-ui-overhaul-fold-style). Used to feed `theme/colors.ts`, `spacing.ts`, `radius.ts`, `typography.ts`, `animations.ts`. Brand accent stays the SecureVault purple (`#5F61F6`); accent should occupy **<10%** of any screen.
 
 **Neutral palette**
 
@@ -298,15 +301,18 @@ contexts/                     # Auth, vault (Phase 3+)
 |-------|------|------|----------|--------|
 | 0 | Foundation | Repo ready, decisions documented | 100% | ✅ Done |
 | 1 | Design system & shell | Theme, navigation, dark mode, UI kit | 100% | ✅ Done |
-| 2 | UI screens (mock data) | All 5 screens match prototype | 61% | 🟡 In progress |
-| 3 | Local vault & security | Real CRUD, encryption, generator | 96% | 🟡 In progress |
+| 2 | UI screens (mock data) | All 5 screens match prototype | 93% | 🟡 In progress |
+| 3 | Local vault & security | Real CRUD, encryption, generator | 100% | ✅ Done |
 | 4 | Password health | Scoring, reuse, strength rules | 100% | ✅ Done |
-| 5 | Polish & release prep | A11y, errors, store assets | 61% | 🟡 In progress |
-| 6 | Backend & sync (optional) | Auth API, cloud vault, multi-device | 0% | ⬜ Not started |
-| 7 | Premium UI (Fold-style) | Design tokens, UI kit, motion + haptics, screen migration | 27% | 🟡 In progress |
-| 8 | Modern Animation & UX | Gestures, shared transitions, delight motion, reduce-motion + 60fps | 0% | ⬜ Not started |
-| — | **Project overall** | All phases | **49%** | 🟡 |
-| — | **Pre-Phase 3 gate** | Phases 0–2 only | **58%** | 🟡 |
+| 5 | Polish & release prep | A11y, errors, store assets | 73% | 🟡 In progress |
+| 6 | Premium UI (Fold-style) | Design tokens, UI kit, motion + haptics, screen migration | 27% | 🟡 In progress |
+| 7 | Modern Animation & UX | Gestures, shared transitions, delight motion, reduce-motion + 60fps | 0% | ⬜ Not started |
+| 8 | Testing | Beta distribution, real-device QA | 0% | ⬜ Not started |
+| 9 | Backend & sync (optional) | Auth API, cloud vault, multi-device | 0% | ⬜ Not started |
+| 10 | Maintenance | Legal/compliance docs, ongoing upkeep | 0% | ⬜ Not started |
+| 11 | Optional Advancement *(not counted)* | Store listing copy, growth — excluded from totals | — | ⬜ Not started |
+| — | **Project overall** | All phases *(excl. Phase 11)* | **59%** | 🟡 |
+| — | **Pre-Phase 3 gate** | Phases 0–2 only | **96%** | 🟡 |
 | — | **V1 must-have** | Product MVP | **25%** | 🟡 |
 
 **Legend:** ⬜ Not started · 🟡 In progress · ✅ Done
@@ -402,8 +408,7 @@ contexts/                     # Auth, vault (Phase 3+)
 - [x] Hero illustration / image area
 - [x] Title, subtitle, step indicator dots
 - [x] Primary CTA (“Get started” / multi-step)
-- [ ] Secondary “Log in” link (placeholder)
-- [ ] Persist “onboarding complete” on CTA
+- [x] Persist “onboarding complete” on CTA *(`setOnboardingComplete()` persists the SecureStore flag before routing to setup)*
 
 ### 2.2 Dashboard (Home)
 
@@ -433,18 +438,18 @@ contexts/                     # Auth, vault (Phase 3+)
 
 ### 2.5 Health
 
-- [ ] “Password Health” header
-- [ ] Health score ring or large score display
-- [ ] Breakdown cards: Safe, Risk, Compromised, Refused (static)
-- [ ] Recommendations list (static)
-- [ ] Actionable list linking to affected entries
+- [x] “Password Health” header *(`VaultHeader title="Password Health"` — `src/components/screens/password-health.tsx`)*
+- [x] Health score ring or large score display *(`ScoreRing` displays the live `computeHealthMetrics` score)*
+- [x] Breakdown cards: Safe, Reused, Weak, Old + Breach Monitor for compromised passwords *(renamed from stale Safe/Risk/Compromised/Refused wording; “Refused” meant “Reused”)*
+- [x] Recommendations list *(implemented as static “Secure Tips”)*
+- [x] Actionable list linking to affected entries *(Needs Attention / reused groups / breach rows open `/entry/[id]`)*
 
 ### 2.6 Entry detail (new screen)
 
-- [ ] View mode: site, username, password (masked), notes, category
-- [ ] Edit mode with form validation (UI)
-- [ ] Show / hide password, copy actions
-- [ ] Delete with confirmation dialog
+- [ ] View mode: site, username, password (masked), notes, category — **read-only detail view** *(pending: `entry/[id]` currently mounts the always-editable `EditCredentialScreen`; expected: a dedicated read-only mode that displays website/URL, username, masked password, notes, and category with no editable inputs, plus an explicit “Edit” affordance to switch into edit mode)*
+- [x] Edit mode with form validation (UI) *(`EditCredentialScreen` edits website/URL/username/password/notes/folder/tags/category + favorite/archive/logo; requires website+username+password before save)* — *follow-up: inline field-level validation instead of a single `Alert`*
+- [x] Show / hide password, copy actions *(`secureTextEntry` + Eye/EyeOff toggle; copy username + `copySensitiveToClipboard` for password with 30s auto-clear)*
+- [x] Delete with confirmation dialog *(`handleDelete` → `Alert.alert` with Cancel + destructive Delete before `deleteCredential`)*
 
 ### Definition of done
 
@@ -483,7 +488,6 @@ contexts/                     # Auth, vault (Phase 3+)
 - [x] **3.15** Save generated password to new or existing entry *(Generator→Add Credential param — Run 4)*
 - [x] **3.16** Wire Dashboard counts from real data
 - [x] **3.19** Support multiple credentials for the same account/site (e.g. two Instagram logins with different passwords)
-- [ ] **3.20** AI-assisted folders/tags for vault organization beyond fixed categories *(manual folder/tag filters done; AI deferred)*
 - [x] **3.21** Advanced search by website, URL/domain, username, notes, category, and account label
 - [x] **3.22** Credential password history for tracking previous passwords per account
 - [x] **3.23** Favorite/archive account organization with dedicated My Space view and archived-excluded dashboard/health summaries
@@ -534,7 +538,6 @@ contexts/                     # Auth, vault (Phase 3+)
 
 ### UX & accessibility
 
-- [ ] **5.1** Dark mode using prototype `.dark` tokens *(done in Phase 1)*
 - [x] **5.2** Haptic feedback on copy, save, delete (expo-haptics)
 - [x] **5.3** Loading and skeleton states *(branded RouteFallback spinner + EmptyState — TASK-036)*
 - [x] **5.4** Toast / snackbar for copy confirmation and errors
@@ -545,6 +548,7 @@ contexts/                     # Auth, vault (Phase 3+)
 ### Security hardening
 
 - [x] **5.7** Screenshot / screen capture policy (`expo-screen-capture` blocks capture while unlocked — TASK-035)
+  - ⚠️ **PRODUCTION REMINDER:** currently **disabled for development** via `SCREEN_CAPTURE_PROTECTION_ENABLED = false` in `src/contexts/vault-context.tsx`. Set it back to `true` before any production/store build so screenshots are blocked while the vault is unlocked.
 - [x] **5.8** Clipboard auto-clear for copied passwords
 - [ ] **5.9** Security review checklist completed
 - [x] **5.18** App lock controls: manual lock button and configurable auto-lock timeout
@@ -553,14 +557,18 @@ contexts/                     # Auth, vault (Phase 3+)
 
 - [x] **5.10** Export encrypted backup file *(plaintext JSON backup v1; encryption pending)*
 - [x] **5.11** Import from CSV or encrypted backup *(JSON backup import with dedupe)*
+- [ ] **5.19** Import from **Google Password Manager** exported CSV *(current importer only accepts SecureVault JSON via clipboard — `parseVaultBackup`; add CSV support)*
+  - Detect CSV vs JSON in the importer instead of assuming SecureVault JSON
+  - Parse Google's CSV header `name,url,username,password,note` and map columns → `website` (`name`), `url`, `username`, `password`, `notes` (`note`)
+  - Read from a file via `expo-document-picker` (CSV exports are files), in addition to the existing clipboard-paste path
+  - Handle CSV edge cases: quoted fields with commas/newlines, empty/extra columns, UTF-8 BOM, and blank rows
+  - Reuse `mergeCredentials` dedupe (website + username) so re-imports don't create duplicates
+  - Surface clear errors for malformed CSV; show imported/skipped counts on success
 
 ### Release
 
 - [x] **5.12** App icon, splash screen, store screenshots *(metadata + aubergine splash updated; store screenshots pending)*
-- [ ] **5.13** Privacy policy & terms (required for stores)
 - [ ] **5.14** EAS Build profiles (development, preview, production)
-- [ ] **5.15** TestFlight / internal testing track
-- [ ] **5.16** Play Store / App Store listing copy
 
 ### Definition of done
 
@@ -569,76 +577,52 @@ contexts/                     # Auth, vault (Phase 3+)
 
 ---
 
-## Phase 6 — Backend & sync (optional)
-
-**Goal:** Multi-device vault and user accounts—only if product requires cloud.
-
-### Backend (Express + MongoDB)
-
-- [ ] **6.1** API folder structure per `backend-mongodb.mdc` rules
-- [ ] **6.2** User registration / login (JWT or session—document choice)
-- [ ] **6.3** Store **encrypted** vault blob server-side (zero-knowledge preferred)
-- [ ] **6.4** Sync conflict strategy (last-write-wins vs merge—document choice)
-- [ ] **6.5** Rate limiting, HTTPS, input validation (zod)
-
-### Mobile integration
-
-- [ ] **6.6** Auth screens wired to API
-- [ ] **6.7** react-query for sync status and background refresh
-- [ ] **6.8** Offline queue for changes when network unavailable
-
-### Definition of done
-
-- User can sign in on two devices and see the same vault (encrypted E2E if promised)
-
----
-
-## Phase 7 — Premium UI overhaul (Fold-style)
+## Phase 6 — Premium UI overhaul (Fold-style)
 
 **Goal:** Upgrade the existing app into a calm, responsive, premium experience inspired by Fold Money — without cloning it. Adopt the design philosophy (clarity, space, motion, depth, consistency), a centralized design-token system, a reusable UI kit, and a Reanimated-based motion + haptics layer. Migrate screens incrementally.
 
-> This is a **parallel polish track**, not a v1 blocker. It can run alongside Phase 5 release prep. See the [Fold-style design tokens](#fold-style-design-tokens-phase-7) reference below for the values these tasks must use.
+> This is a **parallel polish track**, not a v1 blocker. It can run alongside Phase 5 release prep. See the [Fold-style design tokens](#fold-style-design-tokens-phase-6) reference below for the values these tasks must use.
 
 **Core principle:** A premium app is defined by how effortlessly the user moves through it — prefer simplicity over complexity, consistency over novelty, smoothness over speed, clarity over decoration. Keep every animation under **350ms**; users should feel a fast, elegant app without noticing the animations themselves.
 
-### 7.1 Foundation — design tokens & theme
+### 6.1 Foundation — design tokens & theme
 
-- [x] **7.1** Build the design-token system under `theme/`: `colors.ts`, `spacing.ts`, `radius.ts`, `typography.ts`, `shadows.ts`, `animations.ts` *(token layer under `src/theme/` + `getTheme(scheme)` barrel — Run 7)*
-- [x] **7.2** 8-point spacing scale (`xs 4 · sm 8 · md 12 · lg 16 · xl 24 · xxl 32 · xxxl 48`) and radius scale (`chip 12 · button 16 · card 20 · sheet 24 · floating 28`) *(`theme/spacing.ts` + `theme/radius.ts` — Run 7)*
-- [x] **7.3** Typography scale (Display 32/Bold · Heading 24/SemiBold · Title 20/SemiBold · Body 16/Regular · Caption 13/Medium · Label 11/Medium); max three weights, one font family *(`theme/typography.ts` — Run 7)*
-- [x] **7.4** `useTheme` and `useHaptics` hooks; no screen defines its own colors/spacing/typography *(`src/hooks/use-theme.ts` resolves `getTheme(scheme)` + `src/hooks/use-haptics.ts` interaction map — Run 8)*
+- [x] **6.1** Build the design-token system under `theme/`: `colors.ts`, `spacing.ts`, `radius.ts`, `typography.ts`, `shadows.ts`, `animations.ts` *(token layer under `src/theme/` + `getTheme(scheme)` barrel — Run 7)*
+- [x] **6.2** 8-point spacing scale (`xs 4 · sm 8 · md 12 · lg 16 · xl 24 · xxl 32 · xxxl 48`) and radius scale (`chip 12 · button 16 · card 20 · sheet 24 · floating 28`) *(`theme/spacing.ts` + `theme/radius.ts` — Run 7)*
+- [x] **6.3** Typography scale (Display 32/Bold · Heading 24/SemiBold · Title 20/SemiBold · Body 16/Regular · Caption 13/Medium · Label 11/Medium); max three weights, one font family *(`theme/typography.ts` — Run 7)*
+- [x] **6.4** `useTheme` and `useHaptics` hooks; no screen defines its own colors/spacing/typography *(`src/hooks/use-theme.ts` resolves `getTheme(scheme)` + `src/hooks/use-haptics.ts` interaction map — Run 8)*
 
-### 7.2 Core components (reusable UI kit)
+### 6.2 Core components (reusable UI kit)
 
 Build under `components/ui/`; never duplicate UI logic, extract repeated patterns.
 
-- [ ] **7.5** `Button` (scale to 0.98 on press, spring return, immediate visual + light haptic)
-- [ ] **7.6** `Card` + `GlassCard` (radius 20, 20–24px padding, subtle shadow, elevated surface)
-- [ ] **7.7** `Input` (themed, focus/error states)
-- [ ] **7.8** `Avatar`
-- [ ] **7.9** `AnimatedNumber` (count up/down instead of instant change)
-- [ ] **7.10** `BottomSheet` (`@gorhom/bottom-sheet`, radius 24)
-- [ ] **7.11** `SectionHeader`
-- [ ] **7.12** `SkeletonLoader` (shimmer placeholder)
+- [ ] **6.5** `Button` (scale to 0.98 on press, spring return, immediate visual + light haptic)
+- [ ] **6.6** `Card` + `GlassCard` (radius 20, 20–24px padding, subtle shadow, elevated surface)
+- [ ] **6.7** `Input` (themed, focus/error states)
+- [ ] **6.8** `Avatar`
+- [ ] **6.9** `AnimatedNumber` (count up/down instead of instant change)
+- [ ] **6.10** `BottomSheet` (`@gorhom/bottom-sheet`, radius 24)
+- [ ] **6.11** `SectionHeader`
+- [ ] **6.12** `SkeletonLoader` (shimmer placeholder)
 
-### 7.3 Motion design system
+### 6.3 Motion design system
 
-- [x] **7.13** Centralized animation durations in `theme/animations.ts` (tap 120 · button 180 · card expand 250 · navigation 300 · modal 350) *(+ easing/spring/stagger tokens — Run 9)*
-- [ ] **7.14** Reanimated micro-interactions: button press, card fade+slide-up entrance + press elevation, list stagger (20–40ms) *(partial: `PressableScale` press + Dashboard fade-in/stagger — Run 9)*
-- [x] **7.15** Haptic feedback map (press → Light · success → Success · error → Error · pull-to-refresh → Soft · card expand → Selection); avoid excessive vibration *(`hooks/use-haptics.ts` — Run 9)*
-- [ ] **7.16** Skeleton → fade-in loading transitions (skeleton → fetch → fade out → fade content in ~200ms); never blank screens or content pop-in
+- [x] **6.13** Centralized animation durations in `theme/animations.ts` (tap 120 · button 180 · card expand 250 · navigation 300 · modal 350) *(+ easing/spring/stagger tokens — Run 9)*
+- [ ] **6.14** Reanimated micro-interactions: button press, card fade+slide-up entrance + press elevation, list stagger (20–40ms) *(partial: `PressableScale` press + Dashboard fade-in/stagger — Run 9)*
+- [x] **6.15** Haptic feedback map (press → Light · success → Success · error → Error · pull-to-refresh → Soft · card expand → Selection); avoid excessive vibration *(`hooks/use-haptics.ts` — Run 9)*
+- [ ] **6.16** Skeleton → fade-in loading transitions (skeleton → fetch → fade out → fade content in ~200ms); never blank screens or content pop-in
 
-### 7.4 Navigation experience
+### 6.4 Navigation experience
 
-- [ ] **7.17** Floating rounded bottom navigation (soft shadow, active tab slightly larger, active icon accent / inactive muted)
-- [ ] **7.18** Sticky headers that collapse slightly on scroll (no large fixed toolbars)
-- [ ] **7.19** Fade + slide screen transitions with shared visual continuity
+- [ ] **6.17** Floating rounded bottom navigation (soft shadow, active tab slightly larger, active icon accent / inactive muted)
+- [ ] **6.18** Sticky headers that collapse slightly on scroll (no large fixed toolbars)
+- [ ] **6.19** Fade + slide screen transitions with shared visual continuity
 
-### 7.5 Screen migration & polish
+### 6.5 Screen migration & polish
 
-- [ ] **7.20** Migrate screens one at a time to card-based layout + design tokens (Dashboard, Vault, Generator, Health, Settings, entry detail) *(partial: **Dashboard** migrated to tokens + premium card layout — Run 9; Vault/Generator/Health/Settings/entry pending)*
-- [ ] **7.21** Background & depth pass: soft neutral background, subtle hero gradients, blur for floating elements, very light shadows (no heavy drop shadows / excessive glassmorphism) *(partial: Dashboard glow gradients + glass surfaces + light shadows — Run 9)*
-- [ ] **7.22** Final UI consistency audit + animation-timing fine-tune (Design QA checklist: visual, motion, code, UX)
+- [ ] **6.20** Migrate screens one at a time to card-based layout + design tokens (Dashboard, Vault, Generator, Health, Settings, entry detail) *(partial: **Dashboard** migrated to tokens + premium card layout — Run 9; Vault/Generator/Health/Settings/entry pending)*
+- [ ] **6.21** Background & depth pass: soft neutral background, subtle hero gradients, blur for floating elements, very light shadows (no heavy drop shadows / excessive glassmorphism) *(partial: Dashboard glow gradients + glass surfaces + light shadows — Run 9)*
+- [ ] **6.22** Final UI consistency audit + animation-timing fine-tune (Design QA checklist: visual, motion, code, UX)
 
 ### Suggested libraries
 
@@ -659,11 +643,11 @@ Build under `components/ui/`; never duplicate UI logic, extract repeated pattern
 
 ---
 
-## Phase 8 — Modern Animation & UX
+## Phase 7 — Modern Animation & UX
 
-**Goal:** Take the app from "polished" to "alive." Where Phase 7 established the calm token + motion *foundation*, Phase 8 layers on the **advanced, gesture-driven, physics-based motion and micro-interactions** that define best-in-class apps (Things, Linear, Arc, Revolut). Every interaction should feel direct, responsive, and reversible — driven by gestures and spring physics rather than fixed timers — while staying fully accessible and running at 60fps.
+**Goal:** Take the app from "polished" to "alive." Where Phase 6 established the calm token + motion *foundation*, Phase 7 layers on the **advanced, gesture-driven, physics-based motion and micro-interactions** that define best-in-class apps (Things, Linear, Arc, Revolut). Every interaction should feel direct, responsive, and reversible — driven by gestures and spring physics rather than fixed timers — while staying fully accessible and running at 60fps.
 
-> This is a **second polish track** that builds directly on [Phase 7](#phase-7--premium-ui-overhaul-fold-style). It depends on the Phase 7 design tokens (`theme/animations.ts`, `useTheme`, `useHaptics`) and UI kit, and reuses the [Fold-style design tokens](#fold-style-design-tokens-phase-7). Not a v1 blocker.
+> This is a **second polish track** that builds directly on [Phase 6](#phase-6--premium-ui-overhaul-fold-style). It depends on the Phase 6 design tokens (`theme/animations.ts`, `useTheme`, `useHaptics`) and UI kit, and reuses the [Fold-style design tokens](#fold-style-design-tokens-phase-6). Not a v1 blocker.
 
 **Core principles**
 
@@ -673,38 +657,38 @@ Build under `components/ui/`; never duplicate UI logic, extract repeated pattern
 - **Accessible by default:** every animation has a reduced-motion variant; nothing relies solely on motion to convey meaning.
 - **Always 60fps:** all animation runs on the UI thread (Reanimated worklets); never block JS or thrash layout.
 
-### 8.1 Gesture-driven interactions
+### 7.1 Gesture-driven interactions
 
-- [ ] **8.1** Swipe-to-action vault rows (reveal copy / edit / delete) with spring snap, haptic detents, and full-swipe shortcut
-- [ ] **8.2** Long-press → context menu + drag-to-reorder favorites (`react-native-gesture-handler` + Reanimated layout)
-- [ ] **8.3** Custom branded pull-to-refresh (animated shield/progress, not the default spinner)
-- [ ] **8.4** Velocity-aware bottom sheet gestures (snap points, fling-to-dismiss, backdrop fade with drag)
+- [ ] **7.1** Swipe-to-action vault rows (reveal copy / edit / delete) with spring snap, haptic detents, and full-swipe shortcut
+- [ ] **7.2** Long-press → context menu + drag-to-reorder favorites (`react-native-gesture-handler` + Reanimated layout)
+- [ ] **7.3** Custom branded pull-to-refresh (animated shield/progress, not the default spinner)
+- [ ] **7.4** Velocity-aware bottom sheet gestures (snap points, fling-to-dismiss, backdrop fade with drag)
 
-### 8.2 Shared element & screen transitions
+### 7.2 Shared element & screen transitions
 
-- [ ] **8.5** Shared-element transition: vault row → entry detail (logo + title morph in place)
-- [ ] **8.6** Scroll-driven collapsing headers with parallax hero (header shrinks/blurs as content scrolls)
-- [ ] **8.7** Spatial continuity between Dashboard and Health (score/number morphs across screens)
+- [ ] **7.5** Shared-element transition: vault row → entry detail (logo + title morph in place)
+- [ ] **7.6** Scroll-driven collapsing headers with parallax hero (header shrinks/blurs as content scrolls)
+- [ ] **7.7** Spatial continuity between Dashboard and Health (score/number morphs across screens)
 
-### 8.3 Delight & feedback animations
+### 7.3 Delight & feedback animations
 
-- [ ] **8.8** Lottie / Reanimated success states (animated checkmark on save, copy-confirm pulse)
-- [ ] **8.9** Animated empty-state illustrations (subtle looping motion, reduce-motion safe)
-- [ ] **8.10** Generator strength meter: spring fill + color interpolation as strength changes
-- [ ] **8.11** Health score ring draw-on animation synced with the count-up number
-- [ ] **8.12** Subtle celebratory moment on health-score milestone (light confetti / glow, tasteful, dismissible)
+- [ ] **7.8** Lottie / Reanimated success states (animated checkmark on save, copy-confirm pulse)
+- [ ] **7.9** Animated empty-state illustrations (subtle looping motion, reduce-motion safe)
+- [ ] **7.10** Generator strength meter: spring fill + color interpolation as strength changes
+- [ ] **7.11** Health score ring draw-on animation synced with the count-up number
+- [ ] **7.12** Subtle celebratory moment on health-score milestone (light confetti / glow, tasteful, dismissible)
 
-### 8.4 Continuous & ambient motion
+### 7.4 Continuous & ambient motion
 
-- [ ] **8.13** Perf-budgeted animated gradient / glow backdrops (slow drift, paused when offscreen)
-- [ ] **8.14** Shimmer skeleton → content morph using Reanimated layout animations (no hard pop-in)
-- [ ] **8.15** Spring-animated tab bar: active pill slides with spring, icon morph/scale on selection
+- [ ] **7.13** Perf-budgeted animated gradient / glow backdrops (slow drift, paused when offscreen)
+- [ ] **7.14** Shimmer skeleton → content morph using Reanimated layout animations (no hard pop-in)
+- [ ] **7.15** Spring-animated tab bar: active pill slides with spring, icon morph/scale on selection
 
-### 8.5 Accessibility & performance
+### 7.5 Accessibility & performance
 
-- [ ] **8.16** Respect `useReducedMotion()` — provide crossfade/instant variants for every motion above
-- [ ] **8.17** 60fps budget: worklet-driven UI-thread animation, avoid JS layout thrash, profile with the perf monitor on a mid-range device
-- [ ] **8.18** Motion consistency audit: all springs/durations sourced from `theme/animations.ts`; final timing + easing fine-tune and design QA
+- [ ] **7.16** Respect `useReducedMotion()` — provide crossfade/instant variants for every motion above
+- [ ] **7.17** 60fps budget: worklet-driven UI-thread animation, avoid JS layout thrash, profile with the perf monitor on a mid-range device
+- [ ] **7.18** Motion consistency audit: all springs/durations sourced from `theme/animations.ts`; final timing + easing fine-tune and design QA
 
 ### Suggested libraries
 
@@ -727,6 +711,87 @@ Build under `components/ui/`; never duplicate UI logic, extract repeated pattern
 
 ---
 
+## Phase 8 — Testing
+
+**Goal:** Validate the app with real users on real hardware before public launch, and grow automated/manual test coverage.
+
+### Beta distribution
+
+- [ ] **8.1** TestFlight / internal testing track *(moved from Phase 5.15)* — beta distribution before public launch:
+  - **TestFlight (iOS):** upload a production build to App Store Connect and invite testers via TestFlight to install and give feedback.
+  - **Internal testing track (Android):** upload the AAB to the Play Console's internal/closed testing track and invite testers.
+  - Catches device-specific bugs, crashes, and UX issues with real users on real hardware before the wide release.
+  - **Done when:** a build is live on TestFlight and/or the Play internal track, and testers can install it.
+
+### Definition of done
+
+- A beta build is installable by invited testers on iOS and/or Android, with a feedback loop in place.
+
+---
+
+## Phase 9 — Backend & sync (optional)
+
+**Goal:** Multi-device vault and user accounts—only if product requires cloud.
+
+### Backend (Express + MongoDB)
+
+- [ ] **9.1** API folder structure per `backend-mongodb.mdc` rules
+- [ ] **9.2** User registration / login (JWT or session—document choice)
+- [ ] **9.3** Store **encrypted** vault blob server-side (zero-knowledge preferred)
+- [ ] **9.4** Sync conflict strategy (last-write-wins vs merge—document choice)
+- [ ] **9.5** Rate limiting, HTTPS, input validation (zod)
+
+### Mobile integration
+
+- [ ] **9.6** Auth screens wired to API
+- [ ] **9.7** react-query for sync status and background refresh
+- [ ] **9.8** Offline queue for changes when network unavailable
+- [ ] **9.9** Secondary “Log in” link on onboarding (placeholder) — wire to auth once backend exists *(moved from Phase 2.1 — needs backend/DB)*
+- [ ] **9.10** AI-assisted folders/tags for vault organization beyond fixed categories *(moved from Phase 3.20 — manual folder/tag filters done; AI portion needs backend)*
+
+### Definition of done
+
+- User can sign in on two devices and see the same vault (encrypted E2E if promised)
+
+---
+
+## Phase 10 — Maintenance
+
+**Goal:** Ongoing legal, compliance, and upkeep work that lives beyond the initial release and recurs over the app's lifetime.
+
+### Legal & compliance
+
+- [ ] **10.1** Privacy policy & terms (required for stores) *(moved from Phase 5.13)* — write a **Privacy Policy** (what data is collected — ideally "nothing leaves the device", local encrypted storage, HIBP breach-check sends only the k-anonymity SHA-1 prefix, and data-deletion details) and **Terms of Service** (usage terms, disclaimers, liability). Host both at a public URL and link them in-app (Settings) and in the store listings.
+  - **Done when:** both documents exist, are hosted publicly, and are linked in-app + in store metadata. Keep them updated as data practices change.
+
+### Definition of done
+
+- Legal documents are published, linked, and kept current with each release.
+
+---
+
+## Phase 11 — Optional Advancement
+
+**Goal:** Nice-to-have, go-to-market, and growth work that is **not required** for the core app to function. **Excluded from overall progress calculations** — tracked here so it isn't lost, but it does not count toward the project denominator.
+
+> ⚠️ **Not counted:** tasks in this phase are intentionally left out of the Overall progress / quick-reference totals.
+
+### Store presence & growth
+
+- [ ] **11.1** Play Store / App Store listing copy *(moved from Phase 5.16)* — the marketing/metadata content shown on the store pages (not code):
+  - App name & subtitle / short description
+  - Full description — features, privacy/security selling points
+  - Keywords (App Store) for search
+  - Screenshots & preview — the polished store screenshots noted as still pending in 5.12
+  - Category, age rating, support URL, promotional text
+  - **Done when:** all listing text and assets are written and entered in App Store Connect + Google Play Console.
+
+### Definition of done
+
+- Optional items are shipped as capacity allows; none block the core release.
+
+---
+
 ## Milestones (high level)
 
 | Milestone | Phases | User-visible outcome |
@@ -735,9 +800,9 @@ Build under `components/ui/`; never duplicate UI logic, extract repeated pattern
 | **M1 — Walkable UI** | 1–2 | Full app navigable with mock data |
 | **M2 — Private beta** | 3–4 | Real vault, generator, health offline |
 | **M3 — Store beta** | 5 | Polished build on TestFlight / internal track |
-| **M4 — Cloud** | 6 | Account + sync (if in scope) |
-| **M5 — Premium UI** | 7 | Calm, responsive, Fold-style premium experience |
-| **M6 — Living UI** | 8 | Gesture-driven, physics-based, delightful motion that stays accessible and 60fps |
+| **M4 — Cloud** | 9 | Account + sync (if in scope) |
+| **M5 — Premium UI** | 6 | Calm, responsive, Fold-style premium experience |
+| **M6 — Living UI** | 7 | Gesture-driven, physics-based, delightful motion that stays accessible and 60fps |
 
 ---
 
@@ -762,7 +827,7 @@ Record answers here before implementing dependent phases.
 | Risk | Impact | Mitigation |
 |------|--------|------------|
 | Weak custom crypto | Critical | Use well-reviewed libraries; security review in Phase 5 |
-| Scope creep (sync early) | Delays MVP | Ship Phases 1–5 offline-first; Phase 6 optional |
+| Scope creep (sync early) | Delays MVP | Ship Phases 1–5 offline-first; Phase 9 optional |
 | Expo Go limitations | Blocks native modules | Plan EAS dev build before Phase 3 |
 | Prototype ≠ mobile UX | Rework | Skip DeviceFrame; use native patterns from Phase 1 |
 
@@ -777,6 +842,12 @@ Add a row when you complete a phase or milestone.
 
 | Date | Phase / Milestone | Notes | Updated by |
 |------|-------------------|-------|------------|
+| 2026-06-14 | Phases renumbered/reranked | Reranked the later phases for a more logical order. Mapping (old → new): **Premium UI 7 → 6**, **Modern Animation & UX 8 → 7**, **Testing 10 → 8**, **Backend & sync 6 → 9**, **Maintenance 9 → 10**; Optional Advancement stays 11. Renumbered all section headers, sub-headings, and task IDs (e.g. 7.x→6.x, 8.x→7.x, 6.x→9.x, 9.1→10.1, 10.1→8.1), reordered the body sections, and updated the progress/overview/milestone/quick-reference tables, the Fold-style token anchor (now `phase-6`), and risk/reference phase refs. Counts unchanged; overall still 99/167 = 59%. **Note:** earlier progress-log rows and dated status notes keep their original phase numbers as a historical record. | Cursor |
+| 2026-06-14 | Phase 11 — Optional Advancement added (5.16 moved, not counted) | Created **Phase 11 — Optional Advancement** for nice-to-have/go-to-market work and moved **5.16 Play Store / App Store listing copy** there as **11.1**. Phase 11 is **excluded from overall progress calculations**. Phase 5 → 11/15 (73%, was 11/16); overall denominator → 167 (also reconciled the stale top metric that read 169 — both overall figures now 99/167 = 59%). | Cursor |
+| 2026-06-14 | Phase 10 — Testing added (5.15 moved) | Created **Phase 10 — Testing** for real-device beta validation and QA, and moved **5.15 TestFlight / internal testing track** there as **10.1**. Phase 5 → 11/16 (69%, was 11/17); Phase 10 → 0/1. Overall scope unchanged (task moved, not removed): 99/168 = 59%. | Cursor |
+| 2026-06-14 | Phase 9 — Maintenance added (5.13 moved) | Created **Phase 9 — Maintenance** for ongoing legal/compliance/upkeep work and moved **5.13 Privacy policy & terms** there as **9.1**. Phase 5 → 11/17 (65%, was 11/18); Phase 9 → 0/1. Overall scope unchanged (task moved, not removed): 99/168 = 59%. | Cursor |
+| 2026-06-14 | Phase 5 (5.1 removed as duplicate) | Deleted **5.1 Dark mode using prototype `.dark` tokens** from Phase 5 — it duplicated already-completed Phase 1 work (1.1 light+dark palettes, 1.11 theme provider) and decision **D7** assigns dark-mode timing to "Phase 1 with UI". Phase 5 → 11/18 (61%, was 11/19); overall denominator → 168; overall 99/168 = 59%. Other Phase 5 ↔ Phase 7/8 overlaps (haptics, skeletons, a11y, empty states) kept since those are the separate premium-UI/animation polish tracks, not the same v1 tasks. | Cursor |
+| 2026-06-14 | Phase 3 → 100% (3.20 moved) | Moved **3.20** (AI-assisted folders/tags for vault organization) from Phase 3 to **Phase 6 as 6.10**, since the AI portion depends on backend/cloud infrastructure (manual folder/tag filters already shipped). Phase 3 → 100% (22/22); Phase 6 denominator → 10 (0/10). Overall scope unchanged (task moved, not removed): 99/169 = 59%. | Cursor |
 | 2026-06-14 | Phase 8 added (Run 14) | Added **Phase 8 — Modern Animation & UX**: 18 tasks across gesture-driven interactions (8.1–8.4), shared element & screen transitions (8.5–8.7), delight & feedback animations (8.8–8.12), continuous & ambient motion (8.13–8.15), and accessibility & performance (8.16–8.18), plus milestone **M6 — Living UI**. A second polish track that builds on Phase 7's tokens/UI kit toward gesture-first, physics-based, accessible 60fps motion. New scope: overall denominator → 168; overall → 49% (82/168); Pre-Phase 3 gate unchanged at 58%. | Cursor |
 | 2026-06-14 | Phase 1 (1.9) remove Explore tab (Run 13) | Removed the default Expo starter **Explore tab** by deleting the unused `components/app-tabs.tsx` and `app-tabs.web.tsx` scaffolding (Home/Explore triggers + "Expo Starter" branding). No imports referenced them — the app uses the custom `BottomNav` — so no other code changed. Lint clean. Completed **1.9**. Phase 1 → 27% (3/11); overall → 55% (82/150); Pre-Phase 3 gate → 58% (28/48); M1 → 44%. | Cursor |
 | 2026-06-14 | Phase 1 (1.4) route groups (Run 12) | Restructured `src/app/` routing to match the planned architecture: added **`(auth)`** group (onboarding `index` + `unlock` + `setup`), **`(tabs)`** group (dashboard/vault/my-vault/generator/health/settings with a nested no-animation stack `_layout`), and **`entry/[id]`** for credential detail/edit (replaces `/edit-credential`). Updated root `_layout.tsx` to reference the groups and repointed nav calls (`/edit-credential` → `/entry/[id]`). Route groups keep existing URLs, so the custom `BottomNav` and all `href`s still work; `add-credential`/`change-password` remain root routes. Completed **1.4**. Lint clean. Phase 1 → 18% (2/11); overall → 54% (81/150); Pre-Phase 3 gate → 56% (27/48); M1 → 40%. | Cursor |
@@ -837,7 +908,7 @@ npm run lint
 | `screenshots/` | Reference screens (design reference) |
 | `constants/theme.ts` | Current Expo starter theme (to be replaced/extended) |
 | `.cursor/rules/expo-ts.mdc` | Expo / RN coding standards |
-| `.cursor/rules/backend-mongodb.mdc` | Backend standards (Phase 6) |
+| `.cursor/rules/backend-mongodb.mdc` | Backend standards (Phase 9) |
 
 ---
 
@@ -847,15 +918,18 @@ npm run lint
 
 | Field | Current value |
 |-------|----------------|
-| Overall (all phases) | 82 / 168 = **49%** |
-| Pre-Phase 3 (phases 0–2) | 28 / 48 = **58%** |
+| Overall (all phases, excl. Phase 11) | 99 / 167 = **59%** |
+| Pre-Phase 3 (phases 0–2) | 45 / 47 = **96%** |
 | V1 must-have | 2 / 8 = **25%** |
 | Phase 0 | 6 / 6 |
-| Phase 1 | 3 / 11 |
-| Phase 2 | 19 / 31 |
-| Phase 3 | 22 / 23 |
+| Phase 1 | 11 / 11 |
+| Phase 2 | 28 / 30 |
+| Phase 3 | 22 / 22 |
 | Phase 4 | 10 / 10 |
-| Phase 5 | 11 / 18 |
-| Phase 6 | 0 / 8 |
-| Phase 7 | 6 / 22 |
-| Phase 8 | 0 / 18 |
+| Phase 5 | 11 / 15 |
+| Phase 6 | 6 / 22 |
+| Phase 7 | 0 / 18 |
+| Phase 8 | 0 / 1 |
+| Phase 9 | 0 / 10 |
+| Phase 10 | 0 / 1 |
+| Phase 11 *(not counted)* | 0 / 1 |

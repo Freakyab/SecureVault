@@ -2,8 +2,8 @@
 
 Track known issues and work not yet done. Update **Status** and **Progress** as items are fixed.
 
-**Last updated:** 2026-06-14 (BUG-015 Create vault button + BUG-016 biometric switch regressions fixed)  
-**Open:** 4 · **In progress:** 0 · **Done:** 57
+**Last updated:** 2026-06-14 (TASK-051–TASK-061 added — P1 Phase 6 page migrations, onboarding first)  
+**Open:** 19 · **In progress:** 0 · **Done:** 57
 
 > **Status (2026-06-14, Run 5):** No bug/task items changed — the 4 open items remain backend-gated
 > (out of scope for offline-first v1). This run verified the ROADMAP Phase 2 Dashboard and Vault
@@ -21,32 +21,43 @@ Track known issues and work not yet done. Update **Status** and **Progress** as 
 
 | Status | Count |
 |--------|-------|
-| Open | 4 |
+| Open | 19 |
 | In progress | 0 |
 | Blocked | 0 |
 | Done | 57 |
-| **Total** | **61** |
+| **Total** | **76** |
 
 ```
-[███████████████████░] 93% resolved
+[███████████████░░░░░] 75% resolved
 ```
 
 | Priority | Open |
 |----------|------|
 | P0 — Critical | 0 |
-| P1 — High | 0 |
-| P2 — Medium | 0 |
+| P1 — High | 12 |
+| P2 — Medium | 3 |
 | P3 — Low / Optional | 4 |
 
-The 4 remaining open items (TASK-017 backend/cloud sync, TASK-018 sharing, TASK-019 browser
-extension, TASK-022 Google login) all depend on a backend that is **out of scope** for the
-offline-first v1 (Open decision D1 = *Offline only*).
+4 of the open items (TASK-017 backend/cloud sync, TASK-018 sharing, TASK-019 browser
+extension, TASK-022 Google login) depend on a backend that is **out of scope** for the
+offline-first v1 (Open decision D1 = *Offline only*). The remaining 4 open items —
+TASK-047 (read-only entry View mode), TASK-048 (empty states / onboarding skip / logout
+flows), TASK-049 (security review checklist), and TASK-050 (EAS Build profiles) — are
+Phase 2/5 work that can ship offline.
+
+**TASK-051–TASK-061 (P1)** are the **Phase 6 page migrations**: each remaining screen
+must move off the legacy `useVaultColors` / `VaultType` / hardcoded-style system onto the
+completed Phase 6 foundation (`useTheme`, `useThemePresets`, `theme.spacing/radius/typography`,
+`theme.motion`, and `useHaptics`). Dashboard is already migrated (reference). Do these in
+order, **onboarding first**.
 
 ---
 
 ## Recommended Fix Order
 
 ✅ done: TASK-009 → … → TASK-036 → TASK-037 → TASK-038 → TASK-039 → TASK-040 → TASK-041 → TASK-042 → TASK-043 → TASK-044 → TASK-045 → TASK-046
+⏳ remaining (offline, do first): TASK-049 (security review checklist) → TASK-048 (empty states / onboarding skip / logout) → TASK-047 (read-only entry View mode) → TASK-050 (EAS Build profiles)
+⏳ Phase 6 page migrations (P1, do onboarding first): TASK-051 (Onboarding) → TASK-052 (Setup master password) → TASK-053 (Unlock) → TASK-054 (Main Vault) → TASK-055 (My Vault) → TASK-056 (Generator) → TASK-057 (Password Health) → TASK-058 (Settings) → TASK-059 (Add Credential) → TASK-060 (Entry detail/Edit) → TASK-061 (Change Password)
 ⏳ remaining (backend-gated): TASK-017 → TASK-022 → TASK-018 → TASK-019
 
 ---
@@ -105,6 +116,21 @@ Track suspected issues before they are fully reproduced and converted into forma
 
 | ID | Title | Priority | Status |
 |----|-------|----------|--------|
+| [TASK-051](#task-051) | Migrate Onboarding to Phase 6 tokens/hooks | P1 | open |
+| [TASK-052](#task-052) | Migrate Setup Master Password to Phase 6 tokens/hooks | P1 | open |
+| [TASK-053](#task-053) | Migrate Unlock Vault to Phase 6 tokens/hooks | P1 | open |
+| [TASK-054](#task-054) | Migrate Main Vault to Phase 6 tokens/hooks | P1 | open |
+| [TASK-055](#task-055) | Migrate My Vault to Phase 6 tokens/hooks | P1 | open |
+| [TASK-056](#task-056) | Migrate Generator to Phase 6 tokens/hooks | P1 | open |
+| [TASK-057](#task-057) | Migrate Password Health to Phase 6 tokens/hooks | P1 | open |
+| [TASK-058](#task-058) | Migrate Settings to Phase 6 tokens/hooks | P1 | open |
+| [TASK-059](#task-059) | Migrate Add Credential to Phase 6 tokens/hooks | P1 | open |
+| [TASK-060](#task-060) | Migrate Entry detail / Edit Credential to Phase 6 tokens/hooks | P1 | open |
+| [TASK-061](#task-061) | Migrate Change Password to Phase 6 tokens/hooks | P1 | open |
+| [TASK-050](#task-050) | EAS Build profiles (development, preview, production) | P2 | open |
+| [TASK-049](#task-049) | Security review checklist completed | P1 | open |
+| [TASK-048](#task-048) | Empty states, onboarding skip & logout/lock flows | P2 | open |
+| [TASK-047](#task-047) | Read-only credential View mode (entry detail) | P2 | open |
 | [TASK-017](#task-017) | Backend and cloud sync | P3 | open |
 | [TASK-018](#task-018) | Credential sharing | P3 | open |
 | [TASK-019](#task-019) | Browser extension | P3 | open |
@@ -159,6 +185,466 @@ Track suspected issues before they are fully reproduced and converted into forma
 | [TASK-036](#task-036) | Loading and empty-state polish | P2 | done |
 
 </details>
+
+---
+
+<a id="task-051"></a>
+
+## TASK-051: Migrate Onboarding to Phase 6 tokens/hooks
+
+| Field | Value |
+|-------|--------|
+| **ID** | TASK-051 |
+| **Type** | Pending task |
+| **Priority** | P1 — High |
+| **Status** | open |
+| **Area** | Phase 6 UI overhaul / Onboarding |
+| **Reported** | 2026-06-14 |
+
+### Description
+
+Onboarding still uses the legacy `useVaultColors` + `VaultType` system with hardcoded spacing/radius/rgba. Migrate it onto the completed Phase 6 foundation so it matches the Dashboard reference. **Do this page first.**
+
+### Scope
+
+- Replace `useVaultColors()` with `useTheme()` (and `useThemePresets()` where it removes duplication).
+- Replace `VaultType.*` text styles with `theme.typography.*`.
+- Replace hardcoded spacing/radius/colors with `theme.spacing`, `theme.radius`, `theme.colors`.
+- Drive slide transitions / entrances with `theme.motion` durations + easing (Reanimated); keep under 350ms.
+- Add `useHaptics()` feedback on **Continue / Get started** instead of old helpers.
+
+### Related files
+
+- `src/components/screens/onboarding.tsx`
+- `src/hooks/use-theme.ts`, `src/theme/presets.ts`, `src/hooks/use-haptics.ts`
+
+### Acceptance criteria
+
+- No `useVaultColors` / `VaultType` / hardcoded colors/spacing/radius/font sizes remain in the screen.
+- Light + dark schemes resolve through `useTheme()`.
+- Primary actions give haptic + motion feedback; animations < 350ms.
+- Lint clean; no new `tsc` errors.
+
+### Related
+
+- ROADMAP Phase 6.20 (screen migration) + 6.4 / 6.13 / 6.15.
+
+---
+
+<a id="task-052"></a>
+
+## TASK-052: Migrate Setup Master Password to Phase 6 tokens/hooks
+
+| Field | Value |
+|-------|--------|
+| **ID** | TASK-052 |
+| **Type** | Pending task |
+| **Priority** | P1 — High |
+| **Status** | open |
+| **Area** | Phase 6 UI overhaul / Auth — Setup |
+| **Reported** | 2026-06-14 |
+
+### Description
+
+Setup Master Password uses `useVaultColors`, `Fonts`, hardcoded rgba/spacing/radius/typography, and a `Modal animationType="fade"` rather than motion tokens. Migrate it onto the Phase 6 foundation.
+
+### Scope
+
+- Replace `useVaultColors()` / `Fonts` with `useTheme()` + `theme.typography.*`.
+- Replace hardcoded spacing/radius/colors with `theme.spacing`, `theme.radius`, `theme.colors`.
+- Replace the creating-vault modal’s `animationType="fade"` with a `theme.motion`-driven transition.
+- Add `useHaptics()` feedback on create / success / validation error.
+
+### Related files
+
+- `src/components/setup-master-password.tsx`
+- `src/hooks/use-theme.ts`, `src/theme/presets.ts`, `src/hooks/use-haptics.ts`
+
+### Acceptance criteria
+
+- No `useVaultColors` / `Fonts` / hardcoded styles remain; tokens resolve via `useTheme()`.
+- Modal/transition uses motion tokens; animations < 350ms.
+- Create + validation states give haptic feedback.
+- Lint clean; no new `tsc` errors.
+
+### Related
+
+- ROADMAP Phase 6.20 + 6.4 / 6.13 / 6.15.
+
+---
+
+<a id="task-053"></a>
+
+## TASK-053: Migrate Unlock Vault to Phase 6 tokens/hooks
+
+| Field | Value |
+|-------|--------|
+| **ID** | TASK-053 |
+| **Type** | Pending task |
+| **Priority** | P1 — High |
+| **Status** | open |
+| **Area** | Phase 6 UI overhaul / Auth — Unlock |
+| **Reported** | 2026-06-14 |
+
+### Description
+
+Unlock Vault uses `useVaultColors` / `VaultType` with hardcoded values and has no local haptic feedback on unlock / biometric press. Migrate it onto the Phase 6 foundation.
+
+### Scope
+
+- Replace `useVaultColors()` / `VaultType.*` with `useTheme()` + `theme.typography.*`.
+- Replace hardcoded spacing/radius/colors with `theme.spacing`, `theme.radius`, `theme.colors`.
+- Add `useHaptics()` feedback on unlock press, biometric press, success, and wrong-password error.
+- Use `theme.motion` for any entrance / error-shake animation; keep under 350ms.
+
+### Related files
+
+- `src/components/screens/unlock-vault.tsx`
+- `src/hooks/use-theme.ts`, `src/theme/presets.ts`, `src/hooks/use-haptics.ts`
+
+### Acceptance criteria
+
+- No `useVaultColors` / `VaultType` / hardcoded styles remain.
+- Unlock, biometric, success, and error states give haptic feedback.
+- Animations use motion tokens; < 350ms.
+- Lint clean; no new `tsc` errors.
+
+### Related
+
+- ROADMAP Phase 6.20 + 6.4 / 6.13 / 6.15.
+
+---
+
+<a id="task-054"></a>
+
+## TASK-054: Migrate Main Vault to Phase 6 tokens/hooks
+
+| Field | Value |
+|-------|--------|
+| **ID** | TASK-054 |
+| **Type** | Pending task |
+| **Priority** | P1 — High |
+| **Status** | open |
+| **Area** | Phase 6 UI overhaul / Vault |
+| **Reported** | 2026-06-14 |
+
+### Description
+
+Main Vault uses `useVaultColors`, `VaultType`, `vaultShadow`, `Fonts`, and many hardcoded spacing/radius/font values, with no Phase 6 motion. Migrate the screen — and the shared vault components it renders — onto the Phase 6 foundation.
+
+### Scope
+
+- Replace `useVaultColors()` / `VaultType.*` / `vaultShadow` with `useTheme()`, `theme.typography.*`, `theme.shadows.*`.
+- Replace hardcoded spacing/radius/colors with `theme.spacing`, `theme.radius`, `theme.colors`.
+- Migrate shared components used here (e.g. `credential-row`, `credential-avatar`, `category-card`, `vault-header`, `bottom-nav`) since they are shared app-wide.
+- Add list stagger / row entrance via `theme.motion` and `PressableScale` + `useHaptics()` on row tap / copy.
+
+### Related files
+
+- `src/components/screens/main-vault.tsx`
+- `src/components/vault/*` (shared components)
+- `src/hooks/use-theme.ts`, `src/theme/presets.ts`, `src/hooks/use-haptics.ts`
+
+### Acceptance criteria
+
+- No `useVaultColors` / `VaultType` / `vaultShadow` / hardcoded styles remain in this screen.
+- Shared vault components used here resolve through `useTheme()`.
+- Row interactions give haptic + press feedback; list uses motion tokens; < 350ms.
+- Lint clean; no new `tsc` errors.
+
+### Related
+
+- ROADMAP Phase 6.20 + 6.4 / 6.13 / 6.14 / 6.15.
+
+---
+
+<a id="task-055"></a>
+
+## TASK-055: Migrate My Vault to Phase 6 tokens/hooks
+
+| Field | Value |
+|-------|--------|
+| **ID** | TASK-055 |
+| **Type** | Pending task |
+| **Priority** | P1 — High |
+| **Status** | open |
+| **Area** | Phase 6 UI overhaul / Vault |
+| **Reported** | 2026-06-14 |
+
+### Description
+
+My Vault uses `useVaultColors` / `VaultType`, mock accent hex values, hardcoded layout/type values, and no motion or haptics. Migrate it onto the Phase 6 foundation (reuse the shared components migrated in TASK-054).
+
+### Scope
+
+- Replace `useVaultColors()` / `VaultType.*` with `useTheme()` + `theme.typography.*`.
+- Replace mock accent hexes + hardcoded spacing/radius with `theme.colors` / `theme.spacing` / `theme.radius`.
+- Add list/section entrance via `theme.motion` and `useHaptics()` + `PressableScale` on interactive rows.
+
+### Related files
+
+- `src/components/screens/my-vault.tsx`
+- `src/components/vault/*` (shared components)
+- `src/hooks/use-theme.ts`, `src/theme/presets.ts`, `src/hooks/use-haptics.ts`
+
+### Acceptance criteria
+
+- No `useVaultColors` / `VaultType` / mock hex / hardcoded styles remain.
+- Interactions give haptic + press feedback; motion via tokens; < 350ms.
+- Lint clean; no new `tsc` errors.
+
+### Related
+
+- ROADMAP Phase 6.20 + 6.4 / 6.13 / 6.14 / 6.15.
+
+---
+
+<a id="task-056"></a>
+
+## TASK-056: Migrate Generator to Phase 6 tokens/hooks
+
+| Field | Value |
+|-------|--------|
+| **ID** | TASK-056 |
+| **Type** | Pending task |
+| **Priority** | P1 — High |
+| **Status** | open |
+| **Area** | Phase 6 UI overhaul / Generator |
+| **Reported** | 2026-06-14 |
+
+### Description
+
+Generator uses `useVaultColors` / `VaultType` with many hardcoded style numbers and old `hapticSuccess` / `hapticWarning` helpers. Migrate it onto the Phase 6 foundation and `useHaptics()`.
+
+### Scope
+
+- Replace `useVaultColors()` / `VaultType.*` with `useTheme()` + `theme.typography.*`.
+- Replace hardcoded spacing/radius/colors with `theme.spacing`, `theme.radius`, `theme.colors`.
+- Replace `hapticSuccess` / `hapticWarning` with `useHaptics()` (copy → selection/success, error → error).
+- Animate password regeneration / copy confirmation with `theme.motion`; < 350ms.
+
+### Related files
+
+- `src/components/screens/generator.tsx`
+- `src/hooks/use-haptics.ts`, `src/hooks/use-theme.ts`, `src/theme/presets.ts`
+
+### Acceptance criteria
+
+- No `useVaultColors` / `VaultType` / hardcoded styles or direct `hapticSuccess`/`hapticWarning` calls remain.
+- Copy / generate / error states use `useHaptics()`; motion via tokens; < 350ms.
+- Lint clean; no new `tsc` errors.
+
+### Related
+
+- ROADMAP Phase 6.20 + 6.4 / 6.13 / 6.15.
+
+---
+
+<a id="task-057"></a>
+
+## TASK-057: Migrate Password Health to Phase 6 tokens/hooks
+
+| Field | Value |
+|-------|--------|
+| **ID** | TASK-057 |
+| **Type** | Pending task |
+| **Priority** | P1 — High |
+| **Status** | open |
+| **Area** | Phase 6 UI overhaul / Password Health |
+| **Reported** | 2026-06-14 |
+
+### Description
+
+Password Health uses `useVaultColors`, `VaultType`, `SerifFont`, and hardcoded typography/spacing/radius, with no haptics for scan/actions. Migrate it onto the Phase 6 foundation.
+
+### Scope
+
+- Replace `useVaultColors()` / `VaultType.*` / `SerifFont` with `useTheme()` + `theme.typography.*`.
+- Replace hardcoded spacing/radius/colors with `theme.spacing`, `theme.radius`, `theme.colors`.
+- Animate the score ring / count-up and list entrances with `theme.motion` (reuse `AnimatedNumber` pattern once 6.9 lands); < 350ms.
+- Add `useHaptics()` feedback on scan / fix actions.
+
+### Related files
+
+- `src/components/screens/password-health.tsx`
+- `src/components/vault/score-ring.tsx`
+- `src/hooks/use-theme.ts`, `src/theme/presets.ts`, `src/hooks/use-haptics.ts`
+
+### Acceptance criteria
+
+- No `useVaultColors` / `VaultType` / `SerifFont` / hardcoded styles remain.
+- Score + lists animate via motion tokens; actions give haptic feedback; < 350ms.
+- Lint clean; no new `tsc` errors.
+
+### Related
+
+- ROADMAP Phase 6.20 + 6.4 / 6.9 / 6.13 / 6.15.
+
+---
+
+<a id="task-058"></a>
+
+## TASK-058: Migrate Settings to Phase 6 tokens/hooks
+
+| Field | Value |
+|-------|--------|
+| **ID** | TASK-058 |
+| **Type** | Pending task |
+| **Priority** | P1 — High |
+| **Status** | open |
+| **Area** | Phase 6 UI overhaul / Settings |
+| **Reported** | 2026-06-14 |
+
+### Description
+
+Settings uses `useVaultColors` / `VaultType`, hardcoded style values and rgba colors, and old `hapticSuccess` / `hapticWarning` helpers. Migrate it onto the Phase 6 foundation and `useHaptics()`.
+
+### Scope
+
+- Replace `useVaultColors()` / `VaultType.*` with `useTheme()` + `theme.typography.*`.
+- Replace hardcoded spacing/radius/rgba with `theme.spacing`, `theme.radius`, `theme.colors`.
+- Replace `hapticSuccess` / `hapticWarning` with `useHaptics()` on toggles / destructive actions (toggle → selection, success → success, warning → warning/error).
+- Keep the existing color-theme picker working through the new token resolution.
+
+### Related files
+
+- `src/components/screens/settings.tsx`
+- `src/hooks/use-haptics.ts`, `src/hooks/use-theme.ts`, `src/theme/presets.ts`
+
+### Acceptance criteria
+
+- No `useVaultColors` / `VaultType` / hardcoded styles or direct `hapticSuccess`/`hapticWarning` calls remain.
+- Toggles / destructive actions use `useHaptics()`; < 350ms motion.
+- Color-theme picker still applies correctly.
+- Lint clean; no new `tsc` errors.
+
+### Related
+
+- ROADMAP Phase 6.20 + 6.4 / 6.13 / 6.15.
+
+---
+
+<a id="task-059"></a>
+
+## TASK-059: Migrate Add Credential to Phase 6 tokens/hooks
+
+| Field | Value |
+|-------|--------|
+| **ID** | TASK-059 |
+| **Type** | Pending task |
+| **Priority** | P1 — High |
+| **Status** | open |
+| **Area** | Phase 6 UI overhaul / Add Credential |
+| **Reported** | 2026-06-14 |
+
+### Description
+
+Add Credential uses `useVaultColors` / `VaultType` with hardcoded style values and old `hapticSuccess` / `hapticWarning` helpers. Migrate it onto the Phase 6 foundation and `useHaptics()`.
+
+### Scope
+
+- Replace `useVaultColors()` / `VaultType.*` with `useTheme()` + `theme.typography.*`.
+- Replace hardcoded spacing/radius/colors with `theme.spacing`, `theme.radius`, `theme.colors`.
+- Migrate the shared `input-field` component used here to tokens (focus/error states).
+- Replace `hapticSuccess` / `hapticWarning` with `useHaptics()` on save / validation error.
+
+### Related files
+
+- `src/components/screens/add-credential.tsx`
+- `src/components/vault/input-field.tsx`
+- `src/hooks/use-haptics.ts`, `src/hooks/use-theme.ts`, `src/theme/presets.ts`
+
+### Acceptance criteria
+
+- No `useVaultColors` / `VaultType` / hardcoded styles or direct haptic-helper calls remain.
+- Inputs use tokenized focus/error states; save/validation give `useHaptics()` feedback; < 350ms.
+- Lint clean; no new `tsc` errors.
+
+### Related
+
+- ROADMAP Phase 6.20 + 6.4 / 6.7 / 6.13 / 6.15.
+
+---
+
+<a id="task-060"></a>
+
+## TASK-060: Migrate Entry detail / Edit Credential to Phase 6 tokens/hooks
+
+| Field | Value |
+|-------|--------|
+| **ID** | TASK-060 |
+| **Type** | Pending task |
+| **Priority** | P1 — High |
+| **Status** | open |
+| **Area** | Phase 6 UI overhaul / Entry detail |
+| **Reported** | 2026-06-14 |
+
+### Description
+
+Entry detail / Edit Credential uses `useVaultColors` / `VaultType` with hardcoded style values and old haptic + clipboard helpers. Migrate it onto the Phase 6 foundation and `useHaptics()` (keep `copySensitiveToClipboard` behavior, route its haptic through the hook).
+
+### Scope
+
+- Replace `useVaultColors()` / `VaultType.*` with `useTheme()` + `theme.typography.*`.
+- Replace hardcoded spacing/radius/colors with `theme.spacing`, `theme.radius`, `theme.colors`.
+- Replace `hapticSuccess` / `hapticWarning` with `useHaptics()` on save / copy / delete-confirm / validation error.
+- Animate card expand / save confirmation with `theme.motion`; < 350ms.
+
+### Related files
+
+- `src/components/screens/edit-credential.tsx`
+- `src/hooks/use-haptics.ts`, `src/services/feedback.ts` (clipboard), `src/hooks/use-theme.ts`, `src/theme/presets.ts`
+
+### Acceptance criteria
+
+- No `useVaultColors` / `VaultType` / hardcoded styles or direct `hapticSuccess`/`hapticWarning` calls remain.
+- Copy stays masked/secure; save / copy / delete give `useHaptics()` feedback; motion via tokens; < 350ms.
+- Lint clean; no new `tsc` errors.
+
+### Related
+
+- ROADMAP Phase 6.20 + 6.4 / 6.13 / 6.15.
+
+---
+
+<a id="task-061"></a>
+
+## TASK-061: Migrate Change Password to Phase 6 tokens/hooks
+
+| Field | Value |
+|-------|--------|
+| **ID** | TASK-061 |
+| **Type** | Pending task |
+| **Priority** | P1 — High |
+| **Status** | open |
+| **Area** | Phase 6 UI overhaul / Auth — Change Password |
+| **Reported** | 2026-06-14 |
+
+### Description
+
+Change Password uses `useVaultColors` / `VaultType` with hardcoded style values and old `hapticSuccess` / `hapticWarning` helpers. Migrate it onto the Phase 6 foundation and `useHaptics()`.
+
+### Scope
+
+- Replace `useVaultColors()` / `VaultType.*` with `useTheme()` + `theme.typography.*`.
+- Replace hardcoded spacing/radius/colors with `theme.spacing`, `theme.radius`, `theme.colors`.
+- Replace `hapticSuccess` / `hapticWarning` with `useHaptics()` on the validation branches and success.
+- Use `theme.motion` for any error / success transition; < 350ms.
+
+### Related files
+
+- `src/components/screens/change-password.tsx`
+- `src/hooks/use-haptics.ts`, `src/hooks/use-theme.ts`, `src/theme/presets.ts`
+
+### Acceptance criteria
+
+- No `useVaultColors` / `VaultType` / hardcoded styles or direct haptic-helper calls remain.
+- Validation + success use `useHaptics()`; motion via tokens; < 350ms.
+- Lint clean; no new `tsc` errors.
+
+### Related
+
+- ROADMAP Phase 6.20 + 6.4 / 6.13 / 6.15.
 
 ---
 
@@ -1930,7 +2416,7 @@ Add favorite and archive actions for saved accounts on the SecureVault/Vault pag
 | **Status** | open |
 | **Area** | Auth / Account creation / Backend |
 | **Reported** | 2026-05-17 |
-| **Roadmap** | Phase 6 backend & sync |
+| **Roadmap** | Phase 9 backend & sync |
 
 ### Description
 
@@ -2730,6 +3216,284 @@ Replace bare loading frames and plain-text empty states with polished, branded U
 ### Resolution (Run 4)
 
 1. GCM decrypt failure → "Master password is incorrect"; corrupt JSON → `CorruptVaultError` with reset offer on unlock screen; AsyncStorage write failure → storage-full message.
+
+---
+
+<a id="task-047"></a>
+
+## TASK-047: Read-only credential View mode (entry detail)
+
+| Field | Value |
+|-------|--------|
+| **ID** | TASK-047 |
+| **Type** | Pending task / UI |
+| **Priority** | P2 — Medium |
+| **Status** | open |
+| **Area** | Entry detail / Vault |
+| **Reported** | 2026-06-14 |
+| **Roadmap** | 2.6 (Entry detail — View mode) |
+
+### Description
+
+Opening a credential from the Dashboard, Vault, or Health lists routes to `entry/[id]`, which currently mounts the always-editable `EditCredentialScreen`. There is no dedicated read-only "view" of a credential — every field is an editable input the moment the screen opens. Phase 2.6 expects a read-only detail view first, with an explicit switch into edit mode.
+
+### Expected
+
+- A read-only detail view that displays website/URL, username, masked password, notes, and category with **no editable inputs**.
+- Masked password by default with a show/hide toggle and copy actions (reuse the existing `copySensitiveToClipboard` 30s auto-clear behavior).
+- An explicit **Edit** affordance that switches into the existing edit flow (`EditCredentialScreen`).
+- Delete remains behind a confirmation dialog (already implemented in edit mode).
+- View mode is the default landing state when opening an entry; edit is opt-in.
+
+### Related files
+
+- `src/app/entry/[id].tsx` (currently renders `EditCredentialScreen` directly)
+- `src/components/screens/edit-credential.tsx` (existing edit flow + masked password / copy / delete)
+- `src/components/screens/dashboard.tsx`, `src/components/screens/main-vault.tsx`, `src/components/screens/password-health.tsx` (entry points that `router.push('/entry/[id]')`)
+
+### Suggested fix
+
+1. Add a read-only view component (or a `mode` state in the entry screen) that renders fields as static rows instead of `TextInput`s.
+2. Default `entry/[id]` to view mode; add an "Edit" button that flips to the editable form.
+3. Keep show/hide + copy in view mode; route Delete through the existing confirmation `Alert`.
+4. Mark ROADMAP 2.6 "View mode" complete once shipped.
+
+---
+
+<a id="task-048"></a>
+
+## TASK-048: Empty states, onboarding skip & logout/lock flows
+
+| Field | Value |
+|-------|--------|
+| **ID** | TASK-048 |
+| **Type** | Pending task / UX |
+| **Priority** | P2 — Medium |
+| **Status** | open |
+| **Area** | Onboarding / Dashboard / Vault / Health / Auth |
+| **Reported** | 2026-06-14 |
+| **Roadmap** | 5.6 (Empty states and onboarding skip / logout flows) |
+
+### Description
+
+Three related UX gaps grouped under one task. The app already has an `EmptyState`
+component (`src/components/vault/empty-state.tsx`) used by the Vault, plus a manual
+lock (`lockVault`) and full reset (`resetVault`) in `VaultContext`. This task is about
+making empty states **consistent across every screen**, adding a way to **skip
+onboarding**, and surfacing a **discoverable, polished lock/logout flow** that wipes
+the in-memory decrypted session.
+
+### Scope — Empty states
+
+- Audit every list/section for a "nothing here yet" state with an **icon, short
+  explanation, and a clear call-to-action**:
+  - Dashboard with zero credentials (e.g. "No passwords yet — Add your first one").
+  - Health screen with nothing to analyze (no weak/reused/old/breached items).
+  - Search with no matching results (distinct from "vault is empty").
+  - Favorites and Archived views when those filters are empty.
+  - Recently Used section when there is no recent activity.
+- Reuse the shared `EmptyState` so copy, spacing, and iconography stay consistent.
+
+### Scope — Onboarding skip
+
+- Add a **Skip** affordance to the multi-step onboarding carousel that jumps straight
+  to master-password setup.
+- Skipping must still persist the "onboarding complete" flag
+  (`setOnboardingComplete()` / `src/services/onboarding.ts`) so the carousel does not
+  reappear on next launch.
+- Route to `(auth)/setup` after skipping.
+
+### Scope — Logout / lock flow
+
+- Provide a clear, discoverable **Lock / Log out** action (e.g. on Dashboard header
+  and/or Settings) that calls `lockVault()` and routes back to `(auth)/unlock`.
+- Show a brief confirmation before locking so it is not triggered accidentally.
+- On lock, ensure the decrypted AES key and any cached plaintext are cleared from
+  memory (`clearUnlockedSession()` already does this — verify nothing else retains
+  secrets).
+- Distinguish **Lock** (re-unlock with master password/biometrics, data kept) from
+  **Reset/Delete data** (`resetVault()`, destructive) so users do not confuse them.
+
+### Expected
+
+- Every primary screen renders a sensible, on-brand empty state.
+- Onboarding can be skipped and never re-shows after completion.
+- A clean lock/logout path exists that wipes decrypted data and returns to unlock.
+
+### Related files
+
+- `src/components/vault/empty-state.tsx` (shared empty-state component)
+- `src/components/screens/dashboard.tsx`, `src/components/screens/password-health.tsx`,
+  `src/components/screens/main-vault.tsx` (screens needing empty-state coverage)
+- `src/components/screens/onboarding.tsx` (add Skip), `src/services/onboarding.ts`
+  (persist completion flag)
+- `src/contexts/vault-context.tsx` (`lockVault`, `clearUnlockedSession`, `resetVault`)
+- `src/app/(auth)/unlock.tsx`, `src/app/(auth)/setup.tsx` (routing targets)
+- `src/components/screens/settings.tsx` (logout/lock entry point)
+
+### Suggested fix
+
+1. Extend `EmptyState` usage to Dashboard, Health, search, Favorites, and Archived
+   views with view-aware copy + CTA.
+2. Add a Skip button to the onboarding carousel that persists the completion flag and
+   routes to setup.
+3. Add a confirmed Lock/Log out control that calls `lockVault()` and navigates to
+   `(auth)/unlock`; keep it visually separate from destructive reset.
+4. Mark ROADMAP 5.6 complete once all three are shipped.
+
+---
+
+<a id="task-049"></a>
+
+## TASK-049: Security review checklist completed
+
+| Field | Value |
+|-------|--------|
+| **ID** | TASK-049 |
+| **Type** | Pending task / Security |
+| **Priority** | P1 — High |
+| **Status** | open |
+| **Area** | Security / Release readiness |
+| **Reported** | 2026-06-14 |
+| **Roadmap** | 5.9 (Security review checklist completed) |
+
+### Description
+
+A formal, **documented self-audit** of the app's security posture before release.
+For a password manager this is a release blocker. The deliverable is a written
+checklist (a new doc under `Mds/`, e.g. `Mds/SECURITY-REVIEW.md`) where every item is
+verified against the real code, and any findings are fixed or logged as follow-up
+tasks/bugs.
+
+### Checklist — must verify each item
+
+**Cryptography**
+- AES-256-GCM used correctly for the vault blob (auth tag verified on decrypt).
+- PBKDF2-SHA256 with a sufficient iteration count (currently 120k) — confirm and
+  document the value.
+- Unique random salt per vault and unique IV/nonce per encryption; **no IV reuse**.
+- No key reuse across vaults/sessions.
+
+**Key & session handling**
+- Master/derived key lives **only in memory** while unlocked and is cleared on lock
+  and on background (`clearUnlockedSession`, auto-lock TASK-033).
+- Biometric-derived key stored **only** in `SecureStore`, never in `AsyncStorage`.
+- No secrets retained after `lockVault()` / `resetVault()`.
+
+**Storage**
+- No plaintext credentials in `AsyncStorage`, logs, console output, or crash reports.
+- Encrypted blob + salt at rest only; legacy plaintext migration path is safe.
+
+**Clipboard & screen**
+- Clipboard auto-clear works for copied passwords (TASK-035/5.8, 30s).
+- Screenshot/screen-capture protection **re-enabled for production** —
+  `SCREEN_CAPTURE_PROTECTION_ENABLED = true` (see 5.7 production reminder).
+
+**Transport / network**
+- HIBP breach checks use **k-anonymity** (only the SHA-1 prefix is sent, never the
+  full hash or password).
+- All network calls over HTTPS; no secrets in query strings or analytics.
+
+**App hardening**
+- Auto-lock on background/inactivity is enforced and configurable.
+- No secrets leak via deep links or navigation params (entry routing passes IDs, not
+  passwords).
+- Input validation on credential and master-password forms.
+
+### Expected
+
+- `Mds/SECURITY-REVIEW.md` exists with every checklist item marked verified or with a
+  linked follow-up.
+- All P0/P1 findings fixed before release; lower-severity findings logged as tasks.
+
+### Related files
+
+- `src/services/crypto/vault-crypto.ts` (AES-GCM, PBKDF2, salt/IV)
+- `src/contexts/vault-context.tsx` (session handling, auto-lock, screen-capture flag)
+- `src/services/storage` / vault storage helpers (`resetStoredVault`,
+  `unlockStoredVault`, blob + salt persistence)
+- HIBP breach-check service (k-anonymity request)
+- `Mds/SECURITY-REVIEW.md` (to be created)
+
+### Suggested fix
+
+1. Create `Mds/SECURITY-REVIEW.md` from the checklist above.
+2. Walk each item against the code; mark pass/fail with evidence (file + line).
+3. Fix failures or open follow-up TASK/BUG entries; re-flip the screen-capture flag for
+   production builds.
+4. Mark ROADMAP 5.9 complete once the checklist is fully verified.
+
+---
+
+<a id="task-050"></a>
+
+## TASK-050: EAS Build profiles (development, preview, production)
+
+| Field | Value |
+|-------|--------|
+| **ID** | TASK-050 |
+| **Type** | Pending task / Build & release tooling |
+| **Priority** | P2 — Medium |
+| **Status** | open |
+| **Area** | Build / CI / Release readiness |
+| **Reported** | 2026-06-14 |
+| **Roadmap** | 5.14 (EAS Build profiles) |
+
+### Description
+
+EAS (Expo Application Services) is how the project compiles real native binaries
+instead of running only in Expo Go. There is currently **no `eas.json`** at the repo
+root. This task creates it and defines three build profiles so the app can be tested
+on devices, shared with testers, and submitted to the stores.
+
+### Scope — build profiles
+
+- **development** — dev client build (`developmentClient: true`, `distribution:
+  internal`) with debugging tools, for installing on physical devices during
+  development.
+- **preview** — internal release-like build for testers without going through the
+  stores (Android **APK**, iOS **ad-hoc/internal IPA**, `distribution: internal`).
+- **production** — optimized, signed store build (Android **AAB**, iOS **store IPA**)
+  for actual release.
+
+Each profile should define, as needed: build type / `distribution`, the Android
+`buildType` (apk vs app-bundle), environment variables (`env`), `channel` for EAS
+Update, and signing credentials handling.
+
+### Prerequisites / related setup
+
+- Install/login: `eas-cli`, `eas login`, then `eas build:configure`.
+- Ensure `app.json` has a valid `ios.bundleIdentifier`, `android.package`, `version`,
+  and EAS `projectId` (`extra.eas.projectId`).
+- Decide signing approach (EAS-managed credentials vs manual) and document it.
+- (Optional) add a `production` submit profile later for `eas submit` (feeds 5.15/5.16).
+
+### Expected
+
+- A root `eas.json` exists with `development`, `preview`, and `production` profiles.
+- `eas build -p android --profile <profile>` and `-p ios` succeed for each profile and
+  produce installable artifacts (APK/AAB, dev client, IPA).
+
+### Related files
+
+- `eas.json` (to be created at repo root)
+- `app.json` (bundle identifier, package, version, `extra.eas.projectId`)
+- `package.json` (add EAS-related scripts if desired)
+
+### Suggested fix
+
+1. Run `eas build:configure` to scaffold `eas.json` and the EAS `projectId`.
+2. Fill in the three profiles (development / preview / production) with the build
+   type, distribution, env vars, and channel per the scope above.
+3. Verify each profile builds an installable artifact on EAS.
+4. Mark ROADMAP 5.14 complete once all three profiles build successfully.
+
+### Notes
+
+- Depends on a valid Expo/EAS account and project; the build itself runs on EAS
+  servers (or local with `--local`).
+- Feeds directly into TASK for 5.15 (TestFlight / internal testing) and 5.16 (store
+  listings) — those consume the artifacts produced here.
 
 ---
 
