@@ -1,22 +1,27 @@
 import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import {
+  AlertTriangle,
   ChevronRight,
   Clock,
   Copy,
   KeyRound,
   Lightbulb,
-  RefreshCw,
+  RotateCw,
   ScanSearch,
   ShieldAlert,
   ShieldCheck,
 } from 'lucide-react-native';
+import type { LucideIcon } from 'lucide-react-native';
 import { useMemo, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { BottomNav, GlassCard, ScreenBackground, VaultHeader } from '@/components/vault';
-import { VaultColors, VaultType } from '@/constants/vault-theme';
+import { BottomNav, GlassCard, ScoreRing, ScreenBackground, VaultHeader } from '@/components/vault';
+import { SerifFont } from '@/constants/theme';
+import { VaultType } from '@/constants/vault-theme';
+import { useVaultColors } from '@/contexts/color-theme-context';
+import type { VaultColorsShape } from '@/theme/color-themes';
 import { useToast } from '@/contexts/toast-context';
 import { useVault } from '@/contexts/vault-context';
 import { useNavigationLock } from '@/hooks/use-navigation-lock';
@@ -44,20 +49,25 @@ interface AttentionItem {
   kind: IssueKind;
 }
 
-const ISSUE_META: Record<IssueKind, { label: string; action: string; color: string }> = {
-  weak: { label: 'Weak password', action: 'Strengthen', color: VaultColors.warning },
-  reused: { label: 'Reused password', action: 'Change', color: VaultColors.danger },
-  old: { label: 'Old password', action: 'Rotate', color: VaultColors.accent },
-};
-
 export function PasswordHealthScreen() {
   const insets = useSafeAreaInsets();
+  const c = useVaultColors();
+  const styles = useMemo(() => makeStyles(c), [c]);
+  const ISSUE_META: Record<
+    IssueKind,
+    { label: string; action: string; color: string; icon: LucideIcon }
+  > = {
+    weak: { label: 'Weak password', action: 'Strengthen', color: c.warning, icon: ShieldAlert },
+    reused: { label: 'Reused password', action: 'Change', color: c.danger, icon: Copy },
+    old: { label: 'Old password', action: 'Rotate', color: c.accent, icon: Clock },
+  };
   const router = useRouter();
   const { showToast } = useToast();
   const { credentials } = useVault();
   const runLocked = useNavigationLock();
   const metrics = useMemo(() => computeHealthMetrics(credentials), [credentials]);
   const [breach, setBreach] = useState<BreachState>({ status: 'idle' });
+  const [showAllAttention, setShowAllAttention] = useState(false);
 
   async function runBreachScan() {
     if (metrics.total === 0) {
@@ -87,11 +97,11 @@ export function PasswordHealthScreen() {
     return credentials.filter((credential) => ids.has(credential.id));
   }, [breach, credentials]);
 
-  const stats = [
-    { value: String(metrics.strong), label: 'Safe', color: VaultColors.success },
-    { value: String(metrics.reused), label: 'Reused', color: VaultColors.danger },
-    { value: String(metrics.weak), label: 'Weak', color: VaultColors.warning },
-    { value: String(metrics.old), label: 'Old', color: VaultColors.accent },
+  const stats: { value: string; label: string; color: string; icon: LucideIcon }[] = [
+    { value: String(metrics.strong), label: 'Safe', color: c.success, icon: ShieldCheck },
+    { value: String(metrics.reused), label: 'Reused', color: c.danger, icon: Copy },
+    { value: String(metrics.weak), label: 'Weak', color: c.warning, icon: AlertTriangle },
+    { value: String(metrics.old), label: 'Old', color: c.accent, icon: RotateCw },
   ];
 
   // Each credential surfaces its highest-priority issue: reused > weak > old.
@@ -117,6 +127,8 @@ export function PasswordHealthScreen() {
       });
   }, [credentials, metrics.weakIds, metrics.reusedIds, metrics.oldIds]);
 
+  const visibleAttention = showAllAttention ? attention : attention.slice(0, 3);
+
   const reusedGroups = useMemo(
     () =>
       metrics.reusedGroups.map((group) => ({
@@ -136,12 +148,34 @@ export function PasswordHealthScreen() {
     showToast(`Vault re-scanned — health ${metrics.score}%`, 'info');
   }
 
-  const scoreColor =
-    metrics.score >= 80
-      ? VaultColors.success
-      : metrics.score >= 50
-        ? VaultColors.warning
-        : VaultColors.danger;
+  const tier =
+    metrics.score >= 90
+      ? {
+          color: c.success,
+          word: 'FORTIFIED',
+          blurb:
+            'Your overall password security is fortified. Keep rotating credentials to stay ahead.',
+        }
+      : metrics.score >= 60
+        ? {
+            color: c.accent,
+            word: 'GOOD',
+            blurb:
+              'Your overall password security is strong, but a few critical optimizations are recommended to reach Fortified status.',
+          }
+        : metrics.score >= 40
+          ? {
+              color: c.warning,
+              word: 'FAIR',
+              blurb:
+                'Your vault is in fair shape, but a few critical optimizations are recommended below.',
+            }
+          : {
+              color: c.danger,
+              word: 'AT RISK',
+              blurb:
+                'Your vault needs attention. Resolve the weak and reused passwords below to harden it.',
+            };
 
   return (
     <ScreenBackground>
@@ -150,37 +184,49 @@ export function PasswordHealthScreen() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + 120 }]}>
         <View style={styles.scoreWrapper}>
-          <View style={[styles.scoreRing, { borderColor: scoreColor }]}>
-            <Text style={styles.scoreValue}>{metrics.score}</Text>
-            <Text style={styles.scoreUnit}>/ 100</Text>
+          <View
+            accessibilityRole="image"
+            accessibilityLabel={`Vault health score ${metrics.score} percent, ${tier.word}`}>
+            <ScoreRing score={metrics.score} statusLabel={tier.word} color={tier.color} />
           </View>
-          <Text
-            accessibilityRole="text"
-            accessibilityLabel={`Vault health score ${metrics.score} out of 100`}
-            style={styles.scoreLabel}>
+          <Text style={styles.scoreHeadline}>Vault Security Health</Text>
+          <Text style={styles.scoreBlurb}>
             {metrics.total === 0
-              ? 'Add credentials to start your health report'
-              : 'Your vault health updates live'}
+              ? 'Add credentials to start your personalized health report.'
+              : tier.blurb}
           </Text>
         </View>
 
         <View
           accessibilityRole="summary"
           accessibilityLabel={`${metrics.strong} safe, ${metrics.reused} reused, ${metrics.weak} weak, ${metrics.old} old`}
-          style={styles.statsRow}>
-          {stats.map((stat) => (
-            <View key={stat.label} style={styles.statItem}>
-              <Text style={[styles.statValue, { color: stat.color }]}>{stat.value}</Text>
-              <Text style={styles.statLabel}>{stat.label}</Text>
-            </View>
-          ))}
+          style={styles.statsGrid}>
+          {stats.map((stat) => {
+            const Icon = stat.icon;
+            return (
+              <View
+                key={stat.label}
+                style={[
+                  styles.statCard,
+                  { borderColor: stat.color + '33', backgroundColor: stat.color + '12' },
+                ]}>
+                <View style={styles.statCardTop}>
+                  <Text style={[styles.statValue, { color: stat.color }]}>{stat.value}</Text>
+                  <View style={[styles.statIcon, { backgroundColor: stat.color + '22' }]}>
+                    <Icon size={18} color={stat.color} strokeWidth={2} />
+                  </View>
+                </View>
+                <Text style={styles.statLabel}>{stat.label.toUpperCase()}</Text>
+              </View>
+            );
+          })}
         </View>
 
-        <Text style={styles.sectionTitle}>Breach Monitor</Text>
+        <Text style={styles.subsectionTitle}>Breach Monitor</Text>
         <GlassCard style={styles.breachCard}>
           <View style={styles.breachHeader}>
             <View style={styles.breachIcon}>
-              <ScanSearch size={18} color={VaultColors.accent} strokeWidth={2} />
+              <ScanSearch size={18} color={c.accent} strokeWidth={2} />
             </View>
             <Text style={styles.breachLead}>
               Check your passwords against known data breaches. Only an anonymized hash prefix leaves
@@ -191,7 +237,7 @@ export function PasswordHealthScreen() {
           {breach.status === 'done' ? (
             breachedAccounts.length > 0 ? (
               <>
-                <Text style={[styles.breachResult, { color: VaultColors.danger }]}>
+                <Text style={[styles.breachResult, { color: c.danger }]}>
                   {breachedAccounts.length} of {breach.checked} password
                   {breach.checked === 1 ? '' : 's'} found in breaches. Change them now.
                 </Text>
@@ -203,17 +249,17 @@ export function PasswordHealthScreen() {
                       accessibilityLabel={`Open ${account.website} to change its breached password`}
                       onPress={() => openCredential(account.id)}
                       style={({ pressed }) => [styles.reusedMember, pressed && styles.pressed]}>
-                      <ShieldAlert size={15} color={VaultColors.danger} strokeWidth={1.75} />
+                      <ShieldAlert size={15} color={c.danger} strokeWidth={1.75} />
                       <Text style={styles.reusedMemberText} numberOfLines={1}>
                         {account.website} · {account.username || 'No username'}
                       </Text>
-                      <ChevronRight size={15} color={VaultColors.muted} strokeWidth={2} />
+                      <ChevronRight size={15} color={c.muted} strokeWidth={2} />
                     </Pressable>
                   ))}
                 </View>
               </>
             ) : (
-              <Text style={[styles.breachResult, { color: VaultColors.success }]}>
+              <Text style={[styles.breachResult, { color: c.success }]}>
                 Good news — none of your {breach.checked} checked password
                 {breach.checked === 1 ? '' : 's'} appeared in known breaches.
               </Text>
@@ -221,7 +267,7 @@ export function PasswordHealthScreen() {
           ) : null}
 
           {breach.status === 'error' ? (
-            <Text style={[styles.breachResult, { color: VaultColors.warning }]}>{breach.message}</Text>
+            <Text style={[styles.breachResult, { color: c.warning }]}>{breach.message}</Text>
           ) : null}
 
           <Pressable
@@ -236,12 +282,12 @@ export function PasswordHealthScreen() {
             ]}>
             {breach.status === 'scanning' ? (
               <>
-                <ActivityIndicator size="small" color={VaultColors.accent} />
+                <ActivityIndicator size="small" color={c.accent} />
                 <Text style={styles.breachButtonText}>Checking…</Text>
               </>
             ) : (
               <>
-                <ScanSearch size={16} color={VaultColors.accent} strokeWidth={2} />
+                <ScanSearch size={16} color={c.accent} strokeWidth={2} />
                 <Text style={styles.breachButtonText}>
                   {breach.status === 'idle' ? 'Check for breaches' : 'Re-check breaches'}
                 </Text>
@@ -250,11 +296,23 @@ export function PasswordHealthScreen() {
           </Pressable>
         </GlassCard>
 
-        <Text style={styles.sectionTitle}>Needs Attention</Text>
+        <View style={styles.sectionHeaderRow}>
+          <Text style={[styles.sectionTitle, styles.sectionTitleInline]}>Needs Attention</Text>
+          {attention.length > 3 ? (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={showAllAttention ? 'Show fewer items' : 'View all items needing attention'}
+              hitSlop={8}
+              onPress={() => setShowAllAttention((value) => !value)}>
+              <Text style={styles.viewAll}>{showAllAttention ? 'Show Less' : 'View All'}</Text>
+            </Pressable>
+          ) : null}
+        </View>
         {attention.length > 0 ? (
           <View style={styles.attentionList}>
-            {attention.map((item) => {
+            {visibleAttention.map((item) => {
               const meta = ISSUE_META[item.kind];
+              const IssueIcon = meta.icon;
               return (
                 <Pressable
                   key={item.id}
@@ -264,19 +322,22 @@ export function PasswordHealthScreen() {
                   style={({ pressed }) => [pressed && styles.pressed]}>
                   <GlassCard style={styles.attentionCard}>
                     <View style={[styles.attentionIcon, { backgroundColor: meta.color + '22' }]}>
-                      <ShieldAlert size={18} color={meta.color} strokeWidth={2} />
+                      <IssueIcon size={18} color={meta.color} strokeWidth={2} />
                     </View>
                     <View style={styles.attentionText}>
                       <Text style={styles.attentionName} numberOfLines={1}>
                         {item.website}
                       </Text>
                       <Text style={styles.attentionMeta} numberOfLines={1}>
-                        {meta.label} · {item.username}
+                        {meta.label.toUpperCase()}
                       </Text>
                     </View>
-                    <View style={styles.attentionAction}>
-                      <Text style={[styles.attentionActionText, { color: meta.color }]}>{meta.action}</Text>
-                      <ChevronRight size={16} color={VaultColors.muted} strokeWidth={2} />
+                    <View
+                      style={[
+                        styles.actionPill,
+                        { backgroundColor: meta.color + '22', borderColor: meta.color + '55' },
+                      ]}>
+                      <Text style={[styles.actionPillText, { color: meta.color }]}>{meta.action}</Text>
                     </View>
                   </GlassCard>
                 </Pressable>
@@ -285,7 +346,7 @@ export function PasswordHealthScreen() {
           </View>
         ) : (
           <GlassCard style={styles.safeCard}>
-            <ShieldCheck size={20} color={VaultColors.success} strokeWidth={2} />
+            <ShieldCheck size={20} color={c.success} strokeWidth={2} />
             <Text style={styles.safeText}>
               {metrics.total === 0
                 ? 'No credentials saved yet.'
@@ -300,14 +361,16 @@ export function PasswordHealthScreen() {
             <View style={styles.attentionList}>
               {reusedGroups.map((group, index) => (
                 <GlassCard key={`reused-${index}`} style={styles.reusedCard}>
-                  <View style={styles.reusedHeader}>
-                    <View style={styles.reusedIcon}>
-                      <Copy size={18} color={VaultColors.danger} strokeWidth={2} />
+                  <View style={styles.reusedTitleRow}>
+                    <Text style={styles.reusedTitle}>Shared Secret #{index + 1}</Text>
+                    <View style={styles.riskBadge}>
+                      <Text style={styles.riskBadgeText}>High Risk</Text>
                     </View>
-                    <Text style={styles.reusedBody}>
-                      {group.members.length} accounts share one password. Change all but one.
-                    </Text>
                   </View>
+                  <Text style={styles.reusedBody}>
+                    These {group.members.length} accounts use an identical password. Change one to
+                    improve health.
+                  </Text>
                   {group.members.map((member) => (
                     <Pressable
                       key={member.id}
@@ -315,11 +378,11 @@ export function PasswordHealthScreen() {
                       accessibilityLabel={`Open ${member.website} to change its reused password`}
                       onPress={() => openCredential(member.id)}
                       style={({ pressed }) => [styles.reusedMember, pressed && styles.pressed]}>
-                      <KeyRound size={15} color={VaultColors.accent} strokeWidth={1.75} />
+                      <KeyRound size={15} color={c.accent} strokeWidth={1.75} />
                       <Text style={styles.reusedMemberText} numberOfLines={1}>
                         {member.website} · {member.username || 'No username'}
                       </Text>
-                      <ChevronRight size={15} color={VaultColors.muted} strokeWidth={2} />
+                      <ChevronRight size={15} color={c.muted} strokeWidth={2} />
                     </Pressable>
                   ))}
                 </GlassCard>
@@ -330,7 +393,7 @@ export function PasswordHealthScreen() {
 
         {metrics.old > 0 ? (
           <GlassCard style={styles.oldCard}>
-            <Clock size={18} color={VaultColors.accent} strokeWidth={1.75} />
+            <Clock size={18} color={c.accent} strokeWidth={1.75} />
             <Text style={styles.oldText}>
               {metrics.old} password{metrics.old === 1 ? '' : 's'} are older than 6 months. Rotating
               them keeps your vault fresh.
@@ -338,11 +401,14 @@ export function PasswordHealthScreen() {
           </GlassCard>
         ) : null}
 
-        <Text style={styles.sectionTitle}>Secure Tips</Text>
+        <View style={styles.sectionHeaderRow}>
+          <Text style={[styles.sectionTitle, styles.sectionTitleInline]}>Secure Tips</Text>
+          <Lightbulb size={20} color={c.muted} strokeWidth={1.75} />
+        </View>
         <View style={styles.tips}>
           {TIPS.map((tip) => (
             <GlassCard key={tip} style={styles.tipCard}>
-              <Lightbulb size={18} color={VaultColors.accent} strokeWidth={1.75} />
+              <Lightbulb size={18} color={c.accent} strokeWidth={1.75} />
               <Text style={styles.tipText}>{tip}</Text>
             </GlassCard>
           ))}
@@ -350,16 +416,15 @@ export function PasswordHealthScreen() {
 
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Re-scan vault health"
+          accessibilityLabel="Quick fix all password issues"
           onPress={rescan}
           style={({ pressed }) => [styles.rescanWrapper, pressed && styles.pressed]}>
           <LinearGradient
-            colors={[VaultColors.accentStrong, VaultColors.accent]}
+            colors={[c.accentStrong, c.accent]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
             style={styles.rescan}>
-            <RefreshCw size={16} color={VaultColors.buttonText} strokeWidth={2.5} />
-            <Text style={styles.rescanText}>RE-SCAN VAULT</Text>
+            <Text style={styles.rescanText}>Quick Fix All</Text>
           </LinearGradient>
         </Pressable>
       </ScrollView>
@@ -369,69 +434,95 @@ export function PasswordHealthScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+function makeStyles(c: VaultColorsShape) {
+  return StyleSheet.create({
   content: {
     paddingHorizontal: 20,
     paddingTop: 16,
   },
   scoreWrapper: {
     alignItems: 'center',
-    gap: 16,
+    gap: 12,
     marginTop: 16,
   },
-  scoreRing: {
-    width: 160,
-    height: 160,
-    borderRadius: 9999,
-    borderWidth: 8,
-    borderColor: VaultColors.accentStrong,
+  scoreHeadline: {
+    ...VaultType.sectionHeading,
+    color: c.heading,
+    textAlign: 'center',
+    marginTop: 8,
+  },
+  scoreBlurb: {
+    fontSize: 14,
+    lineHeight: 21,
+    color: c.muted,
+    textAlign: 'center',
+    paddingHorizontal: 12,
+    maxWidth: 320,
+  },
+  statsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 12,
+    marginTop: 28,
+  },
+  statCard: {
+    flexBasis: '47%',
+    flexGrow: 1,
+    borderRadius: 20,
+    borderWidth: 1,
+    padding: 16,
+    gap: 8,
+  },
+  statCardTop: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+  },
+  statIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: VaultColors.glassBackground,
-  },
-  scoreValue: {
-    fontSize: 48,
-    fontWeight: '700',
-    color: VaultColors.heading,
-  },
-  scoreUnit: {
-    fontSize: 14,
-    color: VaultColors.muted,
-  },
-  scoreLabel: {
-    ...VaultType.body,
-    color: VaultColors.body,
-  },
-  statsRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 32,
-    paddingVertical: 20,
-    paddingHorizontal: 12,
-    borderRadius: 24,
-    borderWidth: 1,
-    borderColor: VaultColors.glassBorder,
-    backgroundColor: VaultColors.glassBackground,
-  },
-  statItem: {
-    alignItems: 'center',
-    gap: 4,
-    flex: 1,
   },
   statValue: {
-    fontSize: 28,
-    fontWeight: '700',
+    fontFamily: SerifFont.bold,
+    fontSize: 32,
+    lineHeight: 36,
   },
   statLabel: {
-    fontSize: 12,
-    fontWeight: '500',
-    color: VaultColors.muted,
+    fontSize: 11,
+    fontWeight: '600',
+    letterSpacing: 1.2,
+    color: c.muted,
   },
-  sectionTitle: {
-    ...VaultType.heading,
-    color: VaultColors.heading,
+  sectionHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     marginTop: 32,
     marginBottom: 16,
+  },
+  sectionTitle: {
+    ...VaultType.sectionHeading,
+    color: c.heading,
+    marginTop: 32,
+    marginBottom: 16,
+  },
+  sectionTitleInline: {
+    marginTop: 0,
+    marginBottom: 0,
+  },
+  subsectionTitle: {
+    ...VaultType.heading,
+    color: c.heading,
+    marginTop: 32,
+    marginBottom: 16,
+  },
+  viewAll: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: c.accent,
   },
   breachCard: {
     gap: 14,
@@ -447,13 +538,13 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: VaultColors.accentSoft,
+    backgroundColor: c.accentSoft,
   },
   breachLead: {
     flex: 1,
     fontSize: 13,
     lineHeight: 19,
-    color: VaultColors.body,
+    color: c.body,
   },
   breachResult: {
     fontSize: 14,
@@ -471,13 +562,13 @@ const styles = StyleSheet.create({
     height: 48,
     borderRadius: 9999,
     borderWidth: 1,
-    borderColor: VaultColors.accent + '55',
-    backgroundColor: VaultColors.accentSoft,
+    borderColor: c.accent + '55',
+    backgroundColor: c.accentSoft,
   },
   breachButtonText: {
     fontSize: 14,
     fontWeight: '700',
-    color: VaultColors.accent,
+    color: c.accent,
   },
   disabled: {
     opacity: 0.6,
@@ -504,19 +595,22 @@ const styles = StyleSheet.create({
   attentionName: {
     fontSize: 15,
     fontWeight: '600',
-    color: VaultColors.heading,
+    color: c.heading,
   },
   attentionMeta: {
+    fontSize: 11,
+    fontWeight: '600',
+    letterSpacing: 0.8,
+    color: c.muted,
+  },
+  actionPill: {
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 9999,
+    borderWidth: 1,
+  },
+  actionPillText: {
     fontSize: 12,
-    color: VaultColors.muted,
-  },
-  attentionAction: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-  },
-  attentionActionText: {
-    fontSize: 13,
     fontWeight: '700',
   },
   safeCard: {
@@ -528,30 +622,42 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 14,
     lineHeight: 20,
-    color: VaultColors.body,
+    color: c.body,
   },
   reusedCard: {
     gap: 12,
     borderColor: 'rgba(255,138,138,0.3)',
   },
-  reusedHeader: {
+  reusedTitleRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
     gap: 12,
   },
-  reusedIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'rgba(255,138,138,0.15)',
+  reusedTitle: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: c.heading,
+    flex: 1,
+  },
+  riskBadge: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 9999,
+    backgroundColor: c.accentSoft,
+    borderWidth: 1,
+    borderColor: c.accent + '55',
+  },
+  riskBadgeText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: c.accent,
+    letterSpacing: 0.3,
   },
   reusedBody: {
-    flex: 1,
-    fontSize: 14,
-    lineHeight: 20,
-    color: VaultColors.body,
+    fontSize: 13,
+    lineHeight: 19,
+    color: c.muted,
   },
   reusedMember: {
     flexDirection: 'row',
@@ -560,13 +666,13 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 12,
     borderRadius: 14,
-    backgroundColor: VaultColors.glassBackground,
+    backgroundColor: c.glassBackground,
   },
   reusedMemberText: {
     flex: 1,
     fontSize: 13,
     fontWeight: '500',
-    color: VaultColors.heading,
+    color: c.heading,
   },
   oldCard: {
     flexDirection: 'row',
@@ -578,7 +684,7 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 14,
     lineHeight: 20,
-    color: VaultColors.body,
+    color: c.body,
   },
   tips: {
     gap: 12,
@@ -592,7 +698,7 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 14,
     lineHeight: 20,
-    color: VaultColors.body,
+    color: c.body,
   },
   rescanWrapper: {
     marginTop: 32,
@@ -610,9 +716,9 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   rescanText: {
-    fontSize: 14,
+    fontSize: 15,
     fontWeight: '700',
-    letterSpacing: 1.4,
-    color: VaultColors.buttonText,
+    color: c.buttonText,
   },
-});
+  });
+}

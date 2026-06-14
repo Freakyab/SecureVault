@@ -1,8 +1,11 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import { LucideIcon } from 'lucide-react-native';
+import { useMemo } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, Text } from 'react-native';
 
-import { VaultColors, vaultShadow } from '@/constants/vault-theme';
+import { useVaultColors } from '@/contexts/color-theme-context';
+import { vaultShadow } from '@/constants/vault-theme';
+import type { VaultColorsShape } from '@/theme/color-themes';
 
 interface PrimaryButtonProps {
   label: string;
@@ -10,6 +13,36 @@ interface PrimaryButtonProps {
   icon?: LucideIcon;
   disabled?: boolean;
   loading?: boolean;
+}
+
+function makeStyles(c: VaultColorsShape) {
+  return StyleSheet.create({
+    wrapper: {
+      width: '100%',
+      borderRadius: 9999,
+      ...vaultShadow(c.accentStrong),
+    },
+    pressed: {
+      opacity: 0.85,
+    },
+    disabled: {
+      opacity: 0.5,
+    },
+    button: {
+      height: 56,
+      borderRadius: 9999,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 8,
+    },
+    label: {
+      fontSize: 14,
+      fontWeight: '700',
+      letterSpacing: 1.4,
+      color: c.buttonText,
+    },
+  });
 }
 
 /** Gradient pill CTA used as the primary action across screens. */
@@ -20,6 +53,8 @@ export function PrimaryButton({
   disabled = false,
   loading = false,
 }: PrimaryButtonProps) {
+  const c = useVaultColors();
+  const styles = useMemo(() => makeStyles(c), [c]);
   const isDisabled = disabled || loading;
 
   return (
@@ -32,44 +67,14 @@ export function PrimaryButton({
       style={({ pressed }) => [styles.wrapper, pressed && styles.pressed, isDisabled && styles.disabled]}>
       <LinearGradient
         pointerEvents="none"
-        colors={[VaultColors.accentStrong, VaultColors.accent]}
+        colors={[c.accentStrong, c.accent]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={styles.button}>
-        {loading ? (
-          <ActivityIndicator color={VaultColors.buttonText} size="small" />
-        ) : null}
+        {loading ? <ActivityIndicator color={c.buttonText} size="small" /> : null}
         <Text style={styles.label}>{label}</Text>
-        {!loading && Icon ? <Icon size={14} color={VaultColors.buttonText} strokeWidth={2.5} /> : null}
+        {!loading && Icon ? <Icon size={14} color={c.buttonText} strokeWidth={2.5} /> : null}
       </LinearGradient>
     </Pressable>
   );
 }
-
-const styles = StyleSheet.create({
-  wrapper: {
-    width: '100%',
-    borderRadius: 9999,
-    ...vaultShadow,
-  },
-  pressed: {
-    opacity: 0.85,
-  },
-  disabled: {
-    opacity: 0.5,
-  },
-  button: {
-    height: 56,
-    borderRadius: 9999,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-  },
-  label: {
-    fontSize: 14,
-    fontWeight: '700',
-    letterSpacing: 1.4,
-    color: VaultColors.buttonText,
-  },
-});

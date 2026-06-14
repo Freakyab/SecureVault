@@ -1,11 +1,13 @@
 import { useRouter } from 'expo-router';
 import { KeyRound } from 'lucide-react-native';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { IconTile, InputField, PrimaryButton, ScreenBackground, VaultHeader } from '@/components/vault';
-import { VaultColors, VaultType } from '@/constants/vault-theme';
+import { VaultType } from '@/constants/vault-theme';
+import { useVaultColors } from '@/contexts/color-theme-context';
+import type { VaultColorsShape } from '@/theme/color-themes';
 import { useToast } from '@/contexts/toast-context';
 import { useVault } from '@/contexts/vault-context';
 import { hapticSuccess, hapticWarning } from '@/services/feedback';
@@ -14,6 +16,8 @@ const MIN_LENGTH = 12;
 
 export function ChangePasswordScreen() {
   const insets = useSafeAreaInsets();
+  const c = useVaultColors();
+  const styles = useMemo(() => makeStyles(c), [c]);
   const router = useRouter();
   const { showToast } = useToast();
   const { changeMasterPassword } = useVault();
@@ -63,7 +67,7 @@ export function ChangePasswordScreen() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + 40 }]}>
         <View style={styles.badge}>
-          <IconTile icon={KeyRound} size={84} iconSize={34} color={VaultColors.accent} />
+          <IconTile icon={KeyRound} size={84} iconSize={34} color={c.accent} />
         </View>
 
         <Text style={styles.title}>Change Master Password</Text>
@@ -107,7 +111,8 @@ export function ChangePasswordScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+function makeStyles(c: VaultColorsShape) {
+  return StyleSheet.create({
   content: {
     paddingHorizontal: 20,
     paddingTop: 24,
@@ -121,13 +126,13 @@ const styles = StyleSheet.create({
   },
   title: {
     ...VaultType.title,
-    color: VaultColors.heading,
+    color: c.heading,
     textAlign: 'center',
   },
   subtitle: {
     ...VaultType.body,
     marginTop: 12,
-    color: VaultColors.body,
+    color: c.body,
     textAlign: 'center',
     maxWidth: 320,
   },
@@ -140,4 +145,5 @@ const styles = StyleSheet.create({
     marginTop: 40,
     width: '100%',
   },
-});
+  });
+}

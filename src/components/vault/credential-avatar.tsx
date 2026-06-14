@@ -1,10 +1,11 @@
 import { Image } from 'expo-image';
 import { LucideIcon } from 'lucide-react-native';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 
-import { VaultColors } from '@/constants/vault-theme';
+import { useVaultColors } from '@/contexts/color-theme-context';
 import { faviconUrl, getLogoStatus, resolveDomain, setLogoStatus } from '@/services/site-branding';
+import type { VaultColorsShape } from '@/theme/color-themes';
 
 interface CredentialAvatarProps {
   /** Fallback icon when no logo is available. */
@@ -33,8 +34,11 @@ export function CredentialAvatar({
   customLogoUri,
   size = 48,
   iconSize = 20,
-  accent = VaultColors.accent,
+  accent,
 }: CredentialAvatarProps) {
+  const c = useVaultColors();
+  const styles = useMemo(() => makeStyles(c), [c]);
+  const resolvedAccent = accent ?? c.accent;
   const domain = resolveDomain(url) ?? resolveDomain(website);
   const [failed, setFailed] = useState(false);
 
@@ -55,7 +59,7 @@ export function CredentialAvatar({
   const showFavicon = !showCustom && Boolean(domain) && !failed;
 
   return (
-    <View style={[styles.tile, { width: size, height: size, borderRadius: size / 2, borderColor: accent + '55' }]}>
+    <View style={[styles.tile, { width: size, height: size, borderRadius: size / 2, borderColor: resolvedAccent + '55' }]}>
       {showCustom ? (
         <Image
           source={{ uri: customLogoUri }}
@@ -77,22 +81,24 @@ export function CredentialAvatar({
           }}
         />
       ) : (
-        <Icon size={iconSize} color={accent} strokeWidth={1.75} />
+        <Icon size={iconSize} color={resolvedAccent} strokeWidth={1.75} />
       )}
     </View>
   );
 }
 
-const styles = StyleSheet.create({
-  tile: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: VaultColors.glassBackgroundStrong,
-    borderWidth: 1,
-    overflow: 'hidden',
-  },
-  image: {
-    width: '78%',
-    height: '78%',
-  },
-});
+function makeStyles(c: VaultColorsShape) {
+  return StyleSheet.create({
+    tile: {
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: c.glassBackgroundStrong,
+      borderWidth: 1,
+      overflow: 'hidden',
+    },
+    image: {
+      width: '78%',
+      height: '78%',
+    },
+  });
+}

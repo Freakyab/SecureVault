@@ -8,6 +8,7 @@ export { IconTile } from './icon-tile';
 export { InputField } from './input-field';
 export { PrimaryButton } from './primary-button';
 export { RouteFallback } from './route-fallback';
+export { ScoreRing } from './score-ring';
 export { ScreenBackground } from './screen-background';
 export { Toggle } from './toggle';
 export { VaultHeader } from './vault-header';

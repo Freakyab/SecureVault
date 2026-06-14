@@ -25,9 +25,13 @@ export interface Credential {
 
 export type AppThemePreference = 'system' | 'light' | 'dark';
 
+export type ColorThemePreference = 'blue' | 'purple' | 'gold';
+
 export interface VaultSettings {
   biometricEnabled: boolean;
   themePreference: AppThemePreference;
+  /** Accent palette: blue (default), purple, or obsidian gold. */
+  colorTheme: ColorThemePreference;
   autoLockMinutes: number;
   recordPasswordHistory: boolean;
   passwordAgeReminders: boolean;
@@ -49,6 +53,7 @@ export interface VaultState {
 export const DEFAULT_VAULT_SETTINGS: VaultSettings = {
   biometricEnabled: true,
   themePreference: 'dark',
+  colorTheme: 'blue',
   autoLockMinutes: 1,
   recordPasswordHistory: true,
   passwordAgeReminders: false,

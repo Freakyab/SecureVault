@@ -1,7 +1,9 @@
 import { ChevronRight, Copy, LucideIcon, Star } from 'lucide-react-native';
+import { useMemo } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { VaultColors } from '@/constants/vault-theme';
+import { useVaultColors } from '@/contexts/color-theme-context';
+import type { VaultColorsShape } from '@/theme/color-themes';
 
 import { CredentialAvatar } from './credential-avatar';
 
@@ -30,13 +32,6 @@ interface CredentialRowProps {
   disabled?: boolean;
 }
 
-const BADGE_META: Record<keyof CredentialRowBadges, { label: string; color: string }> = {
-  breached: { label: 'Breached', color: VaultColors.danger },
-  reused: { label: 'Reused', color: VaultColors.danger },
-  weak: { label: 'Weak', color: VaultColors.warning },
-  old: { label: 'Old', color: VaultColors.accent },
-};
-
 // Highest-severity first; we only show the top issue to keep rows clean.
 const BADGE_ORDER: (keyof CredentialRowBadges)[] = ['breached', 'reused', 'weak', 'old'];
 
@@ -44,7 +39,7 @@ export function CredentialRow({
   name,
   detail,
   icon,
-  accent = VaultColors.accent,
+  accent,
   website,
   url,
   customLogoUri,
@@ -55,9 +50,23 @@ export function CredentialRow({
   isFavorite = false,
   disabled = false,
 }: CredentialRowProps) {
+  const c = useVaultColors();
+  const styles = useMemo(() => makeStyles(c), [c]);
+  const resolvedAccent = accent ?? c.accent;
+
+  const badgeMetaByKey = useMemo<Record<keyof CredentialRowBadges, { label: string; color: string }>>(
+    () => ({
+      breached: { label: 'Breached', color: c.danger },
+      reused: { label: 'Reused', color: c.danger },
+      weak: { label: 'Weak', color: c.warning },
+      old: { label: 'Old', color: c.accent },
+    }),
+    [c],
+  );
+
   const hasActions = Boolean(onCopy || onToggleFavorite);
   const topBadge = badges ? BADGE_ORDER.find((key) => badges[key]) : undefined;
-  const badgeMeta = topBadge ? BADGE_META[topBadge] : undefined;
+  const badgeMeta = topBadge ? badgeMetaByKey[topBadge] : undefined;
 
   return (
     <Pressable
@@ -71,7 +80,7 @@ export function CredentialRow({
       <View style={styles.left}>
         <CredentialAvatar
           icon={icon}
-          accent={accent}
+          accent={resolvedAccent}
           website={website}
           url={url}
           customLogoUri={customLogoUri}
@@ -102,7 +111,7 @@ export function CredentialRow({
               hitSlop={10}
               onPress={onCopy}
               style={({ pressed }) => [styles.actionButton, pressed && styles.pressed]}>
-              <Copy size={18} color={VaultColors.muted} strokeWidth={1.75} />
+              <Copy size={18} color={c.muted} strokeWidth={1.75} />
             </Pressable>
           ) : null}
           {onToggleFavorite ? (
@@ -115,86 +124,88 @@ export function CredentialRow({
               style={({ pressed }) => [styles.actionButton, pressed && styles.pressed]}>
               <Star
                 size={18}
-                color={isFavorite ? VaultColors.accent : VaultColors.muted}
-                fill={isFavorite ? VaultColors.accent : 'transparent'}
+                color={isFavorite ? c.accent : c.muted}
+                fill={isFavorite ? c.accent : 'transparent'}
                 strokeWidth={1.75}
               />
             </Pressable>
           ) : null}
         </View>
       ) : (
-        <ChevronRight size={18} color={VaultColors.muted} strokeWidth={2} />
+        <ChevronRight size={18} color={c.muted} strokeWidth={2} />
       )}
     </Pressable>
   );
 }
 
-const styles = StyleSheet.create({
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: VaultColors.glassBorder,
-    backgroundColor: VaultColors.glassBackground,
-  },
-  pressed: {
-    opacity: 0.8,
-  },
-  disabled: {
-    opacity: 0.5,
-  },
-  left: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 16,
-    flexShrink: 1,
-  },
-  text: {
-    flexShrink: 1,
-    gap: 2,
-  },
-  nameRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    flexShrink: 1,
-  },
-  name: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: VaultColors.heading,
-    flexShrink: 1,
-  },
-  badge: {
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 9999,
-    borderWidth: 1,
-  },
-  badgeText: {
-    fontSize: 10,
-    fontWeight: '700',
-    letterSpacing: 0.3,
-  },
-  detail: {
-    fontSize: 12,
-    fontWeight: '500',
-    color: VaultColors.muted,
-  },
-  actions: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-  },
-  actionButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 9999,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
+function makeStyles(c: VaultColorsShape) {
+  return StyleSheet.create({
+    row: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingVertical: 12,
+      paddingHorizontal: 16,
+      borderRadius: 20,
+      borderWidth: 1,
+      borderColor: c.glassBorder,
+      backgroundColor: c.glassBackground,
+    },
+    pressed: {
+      opacity: 0.8,
+    },
+    disabled: {
+      opacity: 0.5,
+    },
+    left: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 16,
+      flexShrink: 1,
+    },
+    text: {
+      flexShrink: 1,
+      gap: 2,
+    },
+    nameRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 8,
+      flexShrink: 1,
+    },
+    name: {
+      fontSize: 16,
+      fontWeight: '600',
+      color: c.heading,
+      flexShrink: 1,
+    },
+    badge: {
+      paddingHorizontal: 8,
+      paddingVertical: 2,
+      borderRadius: 9999,
+      borderWidth: 1,
+    },
+    badgeText: {
+      fontSize: 10,
+      fontWeight: '700',
+      letterSpacing: 0.3,
+    },
+    detail: {
+      fontSize: 12,
+      fontWeight: '500',
+      color: c.muted,
+    },
+    actions: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 6,
+    },
+    actionButton: {
+      width: 36,
+      height: 36,
+      borderRadius: 9999,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+  });
+}

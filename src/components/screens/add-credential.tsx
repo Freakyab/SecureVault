@@ -1,12 +1,14 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Eye, EyeOff, Globe, RefreshCw } from 'lucide-react-native';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { PrimaryButton, ScreenBackground, VaultHeader } from '@/components/vault';
 import { CREDENTIAL_CATEGORIES, DEFAULT_CATEGORY } from '@/constants/categories';
-import { VaultColors, VaultType } from '@/constants/vault-theme';
+import { VaultType } from '@/constants/vault-theme';
+import { useVaultColors } from '@/contexts/color-theme-context';
+import type { VaultColorsShape } from '@/theme/color-themes';
 import { useToast } from '@/contexts/toast-context';
 import { useVault } from '@/contexts/vault-context';
 import { hapticSuccess, hapticWarning } from '@/services/feedback';
@@ -29,6 +31,8 @@ function BoxedField({
   value: string;
   onChangeText: (text: string) => void;
 }) {
+  const c = useVaultColors();
+  const styles = useMemo(() => makeStyles(c), [c]);
   return (
     <View style={styles.field}>
       <Text style={styles.fieldLabel}>{label}</Text>
@@ -36,7 +40,7 @@ function BoxedField({
         value={value}
         onChangeText={onChangeText}
         placeholder={placeholder}
-        placeholderTextColor={VaultColors.placeholder}
+        placeholderTextColor={c.placeholder}
         autoCapitalize="none"
         autoCorrect={false}
         style={styles.input}
@@ -47,6 +51,8 @@ function BoxedField({
 
 export function AddCredentialScreen() {
   const insets = useSafeAreaInsets();
+  const c = useVaultColors();
+  const styles = useMemo(() => makeStyles(c), [c]);
   const router = useRouter();
   const params = useLocalSearchParams<{ password?: string }>();
   const { showToast } = useToast();
@@ -111,7 +117,7 @@ export function AddCredentialScreen() {
               accessibilityLabel={`Use ${site.label} website details`}
               onPress={() => applyQuickSite(site)}
               style={styles.quickChip}>
-              <Globe size={16} color={VaultColors.accent} strokeWidth={1.75} />
+              <Globe size={16} color={c.accent} strokeWidth={1.75} />
               <Text style={styles.quickText}>{site.label}</Text>
             </Pressable>
           ))}
@@ -139,7 +145,7 @@ export function AddCredentialScreen() {
                 value={password}
                 onChangeText={setPassword}
                 placeholder="Enter or generate"
-                placeholderTextColor={VaultColors.placeholder}
+                placeholderTextColor={c.placeholder}
                 secureTextEntry={!showPassword}
                 style={styles.passwordInput}
               />
@@ -149,9 +155,9 @@ export function AddCredentialScreen() {
                 onPress={() => setShowPassword((prev) => !prev)}
                 style={styles.generate}>
                 {showPassword ? (
-                  <EyeOff size={18} color={VaultColors.accent} strokeWidth={2} />
+                  <EyeOff size={18} color={c.accent} strokeWidth={2} />
                 ) : (
-                  <Eye size={18} color={VaultColors.accent} strokeWidth={2} />
+                  <Eye size={18} color={c.accent} strokeWidth={2} />
                 )}
               </Pressable>
               <Pressable
@@ -159,7 +165,7 @@ export function AddCredentialScreen() {
                 hitSlop={8}
                 onPress={generatePassword}
                 style={styles.generate}>
-                <RefreshCw size={18} color={VaultColors.accent} strokeWidth={2} />
+                <RefreshCw size={18} color={c.accent} strokeWidth={2} />
               </Pressable>
             </View>
           </View>
@@ -180,7 +186,7 @@ export function AddCredentialScreen() {
                     style={[styles.categoryChip, active && styles.categoryChipActive]}>
                     <Icon
                       size={16}
-                      color={active ? VaultColors.accent : VaultColors.muted}
+                      color={active ? c.accent : c.muted}
                       strokeWidth={1.75}
                     />
                     <Text style={[styles.categoryText, active && styles.categoryTextActive]}>
@@ -201,14 +207,15 @@ export function AddCredentialScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+function makeStyles(c: VaultColorsShape) {
+  return StyleSheet.create({
   content: {
     paddingHorizontal: 20,
     paddingTop: 16,
   },
   eyebrow: {
     ...VaultType.label,
-    color: VaultColors.accent,
+    color: c.accent,
     opacity: 0.8,
     marginBottom: 12,
   },
@@ -224,13 +231,13 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     borderRadius: 9999,
     borderWidth: 1,
-    borderColor: VaultColors.glassBorder,
-    backgroundColor: VaultColors.glassBackground,
+    borderColor: c.glassBorder,
+    backgroundColor: c.glassBackground,
   },
   quickText: {
     fontSize: 13,
     fontWeight: '600',
-    color: VaultColors.heading,
+    color: c.heading,
   },
   form: {
     marginTop: 32,
@@ -243,17 +250,17 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '600',
     letterSpacing: 0.4,
-    color: VaultColors.muted,
+    color: c.muted,
   },
   input: {
     height: 52,
     paddingHorizontal: 16,
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: VaultColors.glassBorder,
-    backgroundColor: VaultColors.glassBackground,
+    borderColor: c.glassBorder,
+    backgroundColor: c.glassBackground,
     fontSize: 15,
-    color: VaultColors.heading,
+    color: c.heading,
   },
   passwordRow: {
     flexDirection: 'row',
@@ -263,13 +270,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: VaultColors.glassBorder,
-    backgroundColor: VaultColors.glassBackground,
+    borderColor: c.glassBorder,
+    backgroundColor: c.glassBackground,
   },
   passwordInput: {
     flex: 1,
     fontSize: 15,
-    color: VaultColors.heading,
+    color: c.heading,
     padding: 0,
   },
   generate: {
@@ -278,7 +285,7 @@ const styles = StyleSheet.create({
     borderRadius: 9999,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: VaultColors.accentSoft,
+    backgroundColor: c.accentSoft,
   },
   categoryRow: {
     flexDirection: 'row',
@@ -293,22 +300,23 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     borderRadius: 9999,
     borderWidth: 1,
-    borderColor: VaultColors.glassBorder,
-    backgroundColor: VaultColors.glassBackground,
+    borderColor: c.glassBorder,
+    backgroundColor: c.glassBackground,
   },
   categoryChipActive: {
-    borderColor: VaultColors.accent,
-    backgroundColor: VaultColors.accentSoft,
+    borderColor: c.accent,
+    backgroundColor: c.accentSoft,
   },
   categoryText: {
     fontSize: 13,
     fontWeight: '600',
-    color: VaultColors.muted,
+    color: c.muted,
   },
   categoryTextActive: {
-    color: VaultColors.accent,
+    color: c.accent,
   },
   save: {
     marginTop: 40,
   },
-});
+  });
+}

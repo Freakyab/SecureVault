@@ -7,12 +7,13 @@ import {
   Lock,
   LucideIcon,
   Moon,
+  Palette,
   Sparkles,
   Timer,
   Trash2,
   Upload,
 } from 'lucide-react-native';
-import { ReactNode, useEffect, useState } from 'react';
+import { ReactNode, useEffect, useMemo, useState } from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -20,13 +21,15 @@ import * as Clipboard from 'expo-clipboard';
 
 import { BottomNav, GlassCard, ScreenBackground, Toggle, VaultHeader } from '@/components/vault';
 import { buildMockCredentials } from '@/constants/mock-credentials';
-import { VaultColors, VaultType } from '@/constants/vault-theme';
+import { VaultType } from '@/constants/vault-theme';
+import { COLOR_THEMES, COLOR_THEME_IDS, useColorTheme, useVaultColors } from '@/contexts/color-theme-context';
 import { useToast } from '@/contexts/toast-context';
 import { useVault } from '@/contexts/vault-context';
 import { BiometricAvailability, canUseBiometrics, getBiometricAvailability } from '@/services/biometric';
 import { copyToClipboard, hapticSuccess, hapticWarning } from '@/services/feedback';
 import { parseVaultBackup, serializeVaultBackup } from '@/services/vault-backup';
-import { AUTO_LOCK_PRESETS } from '@/types/credential';
+import { AUTO_LOCK_PRESETS, type ColorThemePreference } from '@/types/credential';
+import type { VaultColorsShape } from '@/theme/color-themes';
 
 interface RowProps {
   icon: LucideIcon;
@@ -38,7 +41,9 @@ interface RowProps {
 }
 
 function SettingsRow({ icon: Icon, label, detail, trailing, danger, onPress }: RowProps) {
-  const tint = danger ? VaultColors.danger : VaultColors.accent;
+  const c = useVaultColors();
+  const styles = useMemo(() => makeStyles(c), [c]);
+  const tint = danger ? c.danger : c.accent;
   const content = (
     <>
       <View style={styles.rowLeft}>
@@ -50,7 +55,7 @@ function SettingsRow({ icon: Icon, label, detail, trailing, danger, onPress }: R
           {detail ? <Text style={styles.rowDetail}>{detail}</Text> : null}
         </View>
       </View>
-      {trailing ?? <ChevronRight size={18} color={VaultColors.muted} strokeWidth={2} />}
+      {trailing ?? <ChevronRight size={18} color={c.muted} strokeWidth={2} />}
     </>
   );
 
@@ -79,8 +84,11 @@ function autoLockLabel(minutes: number) {
 
 export function SettingsScreen() {
   const insets = useSafeAreaInsets();
+  const c = useVaultColors();
+  const styles = useMemo(() => makeStyles(c), [c]);
   const router = useRouter();
   const { showToast } = useToast();
+  const { setColorTheme } = useColorTheme();
   const { settings, credentials, updateSettings, lockVault, resetVault, importCredentials } = useVault();
   const [showAutoLockPicker, setShowAutoLockPicker] = useState(false);
   const [biometric, setBiometric] = useState<BiometricAvailability | null>(null);
@@ -109,6 +117,12 @@ export function SettingsScreen() {
   async function handleThemeChange(enabled: boolean) {
     await updateSettings({ themePreference: enabled ? 'dark' : 'light' });
     showToast(enabled ? 'Dark mode enabled' : 'Light mode enabled', 'info');
+  }
+
+  async function handleColorThemeChange(id: ColorThemePreference) {
+    await updateSettings({ colorTheme: id });
+    await setColorTheme(id);
+    showToast(`Theme set to ${COLOR_THEMES[id].label}`, 'info');
   }
 
   async function handleAutoLockSelect(minutes: number) {
@@ -327,6 +341,41 @@ export function SettingsScreen() {
               />
             }
           />
+          <View style={styles.separator} />
+          <View style={styles.colorThemeRow}>
+            <View style={styles.rowLeft}>
+              <View style={styles.rowIcon}>
+                <Palette size={18} color={c.accent} strokeWidth={1.75} />
+              </View>
+              <View style={styles.rowText}>
+                <Text style={styles.rowLabel}>Color Theme</Text>
+                <Text style={styles.rowDetail}>{COLOR_THEMES[settings.colorTheme].label}</Text>
+              </View>
+            </View>
+            <View style={styles.swatchRow}>
+              {COLOR_THEME_IDS.map((id) => {
+                const theme = COLOR_THEMES[id];
+                const active = settings.colorTheme === id;
+                return (
+                  <Pressable
+                    key={id}
+                    accessibilityRole="button"
+                    accessibilityLabel={`Use ${theme.label} color theme`}
+                    accessibilityState={{ selected: active }}
+                    onPress={() => handleColorThemeChange(id)}
+                    style={[
+                      styles.swatchChip,
+                      active && { borderColor: c.accent, backgroundColor: c.accentSoft },
+                    ]}>
+                    <View style={[styles.swatchDot, { backgroundColor: theme.swatch }]} />
+                    <Text style={[styles.swatchLabel, active && styles.swatchLabelActive]}>
+                      {theme.label}
+                    </Text>
+                  </Pressable>
+                );
+              })}
+            </View>
+          </View>
         </GlassCard>
 
         <Text style={styles.sectionLabel}>DATA</Text>
@@ -368,7 +417,7 @@ export function SettingsScreen() {
 
         <GlassCard style={styles.dangerCard}>
           <View style={styles.dangerHeader}>
-            <Trash2 size={18} color={VaultColors.danger} strokeWidth={2} />
+            <Trash2 size={18} color={c.danger} strokeWidth={2} />
             <Text style={styles.dangerTitle}>Delete All Data</Text>
           </View>
           <Text style={styles.dangerBody}>
@@ -390,18 +439,19 @@ export function SettingsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+function makeStyles(c: VaultColorsShape) {
+  return StyleSheet.create({
   content: {
     paddingHorizontal: 20,
     paddingTop: 8,
   },
   subtitle: {
     ...VaultType.body,
-    color: VaultColors.body,
+    color: c.body,
   },
   sectionLabel: {
     ...VaultType.label,
-    color: VaultColors.accent,
+    color: c.accent,
     opacity: 0.8,
     marginTop: 32,
     marginBottom: 12,
@@ -432,7 +482,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: VaultColors.accentSoft,
+    backgroundColor: c.accentSoft,
   },
   rowIconDanger: {
     backgroundColor: 'rgba(255,138,138,0.15)',
@@ -444,18 +494,18 @@ const styles = StyleSheet.create({
   rowLabel: {
     fontSize: 15,
     fontWeight: '600',
-    color: VaultColors.heading,
+    color: c.heading,
   },
   rowLabelDanger: {
-    color: VaultColors.danger,
+    color: c.danger,
   },
   rowDetail: {
     fontSize: 12,
-    color: VaultColors.muted,
+    color: c.muted,
   },
   separator: {
     height: 1,
-    backgroundColor: VaultColors.glassBorder,
+    backgroundColor: c.glassBorder,
     marginHorizontal: 12,
   },
   presetRow: {
@@ -470,20 +520,20 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     borderRadius: 9999,
     borderWidth: 1,
-    borderColor: VaultColors.glassBorder,
-    backgroundColor: VaultColors.glassBackground,
+    borderColor: c.glassBorder,
+    backgroundColor: c.glassBackground,
   },
   presetChipActive: {
-    borderColor: VaultColors.accent,
-    backgroundColor: VaultColors.accentSoft,
+    borderColor: c.accent,
+    backgroundColor: c.accentSoft,
   },
   presetText: {
     fontSize: 12,
     fontWeight: '600',
-    color: VaultColors.muted,
+    color: c.muted,
   },
   presetTextActive: {
-    color: VaultColors.accent,
+    color: c.accent,
   },
   dangerCard: {
     marginTop: 32,
@@ -498,12 +548,12 @@ const styles = StyleSheet.create({
   dangerTitle: {
     fontSize: 16,
     fontWeight: '700',
-    color: VaultColors.danger,
+    color: c.danger,
   },
   dangerBody: {
     fontSize: 13,
     lineHeight: 19,
-    color: VaultColors.body,
+    color: c.body,
   },
   dangerButton: {
     marginTop: 4,
@@ -518,6 +568,43 @@ const styles = StyleSheet.create({
   dangerButtonText: {
     fontSize: 14,
     fontWeight: '700',
-    color: VaultColors.danger,
+    color: c.danger,
   },
-});
+  colorThemeRow: {
+    paddingHorizontal: 12,
+    paddingVertical: 14,
+    gap: 14,
+  },
+  swatchRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  swatchChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 9999,
+    borderWidth: 1,
+    borderColor: c.glassBorder,
+    backgroundColor: c.glassBackground,
+  },
+  swatchDot: {
+    width: 16,
+    height: 16,
+    borderRadius: 9999,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.25)',
+  },
+  swatchLabel: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: c.muted,
+  },
+  swatchLabelActive: {
+    color: c.accent,
+  },
+  });
+}

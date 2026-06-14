@@ -7,7 +7,7 @@ import {
   Lock,
   ShieldCheck,
 } from 'lucide-react-native';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -24,24 +24,9 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { PrimaryButton, Toggle } from '@/components/vault';
 import { Fonts } from '@/constants/theme';
+import { useVaultColors } from '@/contexts/color-theme-context';
+import type { VaultColorsShape } from '@/theme/color-themes';
 import { BiometricAvailability, canUseBiometrics, getBiometricAvailability } from '@/services/biometric';
-
-const palette = {
-  background: '#140b20',
-  headerBackground: 'rgba(25,14,39,0.85)',
-  headerBorder: 'rgba(76,67,83,0.4)',
-  heading: '#eedcff',
-  body: '#cfc2d5',
-  accent: '#b06af0',
-  accentStrong: '#7b2cbf',
-  glassBackground: 'rgba(255,255,255,0.03)',
-  glassBorder: 'rgba(192,192,192,0.2)',
-  placeholder: 'rgba(207,194,213,0.4)',
-  inputUnderline: 'rgba(192,192,192,0.2)',
-  buttonText: '#2d0050',
-  avatarBackground: '#30253f',
-  avatarBorder: 'rgba(76,67,83,0.3)',
-};
 
 interface SetupMasterPasswordScreenProps {
   onCreate?: (password: string, biometricEnabled: boolean) => void | Promise<void>;
@@ -49,6 +34,8 @@ interface SetupMasterPasswordScreenProps {
 
 export function SetupMasterPasswordScreen({ onCreate }: SetupMasterPasswordScreenProps) {
   const insets = useSafeAreaInsets();
+  const c = useVaultColors();
+  const styles = useMemo(() => makeStyles(c), [c]);
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -175,7 +162,7 @@ export function SetupMasterPasswordScreen({ onCreate }: SetupMasterPasswordScree
         <View style={styles.lockBadgeWrapper}>
           <View style={styles.lockBadgeGlow} />
           <View style={styles.lockBadge}>
-            <Lock size={32} color={palette.heading} strokeWidth={1.75} />
+            <Lock size={32} color={c.heading} strokeWidth={1.75} />
           </View>
         </View>
 
@@ -196,7 +183,7 @@ export function SetupMasterPasswordScreen({ onCreate }: SetupMasterPasswordScree
                 value={password}
                 onChangeText={setPassword}
                 placeholder="Minimum 12 characters"
-                placeholderTextColor={palette.placeholder}
+                placeholderTextColor={c.placeholder}
                 secureTextEntry={!showPassword}
                 autoCapitalize="none"
                 autoCorrect={false}
@@ -207,9 +194,9 @@ export function SetupMasterPasswordScreen({ onCreate }: SetupMasterPasswordScree
                 hitSlop={12}
                 onPress={() => setShowPassword((prev) => !prev)}>
                 {showPassword ? (
-                  <EyeOff size={20} color={palette.body} strokeWidth={1.75} />
+                  <EyeOff size={20} color={c.body} strokeWidth={1.75} />
                 ) : (
-                  <Eye size={20} color={palette.body} strokeWidth={1.75} />
+                  <Eye size={20} color={c.body} strokeWidth={1.75} />
                 )}
               </Pressable>
             </View>
@@ -223,7 +210,7 @@ export function SetupMasterPasswordScreen({ onCreate }: SetupMasterPasswordScree
                 value={confirmPassword}
                 onChangeText={setConfirmPassword}
                 placeholder="Repeat your password"
-                placeholderTextColor={palette.placeholder}
+                placeholderTextColor={c.placeholder}
                 secureTextEntry={!showPassword}
                 autoCapitalize="none"
                 autoCorrect={false}
@@ -236,7 +223,7 @@ export function SetupMasterPasswordScreen({ onCreate }: SetupMasterPasswordScree
           <View style={[styles.biometricCard, !biometricSupported && styles.biometricCardDisabled]}>
             <View style={styles.biometricInfo}>
               <View style={styles.biometricIcon}>
-                <Fingerprint size={24} color={palette.accent} strokeWidth={1.75} />
+                <Fingerprint size={24} color={c.accent} strokeWidth={1.75} />
               </View>
               <View style={styles.biometricText}>
                 <Text style={styles.biometricTitle}>Enable Biometric Unlock</Text>
@@ -253,7 +240,7 @@ export function SetupMasterPasswordScreen({ onCreate }: SetupMasterPasswordScree
 
           {/* Caution note */}
           <View style={styles.cautionNote}>
-            <AlertTriangle size={16} color={palette.accent} strokeWidth={1.75} />
+            <AlertTriangle size={16} color={c.accent} strokeWidth={1.75} />
             <Text style={styles.cautionText}>
               I understand that SecureVault uses zero-knowledge encryption and my password is never
               stored on any server.
@@ -272,7 +259,7 @@ export function SetupMasterPasswordScreen({ onCreate }: SetupMasterPasswordScree
 
           {/* Footer meta */}
           <View style={styles.footerMeta}>
-            <ShieldCheck size={12} color={palette.placeholder} strokeWidth={1.75} />
+            <ShieldCheck size={12} color={c.placeholder} strokeWidth={1.75} />
             <Text style={styles.footerMetaText}>AES-256 Military Grade Encryption</Text>
           </View>
         </View>
@@ -282,9 +269,9 @@ export function SetupMasterPasswordScreen({ onCreate }: SetupMasterPasswordScree
         <View style={styles.loadingOverlay}>
           <View style={styles.loadingCard}>
             <View style={styles.loadingBadge}>
-              <Lock size={28} color={palette.heading} strokeWidth={1.75} />
+              <Lock size={28} color={c.heading} strokeWidth={1.75} />
             </View>
-            <ActivityIndicator color={palette.accent} size="large" />
+            <ActivityIndicator color={c.accent} size="large" />
             <Text style={styles.loadingTitle}>Creating your vault</Text>
             <Text style={styles.loadingSubtitle}>{loadingMessage}</Text>
             <Text style={styles.loadingHint}>This secure step can take up to 15 seconds.</Text>
@@ -295,7 +282,8 @@ export function SetupMasterPasswordScreen({ onCreate }: SetupMasterPasswordScree
   );
 }
 
-const styles = StyleSheet.create({
+function makeStyles(palette: VaultColorsShape) {
+  return StyleSheet.create({
   root: {
     flex: 1,
     backgroundColor: palette.background,
@@ -307,7 +295,7 @@ const styles = StyleSheet.create({
     width: 200,
     height: 360,
     borderRadius: 9999,
-    backgroundColor: 'rgba(222,183,255,0.12)',
+    backgroundColor: 'rgba(127,176,255,0.12)',
     opacity: 0.9,
   },
   auroraBottomRight: {
@@ -317,7 +305,7 @@ const styles = StyleSheet.create({
     width: 220,
     height: 440,
     borderRadius: 9999,
-    backgroundColor: 'rgba(123,44,191,0.18)',
+    backgroundColor: 'rgba(45,108,246,0.18)',
   },
   header: {
     flexDirection: 'row',
@@ -362,7 +350,7 @@ const styles = StyleSheet.create({
     width: 96,
     height: 96,
     borderRadius: 9999,
-    backgroundColor: 'rgba(123,44,191,0.4)',
+    backgroundColor: 'rgba(45,108,246,0.4)',
     opacity: 0.5,
   },
   lockBadge: {
@@ -445,9 +433,9 @@ const styles = StyleSheet.create({
     borderRadius: 9999,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'rgba(123,44,191,0.2)',
+    backgroundColor: 'rgba(45,108,246,0.2)',
     borderWidth: 1,
-    borderColor: 'rgba(222,183,255,0.2)',
+    borderColor: 'rgba(127,176,255,0.2)',
   },
   biometricText: {
     flexShrink: 1,
@@ -476,7 +464,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
     lineHeight: 16,
     fontWeight: '500',
-    color: 'rgba(207,194,213,0.8)',
+    color: 'rgba(183,196,220,0.8)',
   },
   createError: {
     fontSize: 13,
@@ -490,7 +478,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 24,
-    backgroundColor: 'rgba(25,14,39,0.92)',
+    backgroundColor: 'rgba(18,26,46,0.92)',
   },
   loadingCard: {
     width: '100%',
@@ -510,9 +498,9 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'rgba(123,44,191,0.2)',
+    backgroundColor: 'rgba(45,108,246,0.2)',
     borderWidth: 1,
-    borderColor: 'rgba(222,183,255,0.2)',
+    borderColor: 'rgba(127,176,255,0.2)',
   },
   loadingTitle: {
     fontFamily: Fonts.serif,
@@ -546,4 +534,5 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     color: palette.placeholder,
   },
-});
+  });
+}

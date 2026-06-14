@@ -1,11 +1,13 @@
 import { useRouter } from 'expo-router';
 import { Globe, KeyRound, Search, ShieldAlert, Sparkles } from 'lucide-react-native';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { CredentialRow, GlassCard, ScreenBackground, VaultHeader } from '@/components/vault';
-import { VaultColors, VaultType } from '@/constants/vault-theme';
+import { VaultType } from '@/constants/vault-theme';
+import { useVaultColors } from '@/contexts/color-theme-context';
+import type { VaultColorsShape } from '@/theme/color-themes';
 
 const CHIP_ROWS = [
   { key: 'view', label: 'View', options: ['List', 'Grid'] },
@@ -19,20 +21,22 @@ const GROUPS = [
     count: '3 accounts',
     items: [
       { name: 'Google Workspace', detail: 'alex@email.com', icon: Globe, accent: '#7ee0b8' },
-      { name: 'Gmail Personal', detail: 'alex.personal@gmail.com', icon: Sparkles, accent: '#deb7ff' },
+      { name: 'Gmail Personal', detail: 'alex.personal@gmail.com', icon: Sparkles, accent: '#7FB0FF' },
     ],
   },
   {
     title: 'Developer',
     count: '2 accounts',
     items: [
-      { name: 'GitHub', detail: 'alex_dev_aurora', icon: KeyRound, accent: '#deb7ff' },
+      { name: 'GitHub', detail: 'alex_dev_aurora', icon: KeyRound, accent: '#7FB0FF' },
     ],
   },
 ];
 
 export function MyVaultScreen() {
   const insets = useSafeAreaInsets();
+  const c = useVaultColors();
+  const styles = useMemo(() => makeStyles(c), [c]);
   const router = useRouter();
   const [selected, setSelected] = useState<Record<string, string>>({
     view: 'List',
@@ -47,10 +51,10 @@ export function MyVaultScreen() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + 40 }]}>
         <View style={styles.search}>
-          <Search size={18} color={VaultColors.muted} strokeWidth={1.75} />
+          <Search size={18} color={c.muted} strokeWidth={1.75} />
           <TextInput
             placeholder="Search accounts..."
-            placeholderTextColor={VaultColors.placeholder}
+            placeholderTextColor={c.placeholder}
             style={styles.searchInput}
           />
         </View>
@@ -76,7 +80,7 @@ export function MyVaultScreen() {
 
         <GlassCard style={styles.alert}>
           <View style={styles.alertIcon}>
-            <ShieldAlert size={18} color={VaultColors.warning} strokeWidth={2} />
+            <ShieldAlert size={18} color={c.warning} strokeWidth={2} />
           </View>
           <View style={styles.alertText}>
             <Text style={styles.alertTitle}>Action Recommended</Text>
@@ -109,7 +113,8 @@ export function MyVaultScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+function makeStyles(c: VaultColorsShape) {
+  return StyleSheet.create({
   content: {
     paddingHorizontal: 20,
     paddingTop: 16,
@@ -122,13 +127,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     borderRadius: 20,
     borderWidth: 1,
-    borderColor: VaultColors.glassBorder,
-    backgroundColor: VaultColors.glassBackground,
+    borderColor: c.glassBorder,
+    backgroundColor: c.glassBackground,
   },
   searchInput: {
     flex: 1,
     fontSize: 15,
-    color: VaultColors.heading,
+    color: c.heading,
     padding: 0,
   },
   chipRow: {
@@ -138,7 +143,7 @@ const styles = StyleSheet.create({
   chipRowLabel: {
     ...VaultType.label,
     fontSize: 11,
-    color: VaultColors.muted,
+    color: c.muted,
   },
   chips: {
     gap: 8,
@@ -149,20 +154,20 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     borderRadius: 9999,
     borderWidth: 1,
-    borderColor: VaultColors.glassBorder,
-    backgroundColor: VaultColors.glassBackground,
+    borderColor: c.glassBorder,
+    backgroundColor: c.glassBackground,
   },
   chipActive: {
-    borderColor: VaultColors.accent,
-    backgroundColor: VaultColors.accentSoft,
+    borderColor: c.accent,
+    backgroundColor: c.accentSoft,
   },
   chipText: {
     fontSize: 13,
     fontWeight: '600',
-    color: VaultColors.muted,
+    color: c.muted,
   },
   chipTextActive: {
-    color: VaultColors.accent,
+    color: c.accent,
   },
   alert: {
     flexDirection: 'row',
@@ -186,11 +191,11 @@ const styles = StyleSheet.create({
   alertTitle: {
     fontSize: 15,
     fontWeight: '700',
-    color: VaultColors.heading,
+    color: c.heading,
   },
   alertBody: {
     fontSize: 13,
-    color: VaultColors.body,
+    color: c.body,
   },
   group: {
     marginTop: 24,
@@ -205,13 +210,14 @@ const styles = StyleSheet.create({
   groupTitle: {
     fontSize: 16,
     fontWeight: '700',
-    color: VaultColors.heading,
+    color: c.heading,
   },
   groupCount: {
     fontSize: 12,
-    color: VaultColors.muted,
+    color: c.muted,
   },
   groupList: {
     gap: 12,
   },
-});
+  });
+}

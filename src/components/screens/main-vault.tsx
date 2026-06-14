@@ -20,7 +20,9 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BottomNav, CredentialRow, EmptyState, GlassCard, ScreenBackground } from '@/components/vault';
 import { CATEGORY_FILTERS, CREDENTIAL_CATEGORIES } from '@/constants/categories';
 import { Fonts } from '@/constants/theme';
-import { VaultColors, VaultType, vaultShadow } from '@/constants/vault-theme';
+import { VaultType, vaultShadow } from '@/constants/vault-theme';
+import { useVaultColors } from '@/contexts/color-theme-context';
+import type { VaultColorsShape } from '@/theme/color-themes';
 import { useToast } from '@/contexts/toast-context';
 import { useVault } from '@/contexts/vault-context';
 import { useNavigationLock } from '@/hooks/use-navigation-lock';
@@ -33,6 +35,8 @@ type ViewFilter = (typeof VIEW_FILTERS)[number];
 
 export function MainVaultScreen() {
   const insets = useSafeAreaInsets();
+  const c = useVaultColors();
+  const styles = useMemo(() => makeStyles(c), [c]);
   const router = useRouter();
   const params = useLocalSearchParams<{ category?: string }>();
   const { credentials, toggleFavorite, lockVault } = useVault();
@@ -141,7 +145,7 @@ export function MainVaultScreen() {
         ]}>
         <View style={styles.brandRow}>
           <View style={styles.brandLeading}>
-            <Shield size={18} color={VaultColors.accent} strokeWidth={2} />
+            <Shield size={18} color={c.accent} strokeWidth={2} />
             <Text style={styles.brandWordmark}>SecureVault</Text>
           </View>
           <View style={styles.brandActions}>
@@ -151,7 +155,7 @@ export function MainVaultScreen() {
               hitSlop={10}
               onPress={() => router.push('/settings')}
               style={styles.brandIconButton}>
-              <Upload size={18} color={VaultColors.heading} strokeWidth={1.75} />
+              <Upload size={18} color={c.heading} strokeWidth={1.75} />
             </Pressable>
             <Pressable
               accessibilityRole="button"
@@ -159,7 +163,7 @@ export function MainVaultScreen() {
               hitSlop={10}
               onPress={() => router.push('/settings')}
               style={styles.brandIconButton}>
-              <Download size={18} color={VaultColors.heading} strokeWidth={1.75} />
+              <Download size={18} color={c.heading} strokeWidth={1.75} />
             </Pressable>
             <Pressable
               accessibilityRole="button"
@@ -181,21 +185,21 @@ export function MainVaultScreen() {
             onPress={() => runLocked(() => router.push('/add-credential'))}
             style={({ pressed }) => pressed && styles.pressed}>
             <LinearGradient
-              colors={[VaultColors.accentStrong, VaultColors.accent]}
+              colors={[c.accentStrong, c.accent]}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
               style={styles.newItemButton}>
-              <Plus size={16} color={VaultColors.buttonText} strokeWidth={2.5} />
+              <Plus size={16} color={c.buttonText} strokeWidth={2.5} />
               <Text style={styles.newItemText}>NEW ITEM</Text>
             </LinearGradient>
           </Pressable>
         </View>
 
         <View style={styles.search}>
-          <Search size={17} color={VaultColors.muted} strokeWidth={1.75} />
+          <Search size={17} color={c.muted} strokeWidth={1.75} />
           <TextInput
             placeholder="Search your vault..."
-            placeholderTextColor={VaultColors.placeholder}
+            placeholderTextColor={c.placeholder}
             value={query}
             onChangeText={setQuery}
             autoCapitalize="none"
@@ -229,7 +233,7 @@ export function MainVaultScreen() {
             ]}>
             <SlidersHorizontal
               size={15}
-              color={isFilterPanelOpen || hasAdvancedFilters ? VaultColors.heading : VaultColors.muted}
+              color={isFilterPanelOpen || hasAdvancedFilters ? c.heading : c.muted}
               strokeWidth={2}
             />
             <Text
@@ -296,7 +300,7 @@ export function MainVaultScreen() {
             style={({ pressed }) => pressed && styles.pressed}>
             <GlassCard style={styles.alertCard}>
               <View style={styles.alertHeader}>
-                <AlertTriangle size={18} color={VaultColors.accent} strokeWidth={2} />
+                <AlertTriangle size={18} color={c.accent} strokeWidth={2} />
                 <Text style={styles.alertEyebrow}>SECURITY PULSE</Text>
               </View>
               <Text style={styles.alertTitle}>Review {health.weak + health.reused} password risks</Text>
@@ -305,7 +309,7 @@ export function MainVaultScreen() {
               </Text>
               <View style={styles.alertButton}>
                 <Text style={styles.alertButtonText}>View Health</Text>
-                <ArrowRight size={15} color={VaultColors.accent} strokeWidth={2.5} />
+                <ArrowRight size={15} color={c.accent} strokeWidth={2.5} />
               </View>
             </GlassCard>
           </Pressable>
@@ -315,7 +319,7 @@ export function MainVaultScreen() {
           <Text style={styles.statsEyebrow}>VAULT HEALTH</Text>
           <View style={styles.progressTrack}>
             <LinearGradient
-              colors={[VaultColors.accentStrong, VaultColors.accent]}
+              colors={[c.accentStrong, c.accent]}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 0 }}
               style={[styles.progressFill, { width: `${health.score}%` }]}
@@ -343,7 +347,7 @@ export function MainVaultScreen() {
                     name={credential.website}
                     detail={credential.username || 'No username'}
                     icon={KeyRound}
-                    accent={VaultColors.accent}
+                    accent={c.accent}
                     website={credential.website}
                     url={credential.url}
                     customLogoUri={credential.customLogoUri}
@@ -376,11 +380,11 @@ export function MainVaultScreen() {
         onPress={() => runLocked(() => lockVault())}
         style={({ pressed }) => [styles.fab, { bottom: insets.bottom + 90 }, pressed && styles.pressed]}>
         <LinearGradient
-          colors={[VaultColors.accentStrong, VaultColors.accent]}
+          colors={[c.accentStrong, c.accent]}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
           style={styles.fabInner}>
-          <Fingerprint size={24} color={VaultColors.buttonText} strokeWidth={2.25} />
+          <Fingerprint size={24} color={c.buttonText} strokeWidth={2.25} />
         </LinearGradient>
       </Pressable>
 
@@ -397,7 +401,8 @@ function emptyMessage(view: ViewFilter, total: number, query: string): string {
   return 'No active credentials in this category.';
 }
 
-const styles = StyleSheet.create({
+function makeStyles(c: VaultColorsShape) {
+  return StyleSheet.create({
   content: {
     paddingHorizontal: 20,
   },
@@ -413,7 +418,7 @@ const styles = StyleSheet.create({
   },
   brandWordmark: {
     ...VaultType.brand,
-    color: VaultColors.accent,
+    color: c.accent,
   },
   brandActions: {
     flexDirection: 'row',
@@ -426,17 +431,17 @@ const styles = StyleSheet.create({
     borderRadius: 9999,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: VaultColors.glassBackground,
+    backgroundColor: c.glassBackground,
     borderWidth: 1,
-    borderColor: VaultColors.glassBorder,
+    borderColor: c.glassBorder,
   },
   avatar: {
     width: 36,
     height: 36,
     borderRadius: 9999,
-    backgroundColor: VaultColors.avatarBackground,
+    backgroundColor: c.avatarBackground,
     borderWidth: 1,
-    borderColor: VaultColors.avatarBorder,
+    borderColor: c.avatarBorder,
   },
   headerRow: {
     flexDirection: 'row',
@@ -449,11 +454,11 @@ const styles = StyleSheet.create({
   },
   title: {
     ...VaultType.title,
-    color: VaultColors.heading,
+    color: c.heading,
   },
   subtitle: {
     fontSize: 14,
-    color: VaultColors.muted,
+    color: c.muted,
     marginTop: 2,
   },
   newItemButton: {
@@ -468,7 +473,7 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: '700',
     letterSpacing: 0.6,
-    color: VaultColors.buttonText,
+    color: c.buttonText,
   },
   search: {
     flexDirection: 'row',
@@ -479,13 +484,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: VaultColors.glassBorder,
-    backgroundColor: VaultColors.glassBackground,
+    borderColor: c.glassBorder,
+    backgroundColor: c.glassBackground,
   },
   searchInput: {
     flex: 1,
     fontSize: 15,
-    color: VaultColors.heading,
+    color: c.heading,
     padding: 0,
   },
   viewFilters: {
@@ -501,20 +506,20 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     borderRadius: 9999,
     borderWidth: 1,
-    borderColor: VaultColors.glassBorder,
-    backgroundColor: VaultColors.glassBackground,
+    borderColor: c.glassBorder,
+    backgroundColor: c.glassBackground,
   },
   viewChipActive: {
-    backgroundColor: VaultColors.accentStrong,
-    borderColor: VaultColors.accentStrong,
+    backgroundColor: c.accentStrong,
+    borderColor: c.accentStrong,
   },
   viewChipText: {
     fontSize: 13,
     fontWeight: '600',
-    color: VaultColors.muted,
+    color: c.muted,
   },
   viewChipTextActive: {
-    color: VaultColors.heading,
+    color: c.heading,
   },
   filterToggle: {
     flexDirection: 'row',
@@ -524,20 +529,20 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     borderRadius: 9999,
     borderWidth: 1,
-    borderColor: VaultColors.glassBorder,
-    backgroundColor: VaultColors.glassBackground,
+    borderColor: c.glassBorder,
+    backgroundColor: c.glassBackground,
   },
   filterToggleActive: {
-    backgroundColor: VaultColors.accentSoft,
-    borderColor: VaultColors.accent,
+    backgroundColor: c.accentSoft,
+    borderColor: c.accent,
   },
   filterToggleText: {
     fontSize: 13,
     fontWeight: '600',
-    color: VaultColors.muted,
+    color: c.muted,
   },
   filterToggleTextActive: {
-    color: VaultColors.heading,
+    color: c.heading,
   },
   filterPanel: {
     marginTop: 12,
@@ -547,7 +552,7 @@ const styles = StyleSheet.create({
   },
   filterPanelTitle: {
     ...VaultType.label,
-    color: VaultColors.accent,
+    color: c.accent,
     opacity: 0.8,
   },
   filterPanelSectionTitle: {
@@ -564,40 +569,40 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     borderRadius: 9999,
     borderWidth: 1,
-    borderColor: VaultColors.glassBorder,
-    backgroundColor: VaultColors.glassBackground,
+    borderColor: c.glassBorder,
+    backgroundColor: c.glassBackground,
   },
   chipActive: {
-    backgroundColor: VaultColors.accentSoft,
-    borderColor: VaultColors.accent,
+    backgroundColor: c.accentSoft,
+    borderColor: c.accent,
   },
   chipText: {
     fontSize: 13,
     fontWeight: '600',
-    color: VaultColors.muted,
+    color: c.muted,
   },
   chipTextActive: {
-    color: VaultColors.accent,
+    color: c.accent,
   },
   tagChip: {
     paddingHorizontal: 14,
     paddingVertical: 6,
     borderRadius: 9999,
     borderWidth: 1,
-    borderColor: VaultColors.glassBorder,
+    borderColor: c.glassBorder,
     backgroundColor: 'transparent',
   },
   tagChipActive: {
-    backgroundColor: VaultColors.accentStrong,
-    borderColor: VaultColors.accentStrong,
+    backgroundColor: c.accentStrong,
+    borderColor: c.accentStrong,
   },
   tagChipText: {
     fontSize: 12,
     fontWeight: '600',
-    color: VaultColors.muted,
+    color: c.muted,
   },
   tagChipTextActive: {
-    color: VaultColors.heading,
+    color: c.heading,
   },
   pressed: {
     opacity: 0.85,
@@ -605,7 +610,7 @@ const styles = StyleSheet.create({
   alertCard: {
     marginTop: 24,
     gap: 10,
-    borderColor: VaultColors.accent + '4d',
+    borderColor: c.accent + '4d',
   },
   alertHeader: {
     flexDirection: 'row',
@@ -614,18 +619,18 @@ const styles = StyleSheet.create({
   },
   alertEyebrow: {
     ...VaultType.label,
-    color: VaultColors.accent,
+    color: c.accent,
   },
   alertTitle: {
     fontFamily: Fonts.serif,
     fontSize: 22,
     lineHeight: 30,
-    color: VaultColors.heading,
+    color: c.heading,
   },
   alertBody: {
     fontSize: 14,
     lineHeight: 20,
-    color: VaultColors.body,
+    color: c.body,
   },
   alertButton: {
     flexDirection: 'row',
@@ -636,7 +641,7 @@ const styles = StyleSheet.create({
   alertButtonText: {
     fontSize: 14,
     fontWeight: '700',
-    color: VaultColors.accent,
+    color: c.accent,
   },
   statsCard: {
     marginTop: 16,
@@ -644,7 +649,7 @@ const styles = StyleSheet.create({
   },
   statsEyebrow: {
     ...VaultType.label,
-    color: VaultColors.accent,
+    color: c.accent,
     opacity: 0.8,
   },
   progressTrack: {
@@ -661,11 +666,11 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.serif,
     fontSize: 44,
     lineHeight: 52,
-    color: VaultColors.accent,
+    color: c.accent,
   },
   statsCaption: {
     fontSize: 14,
-    color: VaultColors.body,
+    color: c.body,
   },
   group: {
     marginTop: 24,
@@ -678,13 +683,13 @@ const styles = StyleSheet.create({
   },
   groupTitle: {
     ...VaultType.label,
-    color: VaultColors.accent,
+    color: c.accent,
     opacity: 0.8,
   },
   divider: {
     flex: 1,
     height: 1,
-    backgroundColor: VaultColors.glassBorder,
+    backgroundColor: c.glassBorder,
   },
   groupList: {
     gap: 12,
@@ -692,7 +697,7 @@ const styles = StyleSheet.create({
   emptyText: {
     fontSize: 14,
     lineHeight: 20,
-    color: VaultColors.body,
+    color: c.body,
   },
   fab: {
     position: 'absolute',
@@ -700,7 +705,7 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 9999,
-    ...vaultShadow,
+    ...vaultShadow(c.accentStrong),
   },
   fabInner: {
     width: 56,
@@ -709,4 +714,5 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-});
+  });
+}

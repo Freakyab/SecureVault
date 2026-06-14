@@ -1,11 +1,11 @@
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import { useColorTheme } from '@/contexts/color-theme-context';
 import { getTheme, type ColorSchemeName } from '@/theme';
 
 export function useTheme() {
+  const { colorThemeId } = useColorTheme();
   const scheme = useColorScheme();
-  // SecureVault ships dark-first: only an explicit light scheme opts out of the
-  // premium dark tokens, so unspecified/null resolves to dark.
   const themeScheme: ColorSchemeName = scheme === 'light' ? 'light' : 'dark';
 
-  return getTheme(themeScheme);
+  return getTheme(themeScheme, colorThemeId);
 }

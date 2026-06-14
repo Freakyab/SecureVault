@@ -1,7 +1,9 @@
 import { LucideIcon } from 'lucide-react-native';
+import { useMemo } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { VaultColors } from '@/constants/vault-theme';
+import { useVaultColors } from '@/contexts/color-theme-context';
+import type { VaultColorsShape } from '@/theme/color-themes';
 
 interface CategoryCardProps {
   label: string;
@@ -12,6 +14,9 @@ interface CategoryCardProps {
 }
 
 export function CategoryCard({ label, count, icon: Icon, active = false, onPress }: CategoryCardProps) {
+  const c = useVaultColors();
+  const styles = useMemo(() => makeStyles(c), [c]);
+
   return (
     <Pressable
       accessibilityRole="button"
@@ -22,7 +27,7 @@ export function CategoryCard({ label, count, icon: Icon, active = false, onPress
       <View style={[styles.iconWrap, active && styles.iconWrapActive]}>
         <Icon
           size={20}
-          color={active ? VaultColors.heading : VaultColors.accent}
+          color={active ? c.heading : c.accent}
           strokeWidth={1.75}
         />
       </View>
@@ -31,39 +36,41 @@ export function CategoryCard({ label, count, icon: Icon, active = false, onPress
   );
 }
 
-const styles = StyleSheet.create({
-  card: {
-    flex: 1,
-    minHeight: 108,
-    borderRadius: 28,
-    borderWidth: 1,
-    borderColor: VaultColors.glassBorder,
-    backgroundColor: VaultColors.glassBackground,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 16,
-    gap: 12,
-  },
-  cardActive: {
-    borderColor: VaultColors.accentStrong,
-  },
-  pressed: {
-    opacity: 0.8,
-  },
-  iconWrap: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: VaultColors.accentSoft,
-  },
-  iconWrapActive: {
-    backgroundColor: VaultColors.accentStrong,
-  },
-  label: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: VaultColors.heading,
-  },
-});
+function makeStyles(c: VaultColorsShape) {
+  return StyleSheet.create({
+    card: {
+      flex: 1,
+      minHeight: 108,
+      borderRadius: 28,
+      borderWidth: 1,
+      borderColor: c.glassBorder,
+      backgroundColor: c.glassBackground,
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingVertical: 16,
+      gap: 12,
+    },
+    cardActive: {
+      borderColor: c.accentStrong,
+    },
+    pressed: {
+      opacity: 0.8,
+    },
+    iconWrap: {
+      width: 48,
+      height: 48,
+      borderRadius: 24,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: c.accentSoft,
+    },
+    iconWrapActive: {
+      backgroundColor: c.accentStrong,
+    },
+    label: {
+      fontSize: 14,
+      fontWeight: '600',
+      color: c.heading,
+    },
+  });
+}

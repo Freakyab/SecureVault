@@ -1,10 +1,12 @@
 import { Fingerprint, Settings, Shield } from 'lucide-react-native';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { IconTile, InputField, PrimaryButton, ScreenBackground, VaultHeader } from '@/components/vault';
-import { VaultColors, VaultType } from '@/constants/vault-theme';
+import { VaultType } from '@/constants/vault-theme';
+import { useVaultColors } from '@/contexts/color-theme-context';
+import type { VaultColorsShape } from '@/theme/color-themes';
 
 interface UnlockVaultScreenProps {
   onUnlock?: (password: string) => void;
@@ -20,6 +22,8 @@ export function UnlockVaultScreen({
   biometricLabel = 'Face ID',
 }: UnlockVaultScreenProps) {
   const insets = useSafeAreaInsets();
+  const c = useVaultColors();
+  const styles = useMemo(() => makeStyles(c), [c]);
   const [password, setPassword] = useState('');
 
   function handleUnlock() {
@@ -40,7 +44,7 @@ export function UnlockVaultScreen({
         showsVerticalScrollIndicator={false}
         contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + 32 }]}>
         <View style={styles.shieldWrapper}>
-          <IconTile icon={Shield} size={96} iconSize={36} color={VaultColors.accent} />
+          <IconTile icon={Shield} size={96} iconSize={36} color={c.accent} />
         </View>
 
         <Text style={styles.title}>Welcome Back</Text>
@@ -62,7 +66,7 @@ export function UnlockVaultScreen({
                 accessibilityLabel={`Unlock with ${biometricLabel}`}
                 onPress={() => onBiometricUnlock?.()}
                 style={({ pressed }) => [styles.biometricButton, pressed && styles.pressed]}>
-                <Fingerprint size={28} color={VaultColors.accent} strokeWidth={1.75} />
+                <Fingerprint size={28} color={c.accent} strokeWidth={1.75} />
               </Pressable>
               <Text style={styles.biometricCaption}>Tap to unlock with {biometricLabel}</Text>
             </View>
@@ -77,7 +81,8 @@ export function UnlockVaultScreen({
   );
 }
 
-const styles = StyleSheet.create({
+function makeStyles(c: VaultColorsShape) {
+  return StyleSheet.create({
   content: {
     paddingHorizontal: 20,
     paddingTop: 56,
@@ -91,13 +96,13 @@ const styles = StyleSheet.create({
   },
   title: {
     ...VaultType.title,
-    color: VaultColors.heading,
+    color: c.heading,
     textAlign: 'center',
   },
   subtitle: {
     ...VaultType.body,
     marginTop: 12,
-    color: VaultColors.body,
+    color: c.body,
     textAlign: 'center',
     maxWidth: 300,
   },
@@ -116,16 +121,16 @@ const styles = StyleSheet.create({
     borderRadius: 9999,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: VaultColors.accentSoft,
+    backgroundColor: c.accentSoft,
     borderWidth: 1,
-    borderColor: 'rgba(222,183,255,0.2)',
+    borderColor: 'rgba(127,176,255,0.2)',
   },
   pressed: {
     opacity: 0.8,
   },
   biometricCaption: {
     ...VaultType.caption,
-    color: VaultColors.muted,
+    color: c.muted,
   },
   cta: {
     gap: 16,
@@ -137,6 +142,7 @@ const styles = StyleSheet.create({
   linkText: {
     fontSize: 14,
     fontWeight: '500',
-    color: VaultColors.accent,
+    color: c.accent,
   },
-});
+  });
+}

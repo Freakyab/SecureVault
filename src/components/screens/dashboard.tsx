@@ -10,6 +10,7 @@ import { AnimatedBlobs } from '@/components/ui/animated-blobs';
 import { PressableScale } from '@/components/ui/pressable-scale';
 import { BottomNav, CredentialRow, EmptyState } from '@/components/vault';
 import { CREDENTIAL_CATEGORIES } from '@/constants/categories';
+import { useColorTheme } from '@/contexts/color-theme-context';
 import { useToast } from '@/contexts/toast-context';
 import { useVault } from '@/contexts/vault-context';
 import { useTheme } from '@/hooks/use-theme';
@@ -17,6 +18,7 @@ import { useNavigationLock } from '@/hooks/use-navigation-lock';
 import { filterCredentials } from '@/services/credential-search';
 import { computeHealthMetrics } from '@/services/health-checks';
 import { type Theme } from '@/theme';
+import { COLOR_THEMES } from '@/theme/color-themes';
 import { useThemePresets } from '@/theme/presets';
 
 /** Smoothly counts from 0 → target with an ease-out curve on mount. */
@@ -43,6 +45,7 @@ export function DashboardScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const theme = useTheme();
+  const { colorThemeId } = useColorTheme();
   const p = useThemePresets();
   const s = useMemo(() => makeStyles(theme), [theme]);
   const { showToast } = useToast();
@@ -81,7 +84,7 @@ export function DashboardScreen() {
 
   return (
     <View style={p.screen}>
-      <AnimatedBlobs colors={[theme.colors.accent, theme.colors.accentAlt, theme.colors.info]} />
+      <AnimatedBlobs colors={COLOR_THEMES[colorThemeId].blob} />
 
       <View style={[s.header, { paddingTop: insets.top + 12 }]}>
         <View style={s.headerLeading}>

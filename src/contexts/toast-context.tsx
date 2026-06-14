@@ -1,9 +1,10 @@
-import { createContext, PropsWithChildren, useCallback, useContext, useEffect, useRef, useState } from 'react';
+import { createContext, PropsWithChildren, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { Animated, StyleSheet, Text } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { CheckCircle2, Info, type LucideIcon, TriangleAlert } from 'lucide-react-native';
 
-import { VaultColors } from '@/constants/vault-theme';
+import { useVaultColors } from '@/contexts/color-theme-context';
+import type { VaultColorsShape } from '@/theme/color-themes';
 
 type ToastTone = 'success' | 'error' | 'info';
 
@@ -24,14 +25,18 @@ const TONE_ICON: Record<ToastTone, LucideIcon> = {
   info: Info,
 };
 
-const TONE_COLOR: Record<ToastTone, string> = {
-  success: VaultColors.success,
-  error: VaultColors.danger,
-  info: VaultColors.accent,
-};
-
 export function ToastProvider({ children }: PropsWithChildren) {
   const insets = useSafeAreaInsets();
+  const c = useVaultColors();
+  const styles = useMemo(() => makeStyles(c), [c]);
+  const toneColor = useMemo<Record<ToastTone, string>>(
+    () => ({
+      success: c.success,
+      error: c.danger,
+      info: c.accent,
+    }),
+    [c],
+  );
   const [toast, setToast] = useState<ToastState | null>(null);
   const opacity = useRef(new Animated.Value(0)).current;
   const translateY = useRef(new Animated.Value(20)).current;
@@ -73,7 +78,7 @@ export function ToastProvider({ children }: PropsWithChildren) {
             styles.toast,
             { bottom: insets.bottom + 96, opacity, transform: [{ translateY }] },
           ]}>
-          <Icon size={18} color={TONE_COLOR[toast.tone]} strokeWidth={2} />
+          <Icon size={18} color={toneColor[toast.tone]} strokeWidth={2} />
           <Text style={styles.message} numberOfLines={2}>
             {toast.message}
           </Text>
@@ -89,25 +94,27 @@ export function useToast() {
   return context;
 }
 
-const styles = StyleSheet.create({
-  toast: {
-    position: 'absolute',
-    left: 24,
-    right: 24,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    paddingHorizontal: 18,
-    paddingVertical: 14,
-    borderRadius: 18,
-    backgroundColor: 'rgba(33,20,52,0.97)',
-    borderWidth: 1,
-    borderColor: VaultColors.glassBorder,
-  },
-  message: {
-    flex: 1,
-    fontSize: 14,
-    fontWeight: '600',
-    color: VaultColors.heading,
-  },
-});
+function makeStyles(c: VaultColorsShape) {
+  return StyleSheet.create({
+    toast: {
+      position: 'absolute',
+      left: 24,
+      right: 24,
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 12,
+      paddingHorizontal: 18,
+      paddingVertical: 14,
+      borderRadius: 18,
+      backgroundColor: 'rgba(33,20,52,0.97)',
+      borderWidth: 1,
+      borderColor: c.glassBorder,
+    },
+    message: {
+      flex: 1,
+      fontSize: 14,
+      fontWeight: '600',
+      color: c.heading,
+    },
+  });
+}

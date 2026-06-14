@@ -1,33 +1,38 @@
-import { ReactNode } from 'react';
+import { ReactNode, useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
 
 import { AnimatedBlobs } from '@/components/ui/animated-blobs';
-import { VaultColors } from '@/constants/vault-theme';
+import { useColorTheme } from '@/contexts/color-theme-context';
+import { COLOR_THEMES } from '@/theme/color-themes';
 
 interface ScreenBackgroundProps {
   children: ReactNode;
 }
 
-/** Violet blob palette matching the design's ambient aurora. */
-const BLOB_COLORS = ['#deb7ff', VaultColors.accent, VaultColors.accentStrong] as const;
-
 /**
- * Base dark canvas with slow-roaming ambient aurora blobs that bring the
- * background to life.
+ * Base dark canvas with slow-roaming ambient aurora blobs.
+ * Blob palette follows the active color theme (blue / purple / gold).
  */
 export function ScreenBackground({ children }: ScreenBackgroundProps) {
+  const { colorThemeId, vaultColors } = useColorTheme();
+  const blobColors = COLOR_THEMES[colorThemeId].blob;
+
+  const styles = useMemo(
+    () =>
+      StyleSheet.create({
+        root: {
+          flex: 1,
+          backgroundColor: vaultColors.background,
+          overflow: 'hidden',
+        },
+      }),
+    [vaultColors.background],
+  );
+
   return (
     <View style={styles.root}>
-      <AnimatedBlobs colors={BLOB_COLORS} />
+      <AnimatedBlobs colors={blobColors} />
       {children}
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-    backgroundColor: VaultColors.background,
-    overflow: 'hidden',
-  },
-});

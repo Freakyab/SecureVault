@@ -17,7 +17,9 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { CredentialAvatar, GlassCard, PrimaryButton, ScreenBackground, Toggle, VaultHeader } from '@/components/vault';
 import { CREDENTIAL_CATEGORIES } from '@/constants/categories';
-import { VaultColors, VaultType } from '@/constants/vault-theme';
+import { VaultType } from '@/constants/vault-theme';
+import { useVaultColors } from '@/contexts/color-theme-context';
+import type { VaultColorsShape } from '@/theme/color-themes';
 import { useToast } from '@/contexts/toast-context';
 import { useVault } from '@/contexts/vault-context';
 import { copySensitiveToClipboard, copyToClipboard, hapticSuccess, hapticWarning } from '@/services/feedback';
@@ -36,6 +38,8 @@ function formatAge(iso: string) {
 
 export function EditCredentialScreen() {
   const insets = useSafeAreaInsets();
+  const c = useVaultColors();
+  const styles = useMemo(() => makeStyles(c), [c]);
   const router = useRouter();
   const { showToast } = useToast();
   const { id } = useLocalSearchParams<{ id?: string }>();
@@ -195,7 +199,7 @@ export function EditCredentialScreen() {
               iconSize={28}
             />
             <View style={styles.logoEditBadge}>
-              <ImagePlus size={13} color={VaultColors.buttonText} strokeWidth={2.5} />
+              <ImagePlus size={13} color={c.buttonText} strokeWidth={2.5} />
             </View>
           </Pressable>
           <Text style={styles.identityName}>{credential.website || 'Credential'}</Text>
@@ -212,7 +216,7 @@ export function EditCredentialScreen() {
             <View style={styles.fieldHeader}>
               <Text style={styles.fieldLabel}>Username</Text>
               <Pressable accessibilityLabel="Copy username" hitSlop={8} onPress={() => handleCopy('Username', username)}>
-                <Copy size={16} color={VaultColors.accent} strokeWidth={1.75} />
+                <Copy size={16} color={c.accent} strokeWidth={1.75} />
               </Pressable>
             </View>
             <TextInput
@@ -220,7 +224,7 @@ export function EditCredentialScreen() {
               onChangeText={setUsername}
               autoCapitalize="none"
               autoCorrect={false}
-              placeholderTextColor={VaultColors.placeholder}
+              placeholderTextColor={c.placeholder}
               style={styles.input}
             />
           </View>
@@ -234,19 +238,19 @@ export function EditCredentialScreen() {
                   hitSlop={8}
                   onPress={() => setShowPassword((prev) => !prev)}>
                   {showPassword ? (
-                    <EyeOff size={16} color={VaultColors.muted} strokeWidth={1.75} />
+                    <EyeOff size={16} color={c.muted} strokeWidth={1.75} />
                   ) : (
-                    <Eye size={16} color={VaultColors.muted} strokeWidth={1.75} />
+                    <Eye size={16} color={c.muted} strokeWidth={1.75} />
                   )}
                 </Pressable>
                 <Pressable accessibilityLabel="Copy password" hitSlop={8} onPress={() => handleCopy('Password', password)}>
-                  <Copy size={16} color={VaultColors.accent} strokeWidth={1.75} />
+                  <Copy size={16} color={c.accent} strokeWidth={1.75} />
                 </Pressable>
                 <Pressable
                   accessibilityLabel="Generate new password"
                   hitSlop={8}
                   onPress={() => setPassword(generatePassword())}>
-                  <RefreshCw size={16} color={VaultColors.accent} strokeWidth={1.75} />
+                  <RefreshCw size={16} color={c.accent} strokeWidth={1.75} />
                 </Pressable>
               </View>
             </View>
@@ -256,7 +260,7 @@ export function EditCredentialScreen() {
               secureTextEntry={!showPassword}
               autoCapitalize="none"
               autoCorrect={false}
-              placeholderTextColor={VaultColors.placeholder}
+              placeholderTextColor={c.placeholder}
               style={[styles.input, styles.mono]}
             />
             <View style={styles.strengthRow}>
@@ -284,7 +288,7 @@ export function EditCredentialScreen() {
               onChangeText={setNotes}
               multiline
               placeholder="Add a note..."
-              placeholderTextColor={VaultColors.placeholder}
+              placeholderTextColor={c.placeholder}
               style={[styles.input, styles.notes]}
             />
           </View>
@@ -321,8 +325,8 @@ export function EditCredentialScreen() {
             <View style={styles.toggleLabel}>
               <Star
                 size={18}
-                color={credential.isFavorite ? VaultColors.warning : VaultColors.muted}
-                fill={credential.isFavorite ? VaultColors.warning : 'transparent'}
+                color={credential.isFavorite ? c.warning : c.muted}
+                fill={credential.isFavorite ? c.warning : 'transparent'}
                 strokeWidth={1.75}
               />
               <Text style={styles.toggleText}>Mark as Favorite</Text>
@@ -336,7 +340,7 @@ export function EditCredentialScreen() {
           <View style={styles.divider} />
           <View style={styles.toggleRow}>
             <View style={styles.toggleLabel}>
-              <Trash2 size={18} color={VaultColors.muted} strokeWidth={1.75} />
+              <Trash2 size={18} color={c.muted} strokeWidth={1.75} />
               <Text style={styles.toggleText}>Archive Credential</Text>
             </View>
             <Toggle
@@ -369,16 +373,16 @@ export function EditCredentialScreen() {
                           hitSlop={8}
                           onPress={() => setRevealedHistory((prev) => ({ ...prev, [index]: !prev[index] }))}>
                           {revealed ? (
-                            <EyeOff size={16} color={VaultColors.muted} strokeWidth={1.75} />
+                            <EyeOff size={16} color={c.muted} strokeWidth={1.75} />
                           ) : (
-                            <Eye size={16} color={VaultColors.muted} strokeWidth={1.75} />
+                            <Eye size={16} color={c.muted} strokeWidth={1.75} />
                           )}
                         </Pressable>
                         <Pressable
                           accessibilityLabel="Copy previous password"
                           hitSlop={8}
                           onPress={() => handleCopy('Password', entry.password)}>
-                          <Copy size={16} color={VaultColors.accent} strokeWidth={1.75} />
+                          <Copy size={16} color={c.accent} strokeWidth={1.75} />
                         </Pressable>
                         <Pressable
                           accessibilityLabel="Restore previous password"
@@ -387,7 +391,7 @@ export function EditCredentialScreen() {
                             setPassword(entry.password);
                             showToast('Previous password restored to field', 'info');
                           }}>
-                          <RotateCcw size={16} color={VaultColors.accent} strokeWidth={1.75} />
+                          <RotateCcw size={16} color={c.accent} strokeWidth={1.75} />
                         </Pressable>
                       </View>
                     </View>
@@ -405,7 +409,7 @@ export function EditCredentialScreen() {
             accessibilityLabel="Delete credential"
             onPress={handleDelete}
             style={({ pressed }) => [styles.delete, pressed && styles.pressed]}>
-            <Trash2 size={16} color={VaultColors.danger} strokeWidth={2} />
+            <Trash2 size={16} color={c.danger} strokeWidth={2} />
             <Text style={styles.deleteText}>Delete Credential</Text>
           </Pressable>
         </View>
@@ -425,6 +429,8 @@ function Field({
   onChangeText: (text: string) => void;
   placeholder?: string;
 }) {
+  const c = useVaultColors();
+  const styles = useMemo(() => makeStyles(c), [c]);
   return (
     <View style={styles.field}>
       <Text style={styles.fieldLabel}>{label}</Text>
@@ -432,7 +438,7 @@ function Field({
         value={value}
         onChangeText={onChangeText}
         placeholder={placeholder}
-        placeholderTextColor={VaultColors.placeholder}
+        placeholderTextColor={c.placeholder}
         autoCapitalize="none"
         autoCorrect={false}
         style={styles.input}
@@ -441,7 +447,8 @@ function Field({
   );
 }
 
-const styles = StyleSheet.create({
+function makeStyles(c: VaultColorsShape) {
+  return StyleSheet.create({
   content: {
     paddingHorizontal: 20,
     paddingTop: 16,
@@ -455,7 +462,7 @@ const styles = StyleSheet.create({
   },
   missingText: {
     ...VaultType.body,
-    color: VaultColors.body,
+    color: c.body,
     textAlign: 'center',
   },
   identity: {
@@ -476,22 +483,22 @@ const styles = StyleSheet.create({
     borderRadius: 9999,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: VaultColors.accent,
+    backgroundColor: c.accent,
     borderWidth: 2,
-    borderColor: VaultColors.background,
+    borderColor: c.background,
   },
   identityName: {
     ...VaultType.title,
     fontSize: 24,
-    color: VaultColors.heading,
+    color: c.heading,
   },
   identityUrl: {
     fontSize: 13,
-    color: VaultColors.muted,
+    color: c.muted,
   },
   sectionTitle: {
     ...VaultType.heading,
-    color: VaultColors.heading,
+    color: c.heading,
     marginBottom: 12,
   },
   card: {
@@ -511,7 +518,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '600',
     letterSpacing: 0.4,
-    color: VaultColors.muted,
+    color: c.muted,
   },
   fieldActions: {
     flexDirection: 'row',
@@ -520,7 +527,7 @@ const styles = StyleSheet.create({
   },
   input: {
     fontSize: 15,
-    color: VaultColors.heading,
+    color: c.heading,
     padding: 0,
   },
   mono: {
@@ -533,7 +540,7 @@ const styles = StyleSheet.create({
   },
   divider: {
     height: 1,
-    backgroundColor: VaultColors.glassBorder,
+    backgroundColor: c.glassBorder,
     marginVertical: 8,
   },
   strengthRow: {
@@ -552,12 +559,12 @@ const styles = StyleSheet.create({
   strengthFill: {
     height: 4,
     borderRadius: 9999,
-    backgroundColor: VaultColors.success,
+    backgroundColor: c.success,
   },
   strengthLabel: {
     fontSize: 12,
     fontWeight: '600',
-    color: VaultColors.success,
+    color: c.success,
   },
   categoryRow: {
     flexDirection: 'row',
@@ -569,20 +576,20 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     borderRadius: 9999,
     borderWidth: 1,
-    borderColor: VaultColors.glassBorder,
-    backgroundColor: VaultColors.glassBackground,
+    borderColor: c.glassBorder,
+    backgroundColor: c.glassBackground,
   },
   categoryChipActive: {
-    borderColor: VaultColors.accent,
-    backgroundColor: VaultColors.accentSoft,
+    borderColor: c.accent,
+    backgroundColor: c.accentSoft,
   },
   categoryText: {
     fontSize: 13,
     fontWeight: '600',
-    color: VaultColors.muted,
+    color: c.muted,
   },
   categoryTextActive: {
-    color: VaultColors.accent,
+    color: c.accent,
   },
   toggleRow: {
     flexDirection: 'row',
@@ -598,7 +605,7 @@ const styles = StyleSheet.create({
   toggleText: {
     fontSize: 15,
     fontWeight: '600',
-    color: VaultColors.heading,
+    color: c.heading,
   },
   historyRow: {
     flexDirection: 'row',
@@ -613,11 +620,11 @@ const styles = StyleSheet.create({
   },
   historyValue: {
     fontSize: 15,
-    color: VaultColors.heading,
+    color: c.heading,
   },
   historyAge: {
     fontSize: 12,
-    color: VaultColors.muted,
+    color: c.muted,
   },
   save: {
     marginTop: 24,
@@ -636,6 +643,7 @@ const styles = StyleSheet.create({
   deleteText: {
     fontSize: 14,
     fontWeight: '600',
-    color: VaultColors.danger,
+    color: c.danger,
   },
-});
+  });
+}

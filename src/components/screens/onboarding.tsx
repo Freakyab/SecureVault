@@ -1,5 +1,5 @@
 import { Activity, LayoutGrid, LucideIcon, ShieldCheck } from 'lucide-react-native';
-import { useRef, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import {
   NativeScrollEvent,
   NativeSyntheticEvent,
@@ -13,7 +13,9 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { IconTile, PrimaryButton, ScreenBackground } from '@/components/vault';
-import { VaultColors, VaultType } from '@/constants/vault-theme';
+import { VaultType } from '@/constants/vault-theme';
+import { useVaultColors } from '@/contexts/color-theme-context';
+import type { VaultColorsShape } from '@/theme/color-themes';
 
 interface Slide {
   icon: LucideIcon;
@@ -52,6 +54,8 @@ interface OnboardingScreenProps {
 
 export function OnboardingScreen({ onFinish }: OnboardingScreenProps) {
   const insets = useSafeAreaInsets();
+  const c = useVaultColors();
+  const styles = useMemo(() => makeStyles(c), [c]);
   const { width } = useWindowDimensions();
   const scrollRef = useRef<ScrollView>(null);
   const [index, setIndex] = useState(0);
@@ -88,7 +92,7 @@ export function OnboardingScreen({ onFinish }: OnboardingScreenProps) {
         style={styles.carousel}>
         {SLIDES.map((slide) => (
           <View key={slide.title} style={[styles.slide, { width }]}>
-            <IconTile icon={slide.icon} size={160} iconSize={72} color={VaultColors.accent} />
+            <IconTile icon={slide.icon} size={160} iconSize={72} color={c.accent} />
             <Text style={styles.badge}>{slide.badge}</Text>
             <Text style={styles.title}>{slide.title}</Text>
             <Text style={styles.description}>{slide.description}</Text>
@@ -119,7 +123,8 @@ export function OnboardingScreen({ onFinish }: OnboardingScreenProps) {
   );
 }
 
-const styles = StyleSheet.create({
+function makeStyles(c: VaultColorsShape) {
+  return StyleSheet.create({
   skipRow: {
     alignItems: 'flex-end',
     paddingHorizontal: 20,
@@ -128,7 +133,7 @@ const styles = StyleSheet.create({
   skip: {
     fontSize: 14,
     fontWeight: '500',
-    color: VaultColors.muted,
+    color: c.muted,
   },
   carousel: {
     flex: 1,
@@ -142,17 +147,17 @@ const styles = StyleSheet.create({
   badge: {
     ...VaultType.label,
     marginTop: 16,
-    color: VaultColors.accent,
+    color: c.accent,
     opacity: 0.8,
   },
   title: {
     ...VaultType.title,
-    color: VaultColors.heading,
+    color: c.heading,
     textAlign: 'center',
   },
   description: {
     ...VaultType.body,
-    color: VaultColors.body,
+    color: c.body,
     textAlign: 'center',
     maxWidth: 320,
   },
@@ -174,7 +179,7 @@ const styles = StyleSheet.create({
   },
   dotActive: {
     width: 24,
-    backgroundColor: VaultColors.accent,
+    backgroundColor: c.accent,
   },
   signInRow: {
     flexDirection: 'row',
@@ -184,11 +189,12 @@ const styles = StyleSheet.create({
   },
   signInText: {
     fontSize: 14,
-    color: VaultColors.muted,
+    color: c.muted,
   },
   signInLink: {
     fontSize: 14,
     fontWeight: '600',
-    color: VaultColors.accent,
+    color: c.accent,
   },
-});
+  });
+}

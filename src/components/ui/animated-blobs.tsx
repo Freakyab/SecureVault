@@ -70,51 +70,75 @@ function Blob({ id, color, opacity, size, baseX, baseY, travelX, travelY, durati
   );
 }
 
+/** A center → edge color triplet for the three roaming blobs. */
+export type BlobPalette = readonly [string, string, string];
+
+/**
+ * Reusable palettes. `blue` is the app-wide default (matches the global blue
+ * color scheme); `violet` is kept for one-off use.
+ */
+export const BLOB_PALETTES = {
+  blue: ['#7FB0FF', '#2D6CF6', '#4A90E2'],
+  purple: ['#deb7ff', '#b06af0', '#7b2cbf'],
+  gold: ['#F5ECD2', '#E8C879', '#C9A227'],
+  /** @deprecated Use `purple` — kept for backwards compatibility. */
+  violet: ['#deb7ff', '#b06af0', '#7b2cbf'],
+} as const satisfies Record<string, BlobPalette>;
+
 interface AnimatedBlobsProps {
-  /** Three colors used for the three roaming blobs (center → edges). */
-  colors: readonly [string, string, string];
+  /** Three colors for the blobs (center → edges). Defaults to the blue palette. */
+  colors?: BlobPalette;
+  /** Speed multiplier — >1 is faster, <1 is slower. Defaults to 1. */
+  speed?: number;
+  /** Opacity multiplier — lower it behind dense content. Defaults to 1. */
+  intensity?: number;
 }
 
-/** Drifting, soft gradient blobs that roam the screen background. */
-export function AnimatedBlobs({ colors }: AnimatedBlobsProps) {
+/**
+ * Drifting, soft gradient blobs that roam the screen background.
+ *
+ * Drop it in as the first child of a screen's root `View` (behind content).
+ * Works with React Compiler enabled — see the `"use no memo"` note in `Blob`.
+ */
+export function AnimatedBlobs({ colors = BLOB_PALETTES.blue, speed = 1, intensity = 1 }: AnimatedBlobsProps) {
   const blobs: BlobConfig[] = [
     {
       id: 'blob-a',
       color: colors[0],
-      opacity: 0.22,
+      opacity: 0.22 * intensity,
       size: 460,
       baseX: 0.08,
       baseY: 0.05,
       travelX: 200,
       travelY: 150,
-      durationX: 4800,
-      durationY: 6200,
+      durationX: 4800 / speed,
+      durationY: 6200 / speed,
       delay: 0,
     },
     {
       id: 'blob-b',
       color: colors[1],
-      opacity: 0.2,
+      opacity: 0.2 * intensity,
       size: 420,
       baseX: 0.95,
       baseY: 0.22,
       travelX: -220,
       travelY: 170,
-      durationX: 5600,
-      durationY: 4200,
+      durationX: 5600 / speed,
+      durationY: 4200 / speed,
       delay: 600,
     },
     {
       id: 'blob-c',
       color: colors[2],
-      opacity: 0.18,
+      opacity: 0.18 * intensity,
       size: 440,
       baseX: 0.5,
       baseY: 0.95,
       travelX: 220,
       travelY: -160,
-      durationX: 6400,
-      durationY: 5200,
+      durationX: 6400 / speed,
+      durationY: 5200 / speed,
       delay: 1100,
     },
   ];

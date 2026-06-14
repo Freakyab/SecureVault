@@ -5,7 +5,9 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { BottomNav, GlassCard, PrimaryButton, ScreenBackground, Toggle } from '@/components/vault';
-import { VaultColors, VaultType } from '@/constants/vault-theme';
+import { VaultType } from '@/constants/vault-theme';
+import { useVaultColors } from '@/contexts/color-theme-context';
+import type { VaultColorsShape } from '@/theme/color-themes';
 import { useToast } from '@/contexts/toast-context';
 import { useNavigationLock } from '@/hooks/use-navigation-lock';
 import { copyToClipboard, hapticSuccess, hapticWarning } from '@/services/feedback';
@@ -29,14 +31,15 @@ const CHAR_OPTIONS: { key: CharOption; label: string; hint: string }[] = [
   { key: 'symbols', label: 'Symbols', hint: '!@#$' },
 ];
 
-const STRENGTH_COLOR: Record<string, string> = {
-  Weak: VaultColors.danger,
-  Fair: VaultColors.warning,
-  Strong: VaultColors.success,
-};
-
 export function GeneratorScreen() {
   const insets = useSafeAreaInsets();
+  const c = useVaultColors();
+  const styles = useMemo(() => makeStyles(c), [c]);
+  const strengthColor: Record<string, string> = {
+    Weak: c.danger,
+    Fair: c.warning,
+    Strong: c.success,
+  };
   const router = useRouter();
   const { showToast } = useToast();
   const runLocked = useNavigationLock();
@@ -121,7 +124,7 @@ export function GeneratorScreen() {
         ]}>
         <View style={styles.headerRow}>
           <View style={styles.brandIcon}>
-            <Wand2 size={20} color={VaultColors.accent} strokeWidth={2} />
+            <Wand2 size={20} color={c.accent} strokeWidth={2} />
           </View>
           <View>
             <Text style={styles.title}>Generator</Text>
@@ -140,11 +143,11 @@ export function GeneratorScreen() {
                 <View
                   style={[
                     styles.strengthFill,
-                    { width: `${strength.score}%`, backgroundColor: STRENGTH_COLOR[strength.label] },
+                    { width: `${strength.score}%`, backgroundColor: strengthColor[strength.label] },
                   ]}
                 />
               </View>
-              <Text style={[styles.strengthLabel, { color: STRENGTH_COLOR[strength.label] }]}>
+              <Text style={[styles.strengthLabel, { color: strengthColor[strength.label] }]}>
                 {strength.label}
               </Text>
             </View>
@@ -155,7 +158,7 @@ export function GeneratorScreen() {
                 hitSlop={8}
                 onPress={handleCopy}
                 style={({ pressed }) => [styles.iconButton, pressed && styles.pressed]}>
-                <Copy size={18} color={VaultColors.accent} strokeWidth={2} />
+                <Copy size={18} color={c.accent} strokeWidth={2} />
               </Pressable>
               <Pressable
                 accessibilityRole="button"
@@ -163,7 +166,7 @@ export function GeneratorScreen() {
                 hitSlop={8}
                 onPress={handleRegenerate}
                 style={({ pressed }) => [styles.iconButton, pressed && styles.pressed]}>
-                <RefreshCw size={18} color={VaultColors.accent} strokeWidth={2} />
+                <RefreshCw size={18} color={c.accent} strokeWidth={2} />
               </Pressable>
             </View>
           </View>
@@ -180,7 +183,7 @@ export function GeneratorScreen() {
               accessibilityLabel="Decrease length"
               onPress={() => setLength(options.length - 1)}
               style={({ pressed }) => [styles.stepButton, pressed && styles.pressed]}>
-              <Minus size={18} color={VaultColors.heading} strokeWidth={2.5} />
+              <Minus size={18} color={c.heading} strokeWidth={2.5} />
             </Pressable>
             <View style={styles.lengthTrack}>
               <View
@@ -197,7 +200,7 @@ export function GeneratorScreen() {
               accessibilityLabel="Increase length"
               onPress={() => setLength(options.length + 1)}
               style={({ pressed }) => [styles.stepButton, pressed && styles.pressed]}>
-              <Plus size={18} color={VaultColors.heading} strokeWidth={2.5} />
+              <Plus size={18} color={c.heading} strokeWidth={2.5} />
             </Pressable>
           </View>
           <View style={styles.presetRow}>
@@ -241,7 +244,7 @@ export function GeneratorScreen() {
         <View style={styles.save}>
           <PrimaryButton label="SAVE SECURE PASSWORD" onPress={handleSave} />
           <View style={styles.footerMeta}>
-            <ShieldCheck size={12} color={VaultColors.placeholder} strokeWidth={1.75} />
+            <ShieldCheck size={12} color={c.placeholder} strokeWidth={1.75} />
             <Text style={styles.footerMetaText}>Generated on-device — nothing leaves your phone</Text>
           </View>
         </View>
@@ -252,7 +255,8 @@ export function GeneratorScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+function makeStyles(c: VaultColorsShape) {
+  return StyleSheet.create({
   content: {
     paddingHorizontal: 20,
   },
@@ -267,17 +271,17 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: VaultColors.accentSoft,
+    backgroundColor: c.accentSoft,
     borderWidth: 1,
-    borderColor: VaultColors.accent + '55',
+    borderColor: c.accent + '55',
   },
   title: {
     ...VaultType.title,
-    color: VaultColors.heading,
+    color: c.heading,
   },
   subtitle: {
     fontSize: 14,
-    color: VaultColors.muted,
+    color: c.muted,
     marginTop: 2,
   },
   displayCard: {
@@ -286,14 +290,14 @@ const styles = StyleSheet.create({
   },
   displayLabel: {
     ...VaultType.label,
-    color: VaultColors.accent,
+    color: c.accent,
     opacity: 0.8,
   },
   password: {
     fontSize: 22,
     fontWeight: '600',
     letterSpacing: 1.5,
-    color: VaultColors.heading,
+    color: c.heading,
   },
   displayActions: {
     flexDirection: 'row',
@@ -333,7 +337,7 @@ const styles = StyleSheet.create({
     borderRadius: 9999,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: VaultColors.accentSoft,
+    backgroundColor: c.accentSoft,
   },
   pressed: {
     opacity: 0.8,
@@ -350,12 +354,12 @@ const styles = StyleSheet.create({
   optionTitle: {
     fontSize: 16,
     fontWeight: '700',
-    color: VaultColors.heading,
+    color: c.heading,
   },
   lengthValue: {
     fontSize: 22,
     fontWeight: '700',
-    color: VaultColors.accent,
+    color: c.accent,
   },
   lengthControls: {
     flexDirection: 'row',
@@ -369,8 +373,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
-    borderColor: VaultColors.glassBorder,
-    backgroundColor: VaultColors.glassBackground,
+    borderColor: c.glassBorder,
+    backgroundColor: c.glassBackground,
   },
   lengthTrack: {
     flex: 1,
@@ -382,7 +386,7 @@ const styles = StyleSheet.create({
   lengthFill: {
     height: 6,
     borderRadius: 9999,
-    backgroundColor: VaultColors.accent,
+    backgroundColor: c.accent,
   },
   presetRow: {
     flexDirection: 'row',
@@ -396,24 +400,24 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     borderRadius: 9999,
     borderWidth: 1,
-    borderColor: VaultColors.glassBorder,
-    backgroundColor: VaultColors.glassBackground,
+    borderColor: c.glassBorder,
+    backgroundColor: c.glassBackground,
   },
   presetChipActive: {
-    borderColor: VaultColors.accent,
-    backgroundColor: VaultColors.accentSoft,
+    borderColor: c.accent,
+    backgroundColor: c.accentSoft,
   },
   presetText: {
     fontSize: 13,
     fontWeight: '600',
-    color: VaultColors.muted,
+    color: c.muted,
   },
   presetTextActive: {
-    color: VaultColors.accent,
+    color: c.accent,
   },
   divider: {
     height: 1,
-    backgroundColor: VaultColors.glassBorder,
+    backgroundColor: c.glassBorder,
     marginVertical: 4,
   },
   toggleRow: {
@@ -425,11 +429,11 @@ const styles = StyleSheet.create({
   toggleLabel: {
     fontSize: 15,
     fontWeight: '600',
-    color: VaultColors.heading,
+    color: c.heading,
   },
   toggleHint: {
     fontSize: 12,
-    color: VaultColors.muted,
+    color: c.muted,
     marginTop: 2,
   },
   save: {
@@ -445,6 +449,7 @@ const styles = StyleSheet.create({
   footerMetaText: {
     fontSize: 12,
     fontWeight: '500',
-    color: VaultColors.placeholder,
+    color: c.placeholder,
   },
-});
+  });
+}
