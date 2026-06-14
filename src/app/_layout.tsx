@@ -11,7 +11,8 @@ import { StatusBar } from 'expo-status-bar';
 import { useEffect, useMemo } from 'react';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
-import { ColorThemeProvider, ColorThemeVaultSync, useVaultColors } from '@/contexts/color-theme-context';
+import { ColorThemeVaultSync, useVaultColors } from '@/contexts/color-theme-context';
+import { SecureVaultThemeProvider } from '@/contexts/securevault-theme-context';
 import { ToastProvider } from '@/contexts/toast-context';
 import { VaultProvider, useVault } from '@/contexts/vault-context';
 
@@ -72,12 +73,12 @@ export default function RootLayout() {
 
   return (
     <SafeAreaProvider>
-      <ColorThemeProvider>
+      <SecureVaultThemeProvider>
         <VaultProvider>
           <VaultThemeSync />
           <AppNavigation />
         </VaultProvider>
-      </ColorThemeProvider>
+      </SecureVaultThemeProvider>
     </SafeAreaProvider>
   );
 }

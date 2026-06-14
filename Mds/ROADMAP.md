@@ -2,9 +2,18 @@
 
 Track progress for building the **SecureVault** password manager as an **Expo (React Native)** app, using the UI/UX in the [`screenshots/`](../screenshots) folder as the design reference.
 
-**Last updated:** 2026-06-14 (Run 9)  
-**Overall status:** 🟡 In progress — **55%** project-wide (Phase 7 premium pass: evolved tokens to a CRED-style blend, completed the motion-duration + haptic map, and shipped a redesigned **Dashboard** proof-of-concept)
+**Last updated:** 2026-06-14 (Run 14)  
+**Overall status:** 🟡 In progress — **49%** project-wide (added **Phase 8 — Modern Animation & UX**: an advanced motion track for gesture-driven interactions, shared-element transitions, delight animations, and reduced-motion accessibility)
 
+> **Status (2026-06-14, Run 14):** Added **Phase 8 — Modern Animation & UX** as a second polish track
+> (18 tasks) that extends Phase 7's token + motion foundation toward a best-in-class feel: gesture-driven
+> list/sheet interactions (swipe actions, drag-to-reorder, velocity-aware sheets), shared-element + scroll-
+> driven screen transitions, delight/feedback animations (Lottie success, animated rings/strength meters,
+> celebratory moments), ambient motion (animated gradients, shimmer→content morphs, spring tab bar), and a
+> dedicated accessibility + performance pass (reduce-motion variants, 60fps UI-thread budget, timing audit).
+> Adding the new scope moves the project-wide denominator to **168** tasks; overall → **49%** (82/168).
+> The Pre-Phase 3 gate is unaffected (still 58%). New milestone **M6 — Living UI** tracks the track.
+>
 > **Status (2026-06-14, Run 9):** **Premium UI proof-of-concept (CRED-style blend).** Evolved the
 > `src/theme` tokens toward a premium dark look — deep aubergine background, violet accent, and new
 > `glass` + `gradients` token sets (resolved per scheme via `getTheme`). Added a reusable
@@ -73,23 +82,24 @@ rg "^- \[x\]" ROADMAP.md | wc -l      # completed
 
 | Metric | Value |
 |--------|-------|
-| Tasks completed | **82** / **150** |
-| **Overall progress** | **55%** |
+| Tasks completed | **90** / **168** |
+| **Overall progress** | **54%** |
 
 ```
-[███████████░░░░░░░░░] 55%
+[███████████░░░░░░░░░] 54%
 ```
 
 | Phase | Done | Total | Progress | Status |
 |-------|------|-------|----------|--------|
 | 0 — Foundation | 6 | 6 | 100% | ✅ |
-| 1 — Design system & shell | 3 | 11 | 27% | 🟡 |
+| 1 — Design system & shell | 11 | 11 | 100% | ✅ |
 | 2 — UI (mock data) | 19 | 31 | 61% | 🟡 |
 | 3 — Local vault & security | 22 | 23 | 96% | 🟡 |
 | 4 — Password health | 10 | 10 | 100% | ✅ |
 | 5 — Polish & release | 11 | 18 | 61% | 🟡 |
 | 6 — Backend & sync (optional) | 0 | 8 | 0% | ⬜ |
 | 7 — Premium UI (Fold-style) | 6 | 22 | 27% | 🟡 |
+| 8 — Modern Animation & UX | 0 | 18 | 0% | ⬜ |
 
 *v1 feature lists (must-have / nice-to-have under Phase 0) are tracked separately below and are **not** included in the table above.*
 
@@ -101,11 +111,11 @@ rg "^- \[x\]" ROADMAP.md | wc -l      # completed
 
 | Metric | Value |
 |--------|-------|
-| Tasks completed | **28** / **48** |
-| **Pre-Phase 3 progress** | **58%** |
+| Tasks completed | **36** / **48** |
+| **Pre-Phase 3 progress** | **75%** |
 
 ```
-[████████████░░░░░░░░] 58%
+[███████████████░░░░░] 75%
 ```
 
 **Remaining before Phase 3 gate:** all Phase 1–2 tasks.
@@ -128,13 +138,14 @@ rg "^- \[x\]" ROADMAP.md | wc -l      # completed
 | Milestone | Phases | Progress | Notes |
 |-----------|--------|----------|-------|
 | **M0 — Kickoff** | 0 | 100% | Scope/process documented; design reference now lives in the `screenshots/` folder |
-| **M1 — Walkable UI** | 1–2 | **44%** | Dashboard + Vault UI verified live; Generator tab live; screens wired to real data; app fonts loaded; route groups `(auth)`/`(tabs)` + `entry/[id]`; starter Explore tab removed |
+| **M1 — Walkable UI** | 1–2 | **81%** | Phase 1 app shell complete; Dashboard + Vault UI verified live; Generator tab live; screens wired to real data; app fonts loaded; route groups `(auth)`/`(tabs)` + `entry/[id]`; starter Explore tab removed |
 | **M2 — Private beta** | 3–4 | **98%** | AES-GCM encryption, Generator, categories; Password Health 100% |
 | **M3 — Store beta** | 5 | 61% | Accessibility, release metadata, screen-capture protection, loading/empty states |
 | **M4 — Cloud** | 6 | 0% | Optional |
 | **M5 — Premium UI** | 7 | 27% | Premium CRED-blend tokens + theme/haptics hooks + motion map shipped; Dashboard PoC migrated; UI kit & remaining screens next |
+| **M6 — Living UI** | 8 | 0% | Advanced motion: gesture interactions, shared-element transitions, delight animations, reduce-motion + 60fps pass |
 
-**M1 formula:** average of Phase 1 (27%) and Phase 2 (61%) = **44%**.
+**M1 formula:** average of Phase 1 (100%) and Phase 2 (61%) = **81%**.
 
 ---
 
@@ -286,15 +297,16 @@ contexts/                     # Auth, vault (Phase 3+)
 | Phase | Name | Goal | Progress | Status |
 |-------|------|------|----------|--------|
 | 0 | Foundation | Repo ready, decisions documented | 100% | ✅ Done |
-| 1 | Design system & shell | Theme, navigation, dark mode, UI kit | 27% | 🟡 In progress |
+| 1 | Design system & shell | Theme, navigation, dark mode, UI kit | 100% | ✅ Done |
 | 2 | UI screens (mock data) | All 5 screens match prototype | 61% | 🟡 In progress |
 | 3 | Local vault & security | Real CRUD, encryption, generator | 96% | 🟡 In progress |
 | 4 | Password health | Scoring, reuse, strength rules | 100% | ✅ Done |
 | 5 | Polish & release prep | A11y, errors, store assets | 61% | 🟡 In progress |
 | 6 | Backend & sync (optional) | Auth API, cloud vault, multi-device | 0% | ⬜ Not started |
 | 7 | Premium UI (Fold-style) | Design tokens, UI kit, motion + haptics, screen migration | 27% | 🟡 In progress |
-| — | **Project overall** | All phases | **53%** | 🟡 |
-| — | **Pre-Phase 3 gate** | Phases 0–2 only | **52%** | 🟡 |
+| 8 | Modern Animation & UX | Gestures, shared transitions, delight motion, reduce-motion + 60fps | 0% | ⬜ Not started |
+| — | **Project overall** | All phases | **49%** | 🟡 |
+| — | **Pre-Phase 3 gate** | Phases 0–2 only | **58%** | 🟡 |
 | — | **V1 must-have** | Product MVP | **25%** | 🟡 |
 
 **Legend:** ⬜ Not started · 🟡 In progress · ✅ Done
@@ -361,17 +373,17 @@ contexts/                     # Auth, vault (Phase 3+)
 
 ### Tasks
 
-- [ ] **1.1** Add `constants/securevault-theme.ts` with **light + dark** palettes
+- [x] **1.1** Add `constants/securevault-theme.ts` with **light + dark** palettes *(`src/constants/securevault-theme.ts` bridges to `src/theme/colors.ts`)*
 - [x] **1.2** Load app fonts via `expo-font` — **keep current fonts**: system sans for body + Playfair Display serif headings (`@expo-google-fonts/playfair-display` in `app/_layout.tsx`)
-- [ ] **1.3** Update root `app/_layout.tsx` (theme provider, fonts, splash)
+- [x] **1.3** Update root `app/_layout.tsx` (theme provider, fonts, splash) *(`src/app/_layout.tsx` wires fonts, splash, providers, navigation theme, and status bar)*
 - [x] **1.4** Create route groups: `(auth)` (onboarding/unlock/setup), `(tabs)` (dashboard/vault/my-vault/generator/health/settings) + `entry/[id]` credential detail *(custom `BottomNav` kept; `add-credential`/`change-password` remain root routes)*
-- [ ] **1.5** Implement auth gate (onboarding flag in `expo-secure-store`)
-- [ ] **1.6** Build custom **pill tab bar** (blur on iOS, themed on Android)
-- [ ] **1.7** Wire tab routes: Home, Vault, Generator, Health
-- [ ] **1.8** Create shared UI primitives: `Button`, `Card`, `Input`, `Badge`, `Progress`, `Screen`
+- [x] **1.5** Implement auth gate (onboarding flag in `expo-secure-store`) *(`src/services/onboarding.ts` + auth entry resume setup after onboarding)*
+- [x] **1.6** Build custom **pill tab bar** (blur on iOS, themed on Android) *(`src/components/vault/bottom-nav.tsx`)*
+- [x] **1.7** Wire tab routes: Home, Vault, Generator, Health *(Dashboard, Vault, Generator, Health, Settings wired via `(tabs)` routes + `BottomNav`)*
+- [x] **1.8** Create shared UI primitives: `Button`, `Card`, `Input`, `Badge`, `Progress`, `Screen` *(`src/components/ui/primitives.tsx` + `src/components/ui/index.ts`)*
 - [x] **1.9** Remove default Expo Explore tab *(deleted unused starter `components/app-tabs.tsx` + `app-tabs.web.tsx` with their Home/Explore triggers — app uses the custom `BottomNav`)*
-- [ ] **1.10** Configure status bar / safe areas (`Screen` + `SafeAreaView`)
-- [ ] **1.11** `SecureVaultThemeProvider` — all screens use `useSecureVaultTheme()`
+- [x] **1.10** Configure status bar / safe areas (`Screen` + `SafeAreaView`) *(root `SafeAreaProvider`, `StatusBar`, safe-area-aware screens, and shared `Screen`)*
+- [x] **1.11** `SecureVaultThemeProvider` — all screens use `useSecureVaultTheme()` *(`SecureVaultThemeProvider` wraps the existing theme context; `useSecureVaultTheme()` aliases the resolved token hook)*
 
 ### Definition of done
 
@@ -647,6 +659,74 @@ Build under `components/ui/`; never duplicate UI logic, extract repeated pattern
 
 ---
 
+## Phase 8 — Modern Animation & UX
+
+**Goal:** Take the app from "polished" to "alive." Where Phase 7 established the calm token + motion *foundation*, Phase 8 layers on the **advanced, gesture-driven, physics-based motion and micro-interactions** that define best-in-class apps (Things, Linear, Arc, Revolut). Every interaction should feel direct, responsive, and reversible — driven by gestures and spring physics rather than fixed timers — while staying fully accessible and running at 60fps.
+
+> This is a **second polish track** that builds directly on [Phase 7](#phase-7--premium-ui-overhaul-fold-style). It depends on the Phase 7 design tokens (`theme/animations.ts`, `useTheme`, `useHaptics`) and UI kit, and reuses the [Fold-style design tokens](#fold-style-design-tokens-phase-7). Not a v1 blocker.
+
+**Core principles**
+
+- **Gesture-first:** prefer interruptible, gesture-driven motion (drag, swipe, fling) over tap-then-wait animations; users should be able to reverse a gesture mid-flight.
+- **Physics over timers:** use spring/decay physics for anything the finger touches; reserve fixed durations for non-interactive transitions.
+- **Purposeful delight:** animation must communicate state, hierarchy, or spatial continuity — never decoration for its own sake.
+- **Accessible by default:** every animation has a reduced-motion variant; nothing relies solely on motion to convey meaning.
+- **Always 60fps:** all animation runs on the UI thread (Reanimated worklets); never block JS or thrash layout.
+
+### 8.1 Gesture-driven interactions
+
+- [ ] **8.1** Swipe-to-action vault rows (reveal copy / edit / delete) with spring snap, haptic detents, and full-swipe shortcut
+- [ ] **8.2** Long-press → context menu + drag-to-reorder favorites (`react-native-gesture-handler` + Reanimated layout)
+- [ ] **8.3** Custom branded pull-to-refresh (animated shield/progress, not the default spinner)
+- [ ] **8.4** Velocity-aware bottom sheet gestures (snap points, fling-to-dismiss, backdrop fade with drag)
+
+### 8.2 Shared element & screen transitions
+
+- [ ] **8.5** Shared-element transition: vault row → entry detail (logo + title morph in place)
+- [ ] **8.6** Scroll-driven collapsing headers with parallax hero (header shrinks/blurs as content scrolls)
+- [ ] **8.7** Spatial continuity between Dashboard and Health (score/number morphs across screens)
+
+### 8.3 Delight & feedback animations
+
+- [ ] **8.8** Lottie / Reanimated success states (animated checkmark on save, copy-confirm pulse)
+- [ ] **8.9** Animated empty-state illustrations (subtle looping motion, reduce-motion safe)
+- [ ] **8.10** Generator strength meter: spring fill + color interpolation as strength changes
+- [ ] **8.11** Health score ring draw-on animation synced with the count-up number
+- [ ] **8.12** Subtle celebratory moment on health-score milestone (light confetti / glow, tasteful, dismissible)
+
+### 8.4 Continuous & ambient motion
+
+- [ ] **8.13** Perf-budgeted animated gradient / glow backdrops (slow drift, paused when offscreen)
+- [ ] **8.14** Shimmer skeleton → content morph using Reanimated layout animations (no hard pop-in)
+- [ ] **8.15** Spring-animated tab bar: active pill slides with spring, icon morph/scale on selection
+
+### 8.5 Accessibility & performance
+
+- [ ] **8.16** Respect `useReducedMotion()` — provide crossfade/instant variants for every motion above
+- [ ] **8.17** 60fps budget: worklet-driven UI-thread animation, avoid JS layout thrash, profile with the perf monitor on a mid-range device
+- [ ] **8.18** Motion consistency audit: all springs/durations sourced from `theme/animations.ts`; final timing + easing fine-tune and design QA
+
+### Suggested libraries
+
+| Purpose | Library |
+|---------|---------|
+| Gestures & physics | `react-native-gesture-handler`, `react-native-reanimated` (springs, `withDecay`, layout animations) |
+| Shared transitions | Reanimated shared element transitions / `expo-router` transitions |
+| Vector / Lottie | `lottie-react-native`, `react-native-svg` (animated paths for rings/strength) |
+| Sheets | `@gorhom/bottom-sheet` |
+| Effects | `expo-blur`, `expo-linear-gradient` |
+| Feedback | `expo-haptics` |
+
+### Definition of done
+
+- Core lists and sheets are gesture-driven with spring physics and haptic detents; gestures are interruptible and reversible.
+- Navigating into and out of an entry uses a shared-element / spatial-continuity transition.
+- Success, loading, and empty states use purposeful animation instead of static UI or spinners.
+- Every animation has a verified reduced-motion variant and conveys no information by motion alone.
+- All animations hold 60fps on a mid-range device and source their timing/spring config from `theme/animations.ts`.
+
+---
+
 ## Milestones (high level)
 
 | Milestone | Phases | User-visible outcome |
@@ -657,6 +737,7 @@ Build under `components/ui/`; never duplicate UI logic, extract repeated pattern
 | **M3 — Store beta** | 5 | Polished build on TestFlight / internal track |
 | **M4 — Cloud** | 6 | Account + sync (if in scope) |
 | **M5 — Premium UI** | 7 | Calm, responsive, Fold-style premium experience |
+| **M6 — Living UI** | 8 | Gesture-driven, physics-based, delightful motion that stays accessible and 60fps |
 
 ---
 
@@ -696,6 +777,7 @@ Add a row when you complete a phase or milestone.
 
 | Date | Phase / Milestone | Notes | Updated by |
 |------|-------------------|-------|------------|
+| 2026-06-14 | Phase 8 added (Run 14) | Added **Phase 8 — Modern Animation & UX**: 18 tasks across gesture-driven interactions (8.1–8.4), shared element & screen transitions (8.5–8.7), delight & feedback animations (8.8–8.12), continuous & ambient motion (8.13–8.15), and accessibility & performance (8.16–8.18), plus milestone **M6 — Living UI**. A second polish track that builds on Phase 7's tokens/UI kit toward gesture-first, physics-based, accessible 60fps motion. New scope: overall denominator → 168; overall → 49% (82/168); Pre-Phase 3 gate unchanged at 58%. | Cursor |
 | 2026-06-14 | Phase 1 (1.9) remove Explore tab (Run 13) | Removed the default Expo starter **Explore tab** by deleting the unused `components/app-tabs.tsx` and `app-tabs.web.tsx` scaffolding (Home/Explore triggers + "Expo Starter" branding). No imports referenced them — the app uses the custom `BottomNav` — so no other code changed. Lint clean. Completed **1.9**. Phase 1 → 27% (3/11); overall → 55% (82/150); Pre-Phase 3 gate → 58% (28/48); M1 → 44%. | Cursor |
 | 2026-06-14 | Phase 1 (1.4) route groups (Run 12) | Restructured `src/app/` routing to match the planned architecture: added **`(auth)`** group (onboarding `index` + `unlock` + `setup`), **`(tabs)`** group (dashboard/vault/my-vault/generator/health/settings with a nested no-animation stack `_layout`), and **`entry/[id]`** for credential detail/edit (replaces `/edit-credential`). Updated root `_layout.tsx` to reference the groups and repointed nav calls (`/edit-credential` → `/entry/[id]`). Route groups keep existing URLs, so the custom `BottomNav` and all `href`s still work; `add-credential`/`change-password` remain root routes. Completed **1.4**. Lint clean. Phase 1 → 18% (2/11); overall → 54% (81/150); Pre-Phase 3 gate → 56% (27/48); M1 → 40%. | Cursor |
 | 2026-06-14 | Phase 1 (1.2) font decision (Run 11) | Decided to **keep the current fonts** instead of switching to Plus Jakarta Sans: system sans for body + **Playfair Display** serif headings (loaded via `@expo-google-fonts/playfair-display` in `app/_layout.tsx`). Updated the design-reference Font token and completed **1.2**. Phase 1 → 9% (1/11); overall → 53% (80/150); Pre-Phase 3 gate → 54% (26/48); M1 → 35%. | Cursor |
@@ -765,7 +847,7 @@ npm run lint
 
 | Field | Current value |
 |-------|----------------|
-| Overall (all phases) | 82 / 150 = **55%** |
+| Overall (all phases) | 82 / 168 = **49%** |
 | Pre-Phase 3 (phases 0–2) | 28 / 48 = **58%** |
 | V1 must-have | 2 / 8 = **25%** |
 | Phase 0 | 6 / 6 |
@@ -776,3 +858,4 @@ npm run lint
 | Phase 5 | 11 / 18 |
 | Phase 6 | 0 / 8 |
 | Phase 7 | 6 / 22 |
+| Phase 8 | 0 / 18 |

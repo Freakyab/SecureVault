@@ -15,6 +15,7 @@ import {
 import { mergeCredentials } from '@/services/vault-backup';
 import { clearBiometricKey, getBiometricKey, storeBiometricKey } from '@/services/biometric-key';
 import { hexToKey, keyToHex } from '@/services/crypto/vault-crypto';
+import { clearOnboardingComplete } from '@/services/onboarding';
 import {
   Credential,
   DEFAULT_VAULT_SETTINGS,
@@ -359,6 +360,7 @@ export function VaultProvider({ children }: PropsWithChildren) {
   async function resetVault() {
     await resetStoredVault();
     await clearBiometricKey();
+    await clearOnboardingComplete();
     encryptionKeyRef.current = null;
     setIsInitialized(false);
     setIsUnlocked(false);
