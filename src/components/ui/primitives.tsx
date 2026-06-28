@@ -92,7 +92,7 @@ function makeStyles(theme: Theme) {
       padding: theme.spacing.xl,
     },
     cardElevated: {
-      ...theme.shadows.card,
+      ...theme.shadows.sm,
     },
     field: {
       gap: theme.spacing.sm,

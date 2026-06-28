@@ -10,9 +10,7 @@ export interface SecureVaultThemePalettes {
  * the richer token system in `src/theme` remains the source of truth.
  */
 export const SecureVaultTheme = {
-  light: colors.light,
   dark: colors.dark,
-} as const satisfies SecureVaultThemePalettes;
+} as const satisfies { dark: ColorScheme };
 
-export const SecureVaultLightPalette = SecureVaultTheme.light;
 export const SecureVaultDarkPalette = SecureVaultTheme.dark;

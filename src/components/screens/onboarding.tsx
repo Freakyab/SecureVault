@@ -10,12 +10,18 @@ import {
   useWindowDimensions,
   View,
 } from 'react-native';
+import Animated, { FadeIn } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { IconTile, PrimaryButton, ScreenBackground } from '@/components/vault';
-import { VaultType } from '@/constants/vault-theme';
-import { useVaultColors } from '@/contexts/color-theme-context';
-import type { VaultColorsShape } from '@/theme/color-themes';
+import { AnimatedBlobs } from '@/components/ui/animated-blobs';
+import { IconTile } from '@/components/vault';
+import { Button } from '@/components/ui';
+import { useColorTheme } from '@/contexts/color-theme-context';
+import { useHaptics } from '@/hooks/use-haptics';
+import { useTheme } from '@/hooks/use-theme';
+import { type Theme } from '@/theme';
+import { COLOR_THEMES } from '@/theme/color-themes';
+import { useThemePresets } from '@/theme/presets';
 
 interface Slide {
   icon: LucideIcon;
@@ -54,8 +60,11 @@ interface OnboardingScreenProps {
 
 export function OnboardingScreen({ onFinish }: OnboardingScreenProps) {
   const insets = useSafeAreaInsets();
-  const c = useVaultColors();
-  const styles = useMemo(() => makeStyles(c), [c]);
+  const theme = useTheme();
+  const p = useThemePresets();
+  const haptics = useHaptics();
+  const { colorThemeId } = useColorTheme();
+  const styles = useMemo(() => makeStyles(theme), [theme]);
   const { width } = useWindowDimensions();
   const scrollRef = useRef<ScrollView>(null);
   const [index, setIndex] = useState(0);
@@ -67,22 +76,30 @@ export function OnboardingScreen({ onFinish }: OnboardingScreenProps) {
     if (next !== index) setIndex(next);
   }
 
+  function finish() {
+    haptics.success();
+    onFinish?.();
+  }
+
   function handleNext() {
     if (isLast) {
-      onFinish?.();
+      finish();
       return;
     }
+    haptics.selection();
     scrollRef.current?.scrollTo({ x: width * (index + 1), animated: true });
   }
 
   return (
-    <ScreenBackground>
+    <View style={p.screen}>
+      <AnimatedBlobs colors={COLOR_THEMES[colorThemeId].blob} />
+
       <View style={[styles.skipRow, { paddingTop: insets.top + 12 }]}>
         <Pressable
           accessibilityRole="button"
           accessibilityLabel="Skip onboarding and set up vault"
           hitSlop={12}
-          onPress={onFinish}>
+          onPress={finish}>
           <Text style={styles.skip}>Skip</Text>
         </Pressable>
       </View>
@@ -96,15 +113,19 @@ export function OnboardingScreen({ onFinish }: OnboardingScreenProps) {
         style={styles.carousel}>
         {SLIDES.map((slide) => (
           <View key={slide.title} style={[styles.slide, { width }]}>
-            <IconTile icon={slide.icon} size={160} iconSize={72} color={c.accent} />
-            <Text style={styles.badge}>{slide.badge}</Text>
+            <IconTile icon={slide.icon} size={160} iconSize={72} color={theme.colors.accent} />
+            <Animated.Text
+              entering={FadeIn.duration(theme.motion.duration.cardExpand)}
+              style={styles.badge}>
+              {slide.badge}
+            </Animated.Text>
             <Text style={styles.title}>{slide.title}</Text>
             <Text style={styles.description}>{slide.description}</Text>
           </View>
         ))}
       </ScrollView>
 
-      <View style={[styles.footer, { paddingBottom: insets.bottom + 24 }]}>
+      <View style={[styles.footer, { paddingBottom: insets.bottom + theme.spacing.xl }]}>
         <View style={styles.dots}>
           {SLIDES.map((slide, dotIndex) => (
             <View
@@ -114,7 +135,9 @@ export function OnboardingScreen({ onFinish }: OnboardingScreenProps) {
           ))}
         </View>
 
-        <PrimaryButton label={isLast ? 'GET STARTED' : 'NEXT'} onPress={handleNext} />
+        <Button onPress={handleNext}>
+          {isLast ? 'GET STARTED' : 'NEXT'}
+        </Button>
 
         <View style={styles.signInRow}>
           <Text style={styles.signInText}>Already have an account?</Text>
@@ -122,87 +145,91 @@ export function OnboardingScreen({ onFinish }: OnboardingScreenProps) {
             accessibilityRole="button"
             accessibilityLabel="Sign in or continue to vault setup"
             hitSlop={8}
-            onPress={onFinish}>
+            onPress={finish}>
             <Text style={styles.signInLink}>Sign in</Text>
           </Pressable>
         </View>
       </View>
-    </ScreenBackground>
+    </View>
   );
 }
 
-function makeStyles(c: VaultColorsShape) {
+function makeStyles(t: Theme) {
   return StyleSheet.create({
-  skipRow: {
-    alignItems: 'flex-end',
-    paddingHorizontal: 20,
-    paddingBottom: 8,
-  },
-  skip: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: c.muted,
-  },
-  carousel: {
-    flex: 1,
-  },
-  slide: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 32,
-    gap: 16,
-  },
-  badge: {
-    ...VaultType.label,
-    marginTop: 16,
-    color: c.accent,
-    opacity: 0.8,
-  },
-  title: {
-    ...VaultType.title,
-    color: c.heading,
-    textAlign: 'center',
-  },
-  description: {
-    ...VaultType.body,
-    color: c.body,
-    textAlign: 'center',
-    maxWidth: 320,
-  },
-  footer: {
-    paddingHorizontal: 20,
-    gap: 24,
-  },
-  dots: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    gap: 8,
-  },
-  dot: {
-    width: 8,
-    height: 8,
-    borderRadius: 9999,
-    backgroundColor: 'rgba(255,255,255,0.2)',
-  },
-  dotActive: {
-    width: 24,
-    backgroundColor: c.accent,
-  },
-  signInRow: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    gap: 6,
-  },
-  signInText: {
-    fontSize: 14,
-    color: c.muted,
-  },
-  signInLink: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: c.accent,
-  },
+    skipRow: {
+      alignItems: 'flex-end',
+      paddingHorizontal: t.layout.screenPadding,
+      paddingBottom: t.spacing.sm,
+    },
+    skip: {
+      ...t.typography.body,
+      fontSize: 14,
+      fontWeight: t.fontWeight.medium,
+      color: t.colors.textMuted,
+    },
+    carousel: {
+      flex: 1,
+    },
+    slide: {
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingHorizontal: t.spacing.xxl,
+      gap: t.spacing.lg,
+    },
+    badge: {
+      ...t.typography.label,
+      letterSpacing: 2,
+      marginTop: t.spacing.lg,
+      color: t.colors.accent,
+      opacity: 0.8,
+    },
+    title: {
+      ...t.typography.displaySerif,
+      color: t.colors.text,
+      textAlign: 'center',
+    },
+    description: {
+      ...t.typography.body,
+      color: t.colors.textSecondary,
+      textAlign: 'center',
+      maxWidth: 320,
+    },
+    footer: {
+      paddingHorizontal: t.layout.screenPadding,
+      gap: t.spacing.xl,
+    },
+    dots: {
+      flexDirection: 'row',
+      justifyContent: 'center',
+      alignItems: 'center',
+      gap: t.spacing.sm,
+    },
+    dot: {
+      width: t.spacing.sm,
+      height: t.spacing.sm,
+      borderRadius: t.radius.full,
+      backgroundColor: t.glass.border,
+    },
+    dotActive: {
+      width: t.spacing.xl,
+      backgroundColor: t.colors.accent,
+    },
+    signInRow: {
+      flexDirection: 'row',
+      justifyContent: 'center',
+      alignItems: 'center',
+      gap: t.spacing.xs + 2,
+    },
+    signInText: {
+      ...t.typography.body,
+      fontSize: 14,
+      color: t.colors.textMuted,
+    },
+    signInLink: {
+      ...t.typography.body,
+      fontSize: 14,
+      fontWeight: t.fontWeight.semibold,
+      color: t.colors.accent,
+    },
   });
 }

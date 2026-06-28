@@ -3,9 +3,8 @@ import { useMemo } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { useVaultColors } from '@/contexts/color-theme-context';
-import { VaultType } from '@/constants/vault-theme';
-import type { VaultColorsShape } from '@/theme/color-themes';
+import { useTheme } from '@/hooks/use-theme';
+import { type Theme } from '@/theme';
 
 interface VaultHeaderProps {
   title?: string;
@@ -16,54 +15,55 @@ interface VaultHeaderProps {
   showAvatar?: boolean;
 }
 
-function makeStyles(c: VaultColorsShape) {
+function makeStyles(t: Theme) {
   return StyleSheet.create({
     header: {
       flexDirection: 'row',
       alignItems: 'flex-end',
       justifyContent: 'space-between',
-      paddingHorizontal: 20,
-      paddingBottom: 12,
-      backgroundColor: c.headerBackground,
+      paddingHorizontal: t.layout.screenPadding,
+      paddingBottom: t.spacing.md,
+      backgroundColor: t.colors.surface,
       borderBottomWidth: StyleSheet.hairlineWidth,
-      borderBottomColor: c.headerBorder,
+      borderBottomColor: t.glass.border,
     },
     leading: {
       flexDirection: 'row',
       alignItems: 'center',
-      gap: 12,
+      gap: t.spacing.md,
     },
     backButton: {
       width: 40,
       height: 40,
-      borderRadius: 9999,
+      borderRadius: t.radius.full,
       alignItems: 'center',
       justifyContent: 'center',
-      backgroundColor: c.glassBackground,
+      backgroundColor: t.glass.fill,
       borderWidth: 1,
-      borderColor: c.glassBorder,
+      borderColor: t.glass.border,
     },
     brand: {
-      ...VaultType.brand,
-      color: c.accent,
+      ...t.typography.headingSerif,
+      fontSize: 24,
+      color: t.colors.accent,
     },
     avatar: {
       width: 40,
       height: 40,
-      borderRadius: 9999,
-      backgroundColor: c.avatarBackground,
+      borderRadius: t.radius.full,
+      backgroundColor: t.colors.surfaceAlt,
       borderWidth: 1,
-      borderColor: c.avatarBorder,
+      borderColor: t.glass.border,
     },
     trailingButton: {
       width: 40,
       height: 40,
-      borderRadius: 9999,
+      borderRadius: t.radius.full,
       alignItems: 'center',
       justifyContent: 'center',
-      backgroundColor: c.glassBackground,
+      backgroundColor: t.glass.fill,
       borderWidth: 1,
-      borderColor: c.glassBorder,
+      borderColor: t.glass.border,
     },
   });
 }
@@ -77,15 +77,15 @@ export function VaultHeader({
   showAvatar = false,
 }: VaultHeaderProps) {
   const insets = useSafeAreaInsets();
-  const c = useVaultColors();
-  const styles = useMemo(() => makeStyles(c), [c]);
+  const theme = useTheme();
+  const styles = useMemo(() => makeStyles(theme), [theme]);
 
   return (
     <View style={[styles.header, { paddingTop: insets.top + 12, height: 64 + insets.top }]}>
       <View style={styles.leading}>
         {showBack ? (
           <Pressable accessibilityLabel="Go back" hitSlop={12} onPress={onBack} style={styles.backButton}>
-            <ArrowLeft size={20} color={c.heading} strokeWidth={1.75} />
+            <ArrowLeft size={20} color={theme.colors.text} strokeWidth={1.75} />
           </Pressable>
         ) : null}
         <Text style={styles.brand}>{title}</Text>
@@ -98,7 +98,7 @@ export function VaultHeader({
           hitSlop={12}
           onPress={onTrailingPress}
           style={styles.trailingButton}>
-          <TrailingIcon size={19} color={c.heading} strokeWidth={1.75} />
+          <TrailingIcon size={19} color={theme.colors.text} strokeWidth={1.75} />
         </Pressable>
       ) : null}
     </View>

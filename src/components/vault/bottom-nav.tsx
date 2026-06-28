@@ -5,8 +5,8 @@ import { useMemo } from 'react';
 import { Platform, Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { useVaultColors } from '@/contexts/color-theme-context';
-import type { VaultColorsShape } from '@/theme/color-themes';
+import { useTheme } from '@/hooks/use-theme';
+import { type Theme } from '@/theme';
 
 export type VaultTab = 'dashboard' | 'vault' | 'generator' | 'health' | 'settings';
 
@@ -29,50 +29,56 @@ interface BottomNavProps {
   active: VaultTab;
 }
 
-function makeStyles(c: VaultColorsShape) {
+function makeStyles(t: Theme) {
   return StyleSheet.create({
     bar: {
       position: 'absolute',
-      left: 16,
-      right: 16,
+      left: t.spacing.lg,
+      right: t.spacing.lg,
       bottom: 0,
     },
-    row: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-around',
+    navFrame: {
       height: 66,
-      borderRadius: 9999,
+    },
+    surface: {
+      ...StyleSheet.absoluteFillObject,
+      borderRadius: t.radius.full,
       overflow: 'hidden',
       // iOS layers a BlurView behind a thin translucent tint; Android uses the
       // themed solid fill since blur there is costly and less reliable.
-      backgroundColor: Platform.OS === 'ios' ? c.glassBackgroundStrong : c.headerBackground,
+      backgroundColor: Platform.OS === 'ios' ? t.glass.fillStrong : t.colors.surface,
       borderWidth: 1,
-      borderColor: c.glassBorder,
-      paddingHorizontal: 8,
+      borderColor: t.glass.border,
+    },
+    row: {
+      ...StyleSheet.absoluteFillObject,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-around',
+      paddingHorizontal: t.spacing.sm,
     },
     item: {
       flex: 1,
-      height: 56,
+      height: 66,
       alignItems: 'center',
       justifyContent: 'center',
     },
     iconWrap: {
       width: 44,
       height: 40,
-      borderRadius: 14,
+      borderRadius: t.radius.button,
       alignItems: 'center',
       justifyContent: 'center',
     },
     iconWrapActive: {
       width: 56,
       height: 56,
-      borderRadius: 28,
+      borderRadius: t.radius.floating,
       borderWidth: 1.5,
-      borderColor: c.glassBorder,
-      backgroundColor: c.background,
+      borderColor: t.glass.border,
+      backgroundColor: t.colors.background,
       transform: [{ translateY: -18 }],
-      shadowColor: c.accentStrong,
+      shadowColor: t.colors.accentAlt,
       shadowOpacity: 0.55,
       shadowRadius: 12,
       shadowOffset: { width: 0, height: 6 },
@@ -84,15 +90,25 @@ function makeStyles(c: VaultColorsShape) {
 export function BottomNav({ active }: BottomNavProps) {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const c = useVaultColors();
-  const styles = useMemo(() => makeStyles(c), [c]);
+  const theme = useTheme();
+  const styles = useMemo(() => makeStyles(theme), [theme]);
 
   return (
-    <View style={[styles.bar, { paddingBottom: insets.bottom + 8 }]}>
-      <View style={styles.row}>
-        {Platform.OS === 'ios' && (
-          <BlurView intensity={40} tint="dark" style={StyleSheet.absoluteFill} />
-        )}
+    <View
+      style={[
+        styles.bar,
+        {
+          paddingBottom: insets.bottom + theme.spacing.sm,
+          paddingTop: 18,
+        },
+      ]}>
+      <View style={styles.navFrame}>
+        <View style={styles.surface}>
+          {Platform.OS === 'ios' && (
+            <BlurView intensity={40} tint="dark" style={StyleSheet.absoluteFill} />
+          )}
+        </View>
+        <View style={styles.row}>
         {ITEMS.map((item) => {
           const isActive = item.key === active;
           const Icon = item.icon;
@@ -102,18 +118,21 @@ export function BottomNav({ active }: BottomNavProps) {
               accessibilityRole="button"
               accessibilityLabel={item.label}
               accessibilityState={{ selected: isActive }}
-              onPress={() => router.replace(item.route)}
+              onPress={() => {
+                if (!isActive) router.navigate(item.route);
+              }}
               style={styles.item}>
               <View style={[styles.iconWrap, isActive && styles.iconWrapActive]}>
                 <Icon
                   size={isActive ? 24 : 22}
-                  color={isActive ? c.accent : c.muted}
+                  color={isActive ? theme.colors.accent : theme.colors.textMuted}
                   strokeWidth={isActive ? 2.25 : 1.75}
                 />
               </View>
             </Pressable>
           );
         })}
+        </View>
       </View>
     </View>
   );

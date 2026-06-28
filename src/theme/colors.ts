@@ -6,25 +6,10 @@
  * manager. The accent still reads as the SecureVault violet and should occupy
  * < 10% of any screen.
  *
- * Two schemes (`light` / `dark`) share the same token names so screens can read
- * tokens through `useTheme()` without branching on color scheme. The app ships
- * dark-first, so the `dark` scheme carries the premium look; `light` keeps a
- * calm neutral fallback.
+ * The app ships dark-only to maintain its premium aesthetic.
  *
  * Never hardcode raw hex in screens — read from here.
  */
-
-/** SecureVault brand accent for the light scheme. */
-export const brand = {
-  /** Primary accent (buttons, active states, focus rings). */
-  accent: '#5F61F6',
-  /** Slightly lighter brand tint for gradients / pressed states. */
-  accentAlt: '#6568F7',
-  /** Low-opacity accent wash for subtle highlights / selected surfaces. */
-  accentSoft: 'rgba(95, 97, 246, 0.12)',
-  /** Foreground color to use on top of the solid accent. */
-  onAccent: '#FFFFFF',
-} as const;
 
 /** Premium blue accent for the dark scheme (foreground sky-blue + solid fill). */
 export const brandDark = {
@@ -59,7 +44,7 @@ export interface ColorScheme {
   /** Muted text (captions, disabled, placeholders). */
   textMuted: string;
 
-  /** Brand accent + its companions (mirrors `brand`). */
+  /** Brand accent + its companions (mirrors `brandDark`). */
   accent: string;
   accentAlt: string;
   accentSoft: string;
@@ -71,20 +56,6 @@ export interface ColorScheme {
   error: string;
   info: string;
 }
-
-const light: ColorScheme = {
-  background: '#F7F8FA',
-  surface: '#FFFFFF',
-  surfaceAlt: '#F1F3F5',
-  border: '#E9ECEF',
-
-  text: '#121212',
-  textSecondary: '#6C757D',
-  textMuted: '#ADB5BD',
-
-  ...brand,
-  ...semantic,
-};
 
 const dark: ColorScheme = {
   background: '#0A1020',
@@ -100,7 +71,7 @@ const dark: ColorScheme = {
   ...semantic,
 };
 
-export const colors = { light, dark } as const;
+export const colors = { dark } as const;
 
 export type ColorSchemeName = keyof typeof colors;
 
@@ -109,12 +80,6 @@ export type ColorSchemeName = keyof typeof colors;
  * for elevated cards, search bars, and floating elements.
  */
 export const glass = {
-  light: {
-    fill: 'rgba(18, 18, 18, 0.04)',
-    fillStrong: 'rgba(18, 18, 18, 0.06)',
-    border: 'rgba(18, 18, 18, 0.08)',
-    highlight: 'rgba(255, 255, 255, 0.6)',
-  },
   dark: {
     fill: 'rgba(255, 255, 255, 0.04)',
     fillStrong: 'rgba(255, 255, 255, 0.07)',
@@ -129,12 +94,6 @@ export const glass = {
  * `expo-linear-gradient`.
  */
 export const gradients = {
-  light: {
-    accent: ['#6568F7', '#5F61F6'],
-    hero: ['rgba(95, 97, 246, 0.16)', 'rgba(95, 97, 246, 0.02)'],
-    surface: ['rgba(255, 255, 255, 0.9)', 'rgba(245, 246, 250, 0.7)'],
-    glow: ['rgba(95, 97, 246, 0.14)', 'rgba(95, 97, 246, 0.0)'],
-  },
   dark: {
     accent: ['#2D6CF6', '#7FB0FF'],
     hero: ['rgba(45, 108, 246, 0.38)', 'rgba(127, 176, 255, 0.08)'],

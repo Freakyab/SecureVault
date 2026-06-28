@@ -2,21 +2,23 @@ import { useRouter } from 'expo-router';
 import { Copy, Minus, Plus, RefreshCw, ShieldCheck, Wand2 } from 'lucide-react-native';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import Animated, { FadeIn } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { BottomNav, GlassCard, PrimaryButton, ScreenBackground, Toggle } from '@/components/vault';
-import { VaultType } from '@/constants/vault-theme';
-import { useVaultColors } from '@/contexts/color-theme-context';
-import type { VaultColorsShape } from '@/theme/color-themes';
+import { BottomNav, ScreenBackground } from '@/components/vault';
+import { GlassCard, Button, Toggle } from '@/components/ui';
 import { useToast } from '@/contexts/toast-context';
+import { useHaptics } from '@/hooks/use-haptics';
 import { useNavigationLock } from '@/hooks/use-navigation-lock';
-import { copyToClipboard, hapticSuccess, hapticWarning } from '@/services/feedback';
+import { useTheme } from '@/hooks/use-theme';
+import { copyToClipboard } from '@/services/feedback';
 import {
   DEFAULT_GENERATOR_OPTIONS,
   GeneratorOptions,
   generatePassword,
   scorePasswordStrength,
 } from '@/services/password-generator';
+import { type Theme } from '@/theme';
 
 const MIN_LENGTH = 8;
 const MAX_LENGTH = 48;
@@ -33,12 +35,13 @@ const CHAR_OPTIONS: { key: CharOption; label: string; hint: string }[] = [
 
 export function GeneratorScreen() {
   const insets = useSafeAreaInsets();
-  const c = useVaultColors();
-  const styles = useMemo(() => makeStyles(c), [c]);
+  const theme = useTheme();
+  const haptics = useHaptics();
+  const styles = useMemo(() => makeStyles(theme), [theme]);
   const strengthColor: Record<string, string> = {
-    Weak: c.danger,
-    Fair: c.warning,
-    Strong: c.success,
+    Weak: theme.colors.error,
+    Fair: theme.colors.warning,
+    Strong: theme.colors.success,
   };
   const router = useRouter();
   const { showToast } = useToast();
@@ -81,33 +84,34 @@ export function GeneratorScreen() {
     const enabledCount = CHAR_OPTIONS.filter((option) => options[option.key]).length;
     // Keep at least one character set selected.
     if (options[key] && enabledCount <= 1) {
-      hapticWarning();
+      haptics.warning();
       showToast('Keep at least one character type on', 'info');
       return;
     }
+    haptics.selection();
     updateOptions({ [key]: !options[key] } as Partial<GeneratorOptions>);
   }
 
   async function handleCopy() {
     if (!password) return;
     await copyToClipboard(password);
-    hapticSuccess();
+    haptics.success();
     showToast('Password copied to clipboard', 'success');
   }
 
   function handleRegenerate() {
     if (noCharSet) {
-      hapticWarning();
+      haptics.warning();
       showToast('Select at least one character type', 'info');
       return;
     }
     regenerate(options);
-    hapticSuccess();
+    haptics.success();
   }
 
   function handleSave() {
     if (!password) {
-      hapticWarning();
+      haptics.warning();
       showToast('Generate a password first', 'info');
       return;
     }
@@ -120,11 +124,11 @@ export function GeneratorScreen() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={[
           styles.content,
-          { paddingTop: insets.top + 24, paddingBottom: insets.bottom + 120 },
+          { paddingTop: insets.top + theme.spacing.xl, paddingBottom: insets.bottom + 120 },
         ]}>
         <View style={styles.headerRow}>
           <View style={styles.brandIcon}>
-            <Wand2 size={20} color={c.accent} strokeWidth={2} />
+            <Wand2 size={20} color={theme.colors.accent} strokeWidth={2} />
           </View>
           <View>
             <Text style={styles.title}>Generator</Text>
@@ -134,9 +138,14 @@ export function GeneratorScreen() {
 
         <GlassCard style={styles.displayCard}>
           <Text style={styles.displayLabel}>GENERATED PASSWORD</Text>
-          <Text style={styles.password} selectable numberOfLines={2}>
+          <Animated.Text
+            key={password}
+            entering={FadeIn.duration(theme.motion.duration.button)}
+            style={styles.password}
+            selectable
+            numberOfLines={2}>
             {password || 'Select a character type'}
-          </Text>
+          </Animated.Text>
           <View style={styles.displayActions}>
             <View style={styles.strengthRow}>
               <View style={styles.strengthTrack}>
@@ -158,7 +167,7 @@ export function GeneratorScreen() {
                 hitSlop={8}
                 onPress={handleCopy}
                 style={({ pressed }) => [styles.iconButton, pressed && styles.pressed]}>
-                <Copy size={18} color={c.accent} strokeWidth={2} />
+                <Copy size={18} color={theme.colors.accent} strokeWidth={2} />
               </Pressable>
               <Pressable
                 accessibilityRole="button"
@@ -166,7 +175,7 @@ export function GeneratorScreen() {
                 hitSlop={8}
                 onPress={handleRegenerate}
                 style={({ pressed }) => [styles.iconButton, pressed && styles.pressed]}>
-                <RefreshCw size={18} color={c.accent} strokeWidth={2} />
+                <RefreshCw size={18} color={theme.colors.accent} strokeWidth={2} />
               </Pressable>
             </View>
           </View>
@@ -183,7 +192,7 @@ export function GeneratorScreen() {
               accessibilityLabel="Decrease length"
               onPress={() => setLength(options.length - 1)}
               style={({ pressed }) => [styles.stepButton, pressed && styles.pressed]}>
-              <Minus size={18} color={c.heading} strokeWidth={2.5} />
+              <Minus size={18} color={theme.colors.text} strokeWidth={2.5} />
             </Pressable>
             <View style={styles.lengthTrack}>
               <View
@@ -200,7 +209,7 @@ export function GeneratorScreen() {
               accessibilityLabel="Increase length"
               onPress={() => setLength(options.length + 1)}
               style={({ pressed }) => [styles.stepButton, pressed && styles.pressed]}>
-              <Plus size={18} color={c.heading} strokeWidth={2.5} />
+              <Plus size={18} color={theme.colors.text} strokeWidth={2.5} />
             </Pressable>
           </View>
           <View style={styles.presetRow}>
@@ -242,9 +251,9 @@ export function GeneratorScreen() {
         </GlassCard>
 
         <View style={styles.save}>
-          <PrimaryButton label="SAVE SECURE PASSWORD" onPress={handleSave} />
+          <Button onPress={handleSave}>SAVE SECURE PASSWORD</Button>
           <View style={styles.footerMeta}>
-            <ShieldCheck size={12} color={c.placeholder} strokeWidth={1.75} />
+            <ShieldCheck size={12} color={theme.colors.textMuted} strokeWidth={1.75} />
             <Text style={styles.footerMetaText}>Generated on-device — nothing leaves your phone</Text>
           </View>
         </View>
@@ -255,201 +264,204 @@ export function GeneratorScreen() {
   );
 }
 
-function makeStyles(c: VaultColorsShape) {
+function makeStyles(t: Theme) {
   return StyleSheet.create({
-  content: {
-    paddingHorizontal: 20,
-  },
-  headerRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  brandIcon: {
-    width: 44,
-    height: 44,
-    borderRadius: 14,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: c.accentSoft,
-    borderWidth: 1,
-    borderColor: c.accent + '55',
-  },
-  title: {
-    ...VaultType.title,
-    color: c.heading,
-  },
-  subtitle: {
-    fontSize: 14,
-    color: c.muted,
-    marginTop: 2,
-  },
-  displayCard: {
-    marginTop: 24,
-    gap: 16,
-  },
-  displayLabel: {
-    ...VaultType.label,
-    color: c.accent,
-    opacity: 0.8,
-  },
-  password: {
-    fontSize: 22,
-    fontWeight: '600',
-    letterSpacing: 1.5,
-    color: c.heading,
-  },
-  displayActions: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: 16,
-  },
-  strengthRow: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  strengthTrack: {
-    flex: 1,
-    height: 6,
-    borderRadius: 9999,
-    backgroundColor: 'rgba(255,255,255,0.1)',
-    overflow: 'hidden',
-  },
-  strengthFill: {
-    height: 6,
-    borderRadius: 9999,
-  },
-  strengthLabel: {
-    fontSize: 13,
-    fontWeight: '700',
-    minWidth: 48,
-  },
-  iconButtons: {
-    flexDirection: 'row',
-    gap: 10,
-  },
-  iconButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 9999,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: c.accentSoft,
-  },
-  pressed: {
-    opacity: 0.8,
-  },
-  optionCard: {
-    marginTop: 16,
-    gap: 16,
-  },
-  lengthHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  optionTitle: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: c.heading,
-  },
-  lengthValue: {
-    fontSize: 22,
-    fontWeight: '700',
-    color: c.accent,
-  },
-  lengthControls: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 16,
-  },
-  stepButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: c.glassBorder,
-    backgroundColor: c.glassBackground,
-  },
-  lengthTrack: {
-    flex: 1,
-    height: 6,
-    borderRadius: 9999,
-    backgroundColor: 'rgba(255,255,255,0.1)',
-    overflow: 'hidden',
-  },
-  lengthFill: {
-    height: 6,
-    borderRadius: 9999,
-    backgroundColor: c.accent,
-  },
-  presetRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-  },
-  presetChip: {
-    minWidth: 48,
-    alignItems: 'center',
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 9999,
-    borderWidth: 1,
-    borderColor: c.glassBorder,
-    backgroundColor: c.glassBackground,
-  },
-  presetChipActive: {
-    borderColor: c.accent,
-    backgroundColor: c.accentSoft,
-  },
-  presetText: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: c.muted,
-  },
-  presetTextActive: {
-    color: c.accent,
-  },
-  divider: {
-    height: 1,
-    backgroundColor: c.glassBorder,
-    marginVertical: 4,
-  },
-  toggleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: 6,
-  },
-  toggleLabel: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: c.heading,
-  },
-  toggleHint: {
-    fontSize: 12,
-    color: c.muted,
-    marginTop: 2,
-  },
-  save: {
-    marginTop: 28,
-    gap: 16,
-    alignItems: 'center',
-  },
-  footerMeta: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  footerMetaText: {
-    fontSize: 12,
-    fontWeight: '500',
-    color: c.placeholder,
-  },
+    content: {
+      paddingHorizontal: t.layout.screenPadding,
+    },
+    headerRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: t.spacing.md,
+    },
+    brandIcon: {
+      width: 44,
+      height: 44,
+      borderRadius: t.radius.button,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: t.colors.accentSoft,
+      borderWidth: 1,
+      borderColor: t.colors.accentSoft,
+    },
+    title: {
+      ...t.typography.displaySerif,
+      color: t.colors.text,
+    },
+    subtitle: {
+      ...t.typography.caption,
+      fontSize: 14,
+      color: t.colors.textMuted,
+      marginTop: 2,
+    },
+    displayCard: {
+      marginTop: t.spacing.xl,
+      gap: t.spacing.lg,
+    },
+    displayLabel: {
+      ...t.typography.label,
+      color: t.colors.accent,
+      opacity: 0.8,
+    },
+    password: {
+      ...t.typography.headingSerif,
+      fontSize: 22,
+      letterSpacing: 1.5,
+      color: t.colors.text,
+    },
+    displayActions: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      gap: t.spacing.lg,
+    },
+    strengthRow: {
+      flex: 1,
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: t.spacing.md,
+    },
+    strengthTrack: {
+      flex: 1,
+      height: 6,
+      borderRadius: t.radius.full,
+      backgroundColor: t.glass.fillStrong,
+      overflow: 'hidden',
+    },
+    strengthFill: {
+      height: 6,
+      borderRadius: t.radius.full,
+    },
+    strengthLabel: {
+      fontSize: 13,
+      fontWeight: t.fontWeight.bold,
+      minWidth: 48,
+    },
+    iconButtons: {
+      flexDirection: 'row',
+      gap: t.spacing.sm + 2,
+    },
+    iconButton: {
+      width: 40,
+      height: 40,
+      borderRadius: t.radius.full,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: t.colors.accentSoft,
+    },
+    pressed: {
+      opacity: 0.8,
+    },
+    optionCard: {
+      marginTop: t.spacing.lg,
+      gap: t.spacing.lg,
+    },
+    lengthHeader: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+    },
+    optionTitle: {
+      ...t.typography.body,
+      fontWeight: t.fontWeight.bold,
+      color: t.colors.text,
+    },
+    lengthValue: {
+      ...t.typography.headingSerif,
+      fontSize: 22,
+      color: t.colors.accent,
+    },
+    lengthControls: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: t.spacing.lg,
+    },
+    stepButton: {
+      width: 40,
+      height: 40,
+      borderRadius: t.radius.chip,
+      alignItems: 'center',
+      justifyContent: 'center',
+      borderWidth: 1,
+      borderColor: t.glass.border,
+      backgroundColor: t.glass.fill,
+    },
+    lengthTrack: {
+      flex: 1,
+      height: 6,
+      borderRadius: t.radius.full,
+      backgroundColor: t.glass.fillStrong,
+      overflow: 'hidden',
+    },
+    lengthFill: {
+      height: 6,
+      borderRadius: t.radius.full,
+      backgroundColor: t.colors.accent,
+    },
+    presetRow: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: t.spacing.sm,
+    },
+    presetChip: {
+      minWidth: 48,
+      alignItems: 'center',
+      paddingHorizontal: t.spacing.md + 2,
+      paddingVertical: t.spacing.sm,
+      borderRadius: t.radius.full,
+      borderWidth: 1,
+      borderColor: t.glass.border,
+      backgroundColor: t.glass.fill,
+    },
+    presetChipActive: {
+      borderColor: t.colors.accent,
+      backgroundColor: t.colors.accentSoft,
+    },
+    presetText: {
+      fontSize: 13,
+      fontWeight: t.fontWeight.semibold,
+      color: t.colors.textMuted,
+    },
+    presetTextActive: {
+      color: t.colors.accent,
+    },
+    divider: {
+      height: 1,
+      backgroundColor: t.glass.border,
+      marginVertical: t.spacing.xs,
+    },
+    toggleRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingVertical: t.spacing.xs + 2,
+    },
+    toggleLabel: {
+      ...t.typography.body,
+      fontSize: 15,
+      fontWeight: t.fontWeight.semibold,
+      color: t.colors.text,
+    },
+    toggleHint: {
+      ...t.typography.caption,
+      fontSize: 12,
+      color: t.colors.textMuted,
+      marginTop: 2,
+    },
+    save: {
+      marginTop: t.spacing.xxl,
+      gap: t.spacing.lg,
+      alignItems: 'center',
+    },
+    footerMeta: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: t.spacing.sm,
+    },
+    footerMetaText: {
+      ...t.typography.label,
+      fontSize: 12,
+      color: t.colors.textMuted,
+    },
   });
 }

@@ -2,9 +2,8 @@ import { useMemo } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import Svg, { Circle, Defs, LinearGradient, Stop } from 'react-native-svg';
 
-import { SerifFont } from '@/constants/theme';
-import { useVaultColors } from '@/contexts/color-theme-context';
-import type { VaultColorsShape } from '@/theme/color-themes';
+import { useTheme } from '@/hooks/use-theme';
+import { type Theme } from '@/theme';
 
 interface ScoreRingProps {
   /** 0–100 health score, rendered as a percentage gauge. */
@@ -29,8 +28,8 @@ export function ScoreRing({
   size = 168,
   strokeWidth = 10,
 }: ScoreRingProps) {
-  const c = useVaultColors();
-  const styles = useMemo(() => makeStyles(c), [c]);
+  const theme = useTheme();
+  const styles = useMemo(() => makeStyles(theme), [theme]);
   const clamped = Math.max(0, Math.min(100, score));
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
@@ -42,7 +41,7 @@ export function ScoreRing({
       <Svg width={size} height={size}>
         <Defs>
           <LinearGradient id="scoreArc" x1="0" y1="0" x2="1" y2="1">
-            <Stop offset="0" stopColor={c.accent} />
+            <Stop offset="0" stopColor={theme.colors.accent} />
             <Stop offset="1" stopColor={color} />
           </LinearGradient>
         </Defs>
@@ -50,7 +49,7 @@ export function ScoreRing({
           cx={center}
           cy={center}
           r={radius}
-          stroke={c.glassBorder}
+          stroke={theme.glass.border}
           strokeWidth={strokeWidth}
           strokeDasharray="2 7"
           fill="none"
@@ -89,7 +88,7 @@ export function ScoreRing({
   );
 }
 
-function makeStyles(c: VaultColorsShape) {
+function makeStyles(t: Theme) {
   return StyleSheet.create({
     wrapper: {
       alignItems: 'center',
@@ -102,13 +101,14 @@ function makeStyles(c: VaultColorsShape) {
       gap: 2,
     },
     value: {
-      fontFamily: SerifFont.bold,
+      ...t.typography.displaySerif,
       fontSize: 44,
-      color: c.heading,
+      lineHeight: 50,
+      color: t.colors.text,
     },
     label: {
       fontSize: 12,
-      fontWeight: '700',
+      fontWeight: t.fontWeight.bold,
       letterSpacing: 2.5,
     },
   });

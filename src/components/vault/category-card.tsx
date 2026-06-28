@@ -2,8 +2,8 @@ import { LucideIcon } from 'lucide-react-native';
 import { useMemo } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { useVaultColors } from '@/contexts/color-theme-context';
-import type { VaultColorsShape } from '@/theme/color-themes';
+import { useTheme } from '@/hooks/use-theme';
+import { type Theme } from '@/theme';
 
 interface CategoryCardProps {
   label: string;
@@ -14,8 +14,8 @@ interface CategoryCardProps {
 }
 
 export function CategoryCard({ label, count, icon: Icon, active = false, onPress }: CategoryCardProps) {
-  const c = useVaultColors();
-  const styles = useMemo(() => makeStyles(c), [c]);
+  const theme = useTheme();
+  const styles = useMemo(() => makeStyles(theme), [theme]);
 
   return (
     <Pressable
@@ -27,7 +27,7 @@ export function CategoryCard({ label, count, icon: Icon, active = false, onPress
       <View style={[styles.iconWrap, active && styles.iconWrapActive]}>
         <Icon
           size={20}
-          color={active ? c.heading : c.accent}
+          color={active ? theme.colors.text : theme.colors.accent}
           strokeWidth={1.75}
         />
       </View>
@@ -36,22 +36,22 @@ export function CategoryCard({ label, count, icon: Icon, active = false, onPress
   );
 }
 
-function makeStyles(c: VaultColorsShape) {
+function makeStyles(t: Theme) {
   return StyleSheet.create({
     card: {
       flex: 1,
       minHeight: 108,
-      borderRadius: 28,
+      borderRadius: t.radius.floating,
       borderWidth: 1,
-      borderColor: c.glassBorder,
-      backgroundColor: c.glassBackground,
+      borderColor: t.glass.border,
+      backgroundColor: t.glass.fill,
       alignItems: 'center',
       justifyContent: 'center',
-      paddingVertical: 16,
-      gap: 12,
+      paddingVertical: t.spacing.lg,
+      gap: t.spacing.md,
     },
     cardActive: {
-      borderColor: c.accentStrong,
+      borderColor: t.colors.accentAlt,
     },
     pressed: {
       opacity: 0.8,
@@ -59,18 +59,19 @@ function makeStyles(c: VaultColorsShape) {
     iconWrap: {
       width: 48,
       height: 48,
-      borderRadius: 24,
+      borderRadius: t.radius.full,
       alignItems: 'center',
       justifyContent: 'center',
-      backgroundColor: c.accentSoft,
+      backgroundColor: t.colors.accentSoft,
     },
     iconWrapActive: {
-      backgroundColor: c.accentStrong,
+      backgroundColor: t.colors.accentAlt,
     },
     label: {
+      ...t.typography.caption,
       fontSize: 14,
-      fontWeight: '600',
-      color: c.heading,
+      fontWeight: t.fontWeight.semibold,
+      color: t.colors.text,
     },
   });
 }

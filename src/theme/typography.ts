@@ -44,23 +44,23 @@ type TypeVariant = Pick<
 
 export const typography = {
   display: {
-    fontFamily,
+    fontFamily: serifFont.bold,
     fontSize: 32,
-    fontWeight: fontWeight.bold,
+    fontWeight: 'normal',
     lineHeight: 40,
     letterSpacing: -0.5,
   },
   heading: {
-    fontFamily,
+    fontFamily: serifFont.semibold,
     fontSize: 24,
-    fontWeight: fontWeight.semibold,
+    fontWeight: 'normal',
     lineHeight: 32,
     letterSpacing: -0.3,
   },
   title: {
-    fontFamily,
+    fontFamily: serifFont.semibold,
     fontSize: 20,
-    fontWeight: fontWeight.semibold,
+    fontWeight: 'normal',
     lineHeight: 28,
     letterSpacing: -0.2,
   },
@@ -77,32 +77,32 @@ export const typography = {
     lineHeight: 18,
   },
   label: {
-    fontFamily,
+    fontFamily: serifFont.medium,
     fontSize: 11,
-    fontWeight: fontWeight.medium,
+    fontWeight: 'normal',
     lineHeight: 14,
     letterSpacing: 0.4,
   },
 
-  /** Premium serif headings (used by the modern card-based screens). */
+  /** Premium serif headings (preserved for explicit usage). */
   displaySerif: {
     fontFamily: serifFont.bold,
     fontSize: 30,
-    fontWeight: fontWeight.bold,
+    fontWeight: 'normal',
     lineHeight: 38,
     letterSpacing: -0.4,
   },
   headingSerif: {
     fontFamily: serifFont.semibold,
     fontSize: 22,
-    fontWeight: fontWeight.semibold,
+    fontWeight: 'normal',
     lineHeight: 28,
     letterSpacing: -0.3,
   },
   titleSerif: {
     fontFamily: serifFont.semibold,
     fontSize: 20,
-    fontWeight: fontWeight.semibold,
+    fontWeight: 'normal',
     lineHeight: 26,
     letterSpacing: -0.2,
   },

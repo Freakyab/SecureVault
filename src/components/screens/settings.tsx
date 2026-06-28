@@ -12,24 +12,42 @@ import {
   Timer,
   Trash2,
   Upload,
+  FileText,
 } from 'lucide-react-native';
 import { ReactNode, useEffect, useMemo, useState } from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import * as Clipboard from 'expo-clipboard';
+import * as DocumentPicker from 'expo-document-picker';
+import * as FileSystem from 'expo-file-system/legacy';
 
-import { BottomNav, GlassCard, ScreenBackground, Toggle, VaultHeader } from '@/components/vault';
+import { BottomNav, ScreenBackground, Toggle, VaultHeader } from '@/components/vault';
+import { GlassCard, Button } from '@/components/ui';
 import { buildMockCredentials } from '@/constants/mock-credentials';
-import { VaultType } from '@/constants/vault-theme';
-import { COLOR_THEMES, COLOR_THEME_IDS, useColorTheme, useVaultColors } from '@/contexts/color-theme-context';
+import { COLOR_THEMES, COLOR_THEME_IDS, useColorTheme } from '@/contexts/color-theme-context';
 import { useToast } from '@/contexts/toast-context';
 import { useVault } from '@/contexts/vault-context';
+import { useHaptics } from '@/hooks/use-haptics';
+import { useTheme } from '@/hooks/use-theme';
 import { BiometricAvailability, canUseBiometrics, getBiometricAvailability } from '@/services/biometric';
-import { copyToClipboard, hapticSuccess, hapticWarning } from '@/services/feedback';
+import { copyToClipboard } from '@/services/feedback';
 import { parseVaultBackup, serializeVaultBackup } from '@/services/vault-backup';
+import { parseGoogleCSV } from '@/services/google-csv-import';
+import { suggestCategoriesBulk } from '@/services/ai-categorization';
+import { exportVaultToFile } from '@/services/vault-export';
+import { decryptBackup } from '@/services/vault-secure-backup';
+import { type Theme } from '@/theme';
 import { AUTO_LOCK_PRESETS, type ColorThemePreference } from '@/types/credential';
-import type { VaultColorsShape } from '@/theme/color-themes';
+
+interface RowProps {
+  icon: LucideIcon;
+  label: string;
+  detail?: string;
+  trailing?: ReactNode;
+  danger?: boolean;
+  onPress?: () => void;
+}
 
 interface RowProps {
   icon: LucideIcon;
@@ -41,9 +59,9 @@ interface RowProps {
 }
 
 function SettingsRow({ icon: Icon, label, detail, trailing, danger, onPress }: RowProps) {
-  const c = useVaultColors();
-  const styles = useMemo(() => makeStyles(c), [c]);
-  const tint = danger ? c.danger : c.accent;
+  const theme = useTheme();
+  const styles = useMemo(() => makeStyles(theme), [theme]);
+  const tint = danger ? theme.colors.error : theme.colors.accent;
   const content = (
     <>
       <View style={styles.rowLeft}>
@@ -55,7 +73,7 @@ function SettingsRow({ icon: Icon, label, detail, trailing, danger, onPress }: R
           {detail ? <Text style={styles.rowDetail}>{detail}</Text> : null}
         </View>
       </View>
-      {trailing ?? <ChevronRight size={18} color={c.muted} strokeWidth={2} />}
+      {trailing ?? <ChevronRight size={18} color={theme.colors.textMuted} strokeWidth={2} />}
     </>
   );
 
@@ -84,12 +102,21 @@ function autoLockLabel(minutes: number) {
 
 export function SettingsScreen() {
   const insets = useSafeAreaInsets();
-  const c = useVaultColors();
-  const styles = useMemo(() => makeStyles(c), [c]);
+  const theme = useTheme();
+  const haptics = useHaptics();
+  const styles = useMemo(() => makeStyles(theme), [theme]);
   const router = useRouter();
   const { showToast } = useToast();
   const { setColorTheme } = useColorTheme();
-  const { settings, credentials, updateSettings, lockVault, resetVault, importCredentials } = useVault();
+  const {
+    settings,
+    credentials,
+    updateSettings,
+    lockVault,
+    resetVault,
+    importCredentials,
+    bulkUpdateCategories,
+  } = useVault();
   const [showAutoLockPicker, setShowAutoLockPicker] = useState(false);
   const [biometric, setBiometric] = useState<BiometricAvailability | null>(null);
 
@@ -101,7 +128,7 @@ export function SettingsScreen() {
 
   async function handleBiometricChange(enabled: boolean) {
     if (enabled && !biometricSupported) {
-      hapticWarning();
+      haptics.warning();
       Alert.alert(
         'Biometrics unavailable',
         biometric?.hasHardware
@@ -112,11 +139,6 @@ export function SettingsScreen() {
     }
     await updateSettings({ biometricEnabled: enabled });
     showToast(enabled ? 'Biometric unlock enabled' : 'Biometric unlock disabled', 'info');
-  }
-
-  async function handleThemeChange(enabled: boolean) {
-    await updateSettings({ themePreference: enabled ? 'dark' : 'light' });
-    showToast(enabled ? 'Dark mode enabled' : 'Light mode enabled', 'info');
   }
 
   async function handleColorThemeChange(id: ColorThemePreference) {
@@ -139,7 +161,7 @@ export function SettingsScreen() {
         style: 'destructive',
         onPress: () => {
           lockVault();
-          hapticSuccess();
+          haptics.success();
           showToast('Vault locked', 'info');
           router.replace('/unlock');
         },
@@ -168,6 +190,94 @@ export function SettingsScreen() {
     );
   }
 
+  async function handleExportToFile() {
+    if (credentials.length === 0) {
+      showToast('No credentials to export yet', 'info');
+      return;
+    }
+
+    Alert.prompt(
+      'Backup Password',
+      'Enter a password to encrypt your backup file. You will need this password to restore the data later.',
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: 'Export',
+          onPress: async (password?: string) => {
+            if (!password || password.trim().length < 4) {
+              Alert.alert('Invalid Password', 'Please enter a password of at least 4 characters.');
+              return;
+            }
+            try {
+              await exportVaultToFile(credentials, password);
+              showToast('Encrypted vault backup exported', 'success');
+            } catch (error) {
+              haptics.warning();
+              Alert.alert(
+                'Export failed',
+                error instanceof Error ? error.message : 'Could not save the backup file.',
+              );
+            }
+          },
+        },
+      ],
+      'secure-text',
+    );
+  }
+
+  async function handleImportFromFile() {
+    try {
+      const result = await DocumentPicker.getDocumentAsync({
+        type: ['application/json', 'text/json'],
+      });
+
+      if (result.canceled) return;
+
+      const file = result.assets[0];
+      const content = await FileSystem.readAsStringAsync(file.uri);
+
+      Alert.prompt(
+        'Restore Backup',
+        'Enter the password used to encrypt this backup file.',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          {
+            text: 'Restore',
+            onPress: async (password?: string) => {
+              if (!password || password.trim().length < 4) {
+                Alert.alert('Invalid Password', 'Please enter the correct backup password.');
+                return;
+              }
+              try {
+                const incoming = await decryptBackup(content, password);
+                const { added, skipped } = await importCredentials(incoming);
+                haptics.success();
+                showToast(`Restored ${added} · skipped ${skipped} duplicates from file`, 'success');
+              } catch (error) {
+                haptics.warning();
+                Alert.alert(
+                  'Restore failed',
+                  error instanceof Error ? error.message : 'Could not decrypt the backup file. Please check your password.',
+                );
+              }
+            },
+          },
+        ],
+        'secure-text',
+      );
+    } catch (error) {
+      console.error('[VaultImportFileError] Failed to import backup from file:', error);
+      haptics.warning();
+      Alert.alert(
+        'Import failed',
+        error instanceof Error ? error.message : 'Could not read the selected file.',
+      );
+    }
+  }
+
   async function handleImport() {
     Alert.alert(
       'Import vault backup',
@@ -180,16 +290,17 @@ export function SettingsScreen() {
             try {
               const raw = await Clipboard.getStringAsync();
               if (!raw.trim()) {
-                hapticWarning();
+                haptics.warning();
                 showToast('Clipboard is empty', 'error');
                 return;
               }
               const incoming = parseVaultBackup(raw);
               const { added, skipped } = await importCredentials(incoming);
-              hapticSuccess();
+              haptics.success();
               showToast(`Imported ${added} · skipped ${skipped} duplicates`, 'success');
             } catch (error) {
-              hapticWarning();
+              console.error('[VaultImportError] Failed to import backup from clipboard:', error);
+              haptics.warning();
               Alert.alert(
                 'Import failed',
                 error instanceof Error ? error.message : 'Could not read the backup.',
@@ -199,6 +310,88 @@ export function SettingsScreen() {
         },
       ],
     );
+  }
+
+  async function handleAICategorize() {
+    Alert.alert(
+      'AI Categorization',
+      'This will analyze your vault and automatically suggest categories for your passwords. Some may be updated to new categories.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Categorize Now',
+          onPress: async () => {
+            try {
+              const toCategorize = credentials
+                .filter((c) => c.category === 'Login')
+                .map((c) => ({ id: c.id, name: c.website, url: c.url }));
+
+              if (toCategorize.length === 0) {
+                showToast('No passwords need categorization', 'info');
+                return;
+              }
+
+              showToast(`Analyzing ${toCategorize.length} passwords...`, 'info');
+
+              // Batch processing to avoid Gemini limits (50 per request)
+              const batchSize = 50;
+              let totalUpdated = 0;
+              const allUpdates: Record<string, string> = {};
+
+              for (let i = 0; i < toCategorize.length; i += batchSize) {
+                const batch = toCategorize.slice(i, i + batchSize);
+                const results = await suggestCategoriesBulk(batch);
+                Object.assign(allUpdates, results);
+              }
+
+              const { updated } = await bulkUpdateCategories(allUpdates);
+              totalUpdated = updated;
+
+              haptics.success();
+              showToast(`AI updated ${totalUpdated} passwords`, 'success');
+            } catch (error) {
+              console.error('[AICategorizeError] Bulk categorization failed:', error);
+              haptics.warning();
+              Alert.alert('Categorization failed', 'Could not update categories. Please try again.');
+            }
+          },
+        },
+      ],
+    );
+  }
+
+  async function handleGoogleCSVImport() {
+    try {
+      const result = await DocumentPicker.getDocumentAsync({
+        type: ['text/csv', 'application/vnd.ms-excel', 'text/*'],
+      });
+
+      if (result.canceled) return;
+
+      const file = result.assets[0];
+      const content = await FileSystem.readAsStringAsync(file.uri);
+      const incoming = parseGoogleCSV(content);
+
+      if (incoming.length === 0) {
+        haptics.warning();
+        showToast('No valid credentials found in CSV', 'error');
+        return;
+      }
+
+      const { added, skipped } = await importCredentials(incoming);
+      haptics.success();
+      showToast(`Imported ${added} · skipped ${skipped} duplicates from Google`, 'success');
+    } catch (error) {
+      console.error('[GoogleCSVImportError] Failed to import Google CSV:', {
+        error,
+        timestamp: new Date().toISOString(),
+      });
+      haptics.warning();
+      Alert.alert(
+        'CSV Import failed',
+        error instanceof Error ? error.message : 'Could not read the CSV file.',
+      );
+    }
   }
 
   async function handleLoadSampleData() {
@@ -212,7 +405,7 @@ export function SettingsScreen() {
           onPress: async () => {
             try {
               const { added, skipped } = await importCredentials(buildMockCredentials());
-              hapticSuccess();
+              haptics.success();
               showToast(
                 added > 0
                   ? `Added ${added} sample credentials · skipped ${skipped}`
@@ -220,7 +413,8 @@ export function SettingsScreen() {
                 added > 0 ? 'success' : 'info',
               );
             } catch (error) {
-              hapticWarning();
+              console.error('[SampleDataError] Failed to load mock credentials:', error);
+              haptics.warning();
               Alert.alert(
                 'Could not load samples',
                 error instanceof Error ? error.message : 'Please try again.',
@@ -248,11 +442,11 @@ export function SettingsScreen() {
           onPress: async () => {
             try {
               await resetVault();
-              hapticSuccess();
+              haptics.success();
               showToast('All local data deleted', 'info');
               router.replace('/');
             } catch (error) {
-              hapticWarning();
+              haptics.warning();
               Alert.alert(
                 'Reset failed',
                 error instanceof Error ? error.message : 'Please try again.',
@@ -330,22 +524,10 @@ export function SettingsScreen() {
 
         <Text style={styles.sectionLabel}>APPEARANCE</Text>
         <GlassCard style={styles.group}>
-          <SettingsRow
-            icon={Moon}
-            label="Dark Mode"
-            trailing={
-              <Toggle
-                value={settings.themePreference === 'dark'}
-                onChange={handleThemeChange}
-                label="Dark mode"
-              />
-            }
-          />
-          <View style={styles.separator} />
           <View style={styles.colorThemeRow}>
             <View style={styles.rowLeft}>
               <View style={styles.rowIcon}>
-                <Palette size={18} color={c.accent} strokeWidth={1.75} />
+                <Palette size={18} color={theme.colors.accent} strokeWidth={1.75} />
               </View>
               <View style={styles.rowText}>
                 <Text style={styles.rowLabel}>Color Theme</Text>
@@ -354,22 +536,22 @@ export function SettingsScreen() {
             </View>
             <View style={styles.swatchRow}>
               {COLOR_THEME_IDS.map((id) => {
-                const theme = COLOR_THEMES[id];
+                const preset = COLOR_THEMES[id];
                 const active = settings.colorTheme === id;
                 return (
                   <Pressable
                     key={id}
                     accessibilityRole="button"
-                    accessibilityLabel={`Use ${theme.label} color theme`}
+                    accessibilityLabel={`Use ${preset.label} color theme`}
                     accessibilityState={{ selected: active }}
                     onPress={() => handleColorThemeChange(id)}
                     style={[
                       styles.swatchChip,
-                      active && { borderColor: c.accent, backgroundColor: c.accentSoft },
+                      active && { borderColor: theme.colors.accent, backgroundColor: theme.colors.accentSoft },
                     ]}>
-                    <View style={[styles.swatchDot, { backgroundColor: theme.swatch }]} />
+                    <View style={[styles.swatchDot, { backgroundColor: preset.swatch }]} />
                     <Text style={[styles.swatchLabel, active && styles.swatchLabelActive]}>
-                      {theme.label}
+                      {preset.label}
                     </Text>
                   </Pressable>
                 );
@@ -382,16 +564,44 @@ export function SettingsScreen() {
         <GlassCard style={styles.group}>
           <SettingsRow
             icon={Download}
-            label="Export Vault"
-            detail="Copy a backup to clipboard"
+            label="Export to Clipboard"
+            detail="Quick copy of your backup"
             onPress={handleExport}
           />
           <View style={styles.separator} />
           <SettingsRow
+            icon={FileText}
+            label="Export to File"
+            detail="Save backup as .json file"
+            onPress={handleExportToFile}
+          />
+          <View style={styles.separator} />
+          <SettingsRow
             icon={Upload}
-            label="Import Data"
+            label="Import from Clipboard"
             detail="Paste a backup from clipboard"
             onPress={handleImport}
+          />
+          <View style={styles.separator} />
+          <SettingsRow
+            icon={FileText}
+            label="Import from File"
+            detail="Restore from .json backup"
+            onPress={handleImportFromFile}
+          />
+          <View style={styles.separator} />
+          <SettingsRow
+            icon={Sparkles}
+            label="AI Categorize Vault"
+            detail="Automatically organize existing passwords"
+            onPress={handleAICategorize}
+          />
+          <View style={styles.separator} />
+          <SettingsRow
+            icon={FileText}
+            label="Import Google CSV"
+            detail="Upload Google Password Manager CSV"
+            onPress={handleGoogleCSVImport}
           />
           <View style={styles.separator} />
           <SettingsRow
@@ -417,20 +627,20 @@ export function SettingsScreen() {
 
         <GlassCard style={styles.dangerCard}>
           <View style={styles.dangerHeader}>
-            <Trash2 size={18} color={c.danger} strokeWidth={2} />
+            <Trash2 size={18} color={theme.colors.error} strokeWidth={2} />
             <Text style={styles.dangerTitle}>Delete All Data</Text>
           </View>
           <Text style={styles.dangerBody}>
             This action will permanently delete all encrypted records stored on this device. This
             cannot be undone.
           </Text>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="Delete all local data"
+          <Button
+            variant="secondary"
             onPress={handleDeleteAllData}
-            style={({ pressed }) => [styles.dangerButton, pressed && styles.pressed]}>
-            <Text style={styles.dangerButtonText}>Delete Everything</Text>
-          </Pressable>
+            style={[styles.dangerButton, { backgroundColor: 'transparent' }]}
+            textStyle={{ color: theme.colors.error, fontWeight: 'bold' }}>
+            Delete Everything
+          </Button>
         </GlassCard>
       </ScrollView>
 
@@ -439,172 +649,174 @@ export function SettingsScreen() {
   );
 }
 
-function makeStyles(c: VaultColorsShape) {
+function makeStyles(t: Theme) {
   return StyleSheet.create({
-  content: {
-    paddingHorizontal: 20,
-    paddingTop: 8,
-  },
-  subtitle: {
-    ...VaultType.body,
-    color: c.body,
-  },
-  sectionLabel: {
-    ...VaultType.label,
-    color: c.accent,
-    opacity: 0.8,
-    marginTop: 32,
-    marginBottom: 12,
-  },
-  group: {
-    padding: 8,
-    gap: 0,
-  },
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 12,
-    paddingVertical: 14,
-  },
-  pressed: {
-    opacity: 0.8,
-  },
-  rowLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 14,
-    flexShrink: 1,
-  },
-  rowIcon: {
-    width: 38,
-    height: 38,
-    borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: c.accentSoft,
-  },
-  rowIconDanger: {
-    backgroundColor: 'rgba(255,138,138,0.15)',
-  },
-  rowText: {
-    flexShrink: 1,
-    gap: 2,
-  },
-  rowLabel: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: c.heading,
-  },
-  rowLabelDanger: {
-    color: c.danger,
-  },
-  rowDetail: {
-    fontSize: 12,
-    color: c.muted,
-  },
-  separator: {
-    height: 1,
-    backgroundColor: c.glassBorder,
-    marginHorizontal: 12,
-  },
-  presetRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-    paddingHorizontal: 12,
-    paddingBottom: 12,
-  },
-  presetChip: {
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 9999,
-    borderWidth: 1,
-    borderColor: c.glassBorder,
-    backgroundColor: c.glassBackground,
-  },
-  presetChipActive: {
-    borderColor: c.accent,
-    backgroundColor: c.accentSoft,
-  },
-  presetText: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: c.muted,
-  },
-  presetTextActive: {
-    color: c.accent,
-  },
-  dangerCard: {
-    marginTop: 32,
-    gap: 12,
-    borderColor: 'rgba(255,138,138,0.3)',
-  },
-  dangerHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  dangerTitle: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: c.danger,
-  },
-  dangerBody: {
-    fontSize: 13,
-    lineHeight: 19,
-    color: c.body,
-  },
-  dangerButton: {
-    marginTop: 4,
-    height: 48,
-    borderRadius: 9999,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'rgba(255,138,138,0.15)',
-    borderWidth: 1,
-    borderColor: 'rgba(255,138,138,0.4)',
-  },
-  dangerButtonText: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: c.danger,
-  },
-  colorThemeRow: {
-    paddingHorizontal: 12,
-    paddingVertical: 14,
-    gap: 14,
-  },
-  swatchRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-  },
-  swatchChip: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 9999,
-    borderWidth: 1,
-    borderColor: c.glassBorder,
-    backgroundColor: c.glassBackground,
-  },
-  swatchDot: {
-    width: 16,
-    height: 16,
-    borderRadius: 9999,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.25)',
-  },
-  swatchLabel: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: c.muted,
-  },
-  swatchLabelActive: {
-    color: c.accent,
-  },
+    content: {
+      paddingHorizontal: t.layout.screenPadding,
+      paddingTop: t.spacing.sm,
+    },
+    subtitle: {
+      ...t.typography.body,
+      color: t.colors.textSecondary,
+    },
+    sectionLabel: {
+      ...t.typography.label,
+      color: t.colors.accent,
+      opacity: 0.8,
+      marginTop: t.spacing.xxl,
+      marginBottom: t.spacing.md,
+    },
+    group: {
+      padding: t.spacing.sm,
+      gap: 0,
+    },
+    row: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingHorizontal: t.spacing.md,
+      paddingVertical: t.spacing.md + 2,
+    },
+    pressed: {
+      opacity: 0.8,
+    },
+    rowLeft: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: t.spacing.md + 2,
+      flexShrink: 1,
+    },
+    rowIcon: {
+      width: 38,
+      height: 38,
+      borderRadius: t.radius.chip,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: t.colors.accentSoft,
+    },
+    rowIconDanger: {
+      backgroundColor: t.colors.error + '26',
+    },
+    rowText: {
+      flexShrink: 1,
+      gap: 2,
+    },
+    rowLabel: {
+      ...t.typography.body,
+      fontSize: 15,
+      fontWeight: t.fontWeight.semibold,
+      color: t.colors.text,
+    },
+    rowLabelDanger: {
+      color: t.colors.error,
+    },
+    rowDetail: {
+      fontSize: 12,
+      color: t.colors.textMuted,
+    },
+    separator: {
+      height: 1,
+      backgroundColor: t.glass.border,
+      marginHorizontal: t.spacing.md,
+    },
+    presetRow: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: t.spacing.sm,
+      paddingHorizontal: t.spacing.md,
+      paddingBottom: t.spacing.md,
+    },
+    presetChip: {
+      paddingHorizontal: t.spacing.md + 2,
+      paddingVertical: t.spacing.sm,
+      borderRadius: t.radius.full,
+      borderWidth: 1,
+      borderColor: t.glass.border,
+      backgroundColor: t.glass.fill,
+    },
+    presetChipActive: {
+      borderColor: t.colors.accent,
+      backgroundColor: t.colors.accentSoft,
+    },
+    presetText: {
+      fontSize: 12,
+      fontWeight: t.fontWeight.semibold,
+      color: t.colors.textMuted,
+    },
+    presetTextActive: {
+      color: t.colors.accent,
+    },
+    dangerCard: {
+      marginTop: t.spacing.xxl,
+      gap: t.spacing.md,
+      borderColor: t.colors.error + '4d',
+    },
+    dangerHeader: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: t.spacing.md,
+    },
+    dangerTitle: {
+      ...t.typography.body,
+      fontSize: 16,
+      fontWeight: t.fontWeight.bold,
+      color: t.colors.error,
+    },
+    dangerBody: {
+      ...t.typography.caption,
+      lineHeight: 19,
+      color: t.colors.textSecondary,
+    },
+    dangerButton: {
+      marginTop: t.spacing.xs,
+      height: 48,
+      borderRadius: t.radius.full,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: t.colors.error + '26',
+      borderWidth: 1,
+      borderColor: t.colors.error + '66',
+    },
+    dangerButtonText: {
+      fontSize: 14,
+      fontWeight: t.fontWeight.bold,
+      color: t.colors.error,
+    },
+    colorThemeRow: {
+      paddingHorizontal: t.spacing.md,
+      paddingVertical: t.spacing.md + 2,
+      gap: t.spacing.md + 2,
+    },
+    swatchRow: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: t.spacing.sm,
+    },
+    swatchChip: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: t.spacing.sm,
+      paddingHorizontal: t.spacing.md + 2,
+      paddingVertical: t.spacing.sm,
+      borderRadius: t.radius.full,
+      borderWidth: 1,
+      borderColor: t.glass.border,
+      backgroundColor: t.glass.fill,
+    },
+    swatchDot: {
+      width: 16,
+      height: 16,
+      borderRadius: t.radius.full,
+      borderWidth: 1,
+      borderColor: 'rgba(255,255,255,0.25)',
+    },
+    swatchLabel: {
+      fontSize: 12,
+      fontWeight: t.fontWeight.semibold,
+      color: t.colors.textMuted,
+    },
+    swatchLabelActive: {
+      color: t.colors.accent,
+    },
   });
 }

@@ -1,11 +1,15 @@
 import * as SecureStore from 'expo-secure-store';
 import { Platform } from 'react-native';
 
-const ONBOARDING_COMPLETE_KEY = 'securevault:onboarding-complete';
+const ONBOARDING_COMPLETE_KEY = 'securevault.onboarding-complete';
 
 export async function getOnboardingComplete() {
   if (Platform.OS === 'web') return false;
-  return (await SecureStore.getItemAsync(ONBOARDING_COMPLETE_KEY)) === 'true';
+  try {
+    return (await SecureStore.getItemAsync(ONBOARDING_COMPLETE_KEY)) === 'true';
+  } catch {
+    return false;
+  }
 }
 
 export async function setOnboardingComplete() {

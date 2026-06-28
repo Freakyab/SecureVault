@@ -16,26 +16,26 @@ import {
 import type { LucideIcon } from 'lucide-react-native';
 import { useMemo, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import {
   BottomNav,
   CredentialAvatar,
   EmptyState,
-  GlassCard,
   ScoreRing,
   ScreenBackground,
   VaultHeader,
 } from '@/components/vault';
-import { SerifFont } from '@/constants/theme';
-import { VaultType } from '@/constants/vault-theme';
-import { useVaultColors } from '@/contexts/color-theme-context';
-import type { VaultColorsShape } from '@/theme/color-themes';
+import { GlassCard } from '@/components/ui';
 import { useToast } from '@/contexts/toast-context';
 import { useVault } from '@/contexts/vault-context';
+import { useHaptics } from '@/hooks/use-haptics';
 import { useNavigationLock } from '@/hooks/use-navigation-lock';
+import { useTheme } from '@/hooks/use-theme';
 import { scanCredentialsForBreaches } from '@/services/breach-check';
 import { computeHealthMetrics } from '@/services/health-checks';
+import { type Theme } from '@/theme';
 
 type BreachState =
   | { status: 'idle' }
@@ -60,15 +60,16 @@ interface AttentionItem {
 
 export function PasswordHealthScreen() {
   const insets = useSafeAreaInsets();
-  const c = useVaultColors();
-  const styles = useMemo(() => makeStyles(c), [c]);
+  const theme = useTheme();
+  const haptics = useHaptics();
+  const styles = useMemo(() => makeStyles(theme), [theme]);
   const ISSUE_META: Record<
     IssueKind,
     { label: string; action: string; color: string; icon: LucideIcon }
   > = {
-    weak: { label: 'Weak password', action: 'Strengthen', color: c.warning, icon: ShieldAlert },
-    reused: { label: 'Reused password', action: 'Change', color: c.danger, icon: Copy },
-    old: { label: 'Old password', action: 'Rotate', color: c.accent, icon: Clock },
+    weak: { label: 'Weak password', action: 'Strengthen', color: theme.colors.warning, icon: ShieldAlert },
+    reused: { label: 'Reused password', action: 'Change', color: theme.colors.error, icon: Copy },
+    old: { label: 'Old password', action: 'Rotate', color: theme.colors.accent, icon: Clock },
   };
   const router = useRouter();
   const { showToast } = useToast();
@@ -80,9 +81,11 @@ export function PasswordHealthScreen() {
 
   async function runBreachScan() {
     if (metrics.total === 0) {
+      haptics.warning();
       showToast('Add credentials before scanning for breaches', 'info');
       return;
     }
+    haptics.selection();
     setBreach({ status: 'scanning' });
     try {
       const result = await scanCredentialsForBreaches(credentials);
@@ -92,7 +95,10 @@ export function PasswordHealthScreen() {
         checked: result.checkedPasswords,
         maxExposures: result.maxExposures,
       });
+      if (result.breachedIds.length > 0) haptics.warning();
+      else haptics.success();
     } catch (error) {
+      haptics.error();
       setBreach({
         status: 'error',
         message: error instanceof Error ? error.message : 'Could not reach the breach service.',
@@ -107,10 +113,10 @@ export function PasswordHealthScreen() {
   }, [breach, credentials]);
 
   const stats: { value: string; label: string; color: string; icon: LucideIcon }[] = [
-    { value: String(metrics.strong), label: 'Safe', color: c.success, icon: ShieldCheck },
-    { value: String(metrics.reused), label: 'Reused', color: c.danger, icon: Copy },
-    { value: String(metrics.weak), label: 'Weak', color: c.warning, icon: AlertTriangle },
-    { value: String(metrics.old), label: 'Old', color: c.accent, icon: RotateCw },
+    { value: String(metrics.strong), label: 'Safe', color: theme.colors.success, icon: ShieldCheck },
+    { value: String(metrics.reused), label: 'Reused', color: theme.colors.error, icon: Copy },
+    { value: String(metrics.weak), label: 'Weak', color: theme.colors.warning, icon: AlertTriangle },
+    { value: String(metrics.old), label: 'Old', color: theme.colors.accent, icon: RotateCw },
   ];
 
   // Each credential surfaces its highest-priority issue: reused > weak > old.
@@ -154,33 +160,34 @@ export function PasswordHealthScreen() {
   }
 
   function rescan() {
+    haptics.success();
     showToast(`Vault re-scanned — health ${metrics.score}%`, 'info');
   }
 
   const tier =
     metrics.score >= 90
       ? {
-          color: c.success,
+          color: theme.colors.success,
           word: 'FORTIFIED',
           blurb:
             'Your overall password security is fortified. Keep rotating credentials to stay ahead.',
         }
       : metrics.score >= 60
         ? {
-            color: c.accent,
+            color: theme.colors.accent,
             word: 'GOOD',
             blurb:
               'Your overall password security is strong, but a few critical optimizations are recommended to reach Fortified status.',
           }
         : metrics.score >= 40
           ? {
-              color: c.warning,
+              color: theme.colors.warning,
               word: 'FAIR',
               blurb:
                 'Your vault is in fair shape, but a few critical optimizations are recommended below.',
             }
           : {
-              color: c.danger,
+              color: theme.colors.error,
               word: 'AT RISK',
               blurb:
                 'Your vault needs attention. Resolve the weak and reused passwords below to harden it.',
@@ -192,7 +199,9 @@ export function PasswordHealthScreen() {
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + 120 }]}>
-        <View style={styles.scoreWrapper}>
+        <Animated.View
+          entering={FadeIn.duration(theme.motion.duration.navigation)}
+          style={styles.scoreWrapper}>
           <View
             accessibilityRole="image"
             accessibilityLabel={`Vault health score ${metrics.score} percent, ${tier.word}`}>
@@ -204,17 +213,20 @@ export function PasswordHealthScreen() {
               ? 'Add credentials to start your personalized health report.'
               : tier.blurb}
           </Text>
-        </View>
+        </Animated.View>
 
         <View
           accessibilityRole="summary"
           accessibilityLabel={`${metrics.strong} safe, ${metrics.reused} reused, ${metrics.weak} weak, ${metrics.old} old`}
           style={styles.statsGrid}>
-          {stats.map((stat) => {
+          {stats.map((stat, index) => {
             const Icon = stat.icon;
             return (
-              <View
+              <Animated.View
                 key={stat.label}
+                entering={FadeInDown.duration(theme.motion.duration.cardExpand).delay(
+                  index * theme.motion.stagger.list,
+                )}
                 style={[
                   styles.statCard,
                   { borderColor: stat.color + '33', backgroundColor: stat.color + '12' },
@@ -226,7 +238,7 @@ export function PasswordHealthScreen() {
                   </View>
                 </View>
                 <Text style={styles.statLabel}>{stat.label.toUpperCase()}</Text>
-              </View>
+              </Animated.View>
             );
           })}
         </View>
@@ -235,7 +247,7 @@ export function PasswordHealthScreen() {
         <GlassCard style={styles.breachCard}>
           <View style={styles.breachHeader}>
             <View style={styles.breachIcon}>
-              <ScanSearch size={18} color={c.accent} strokeWidth={2} />
+              <ScanSearch size={18} color={theme.colors.accent} strokeWidth={2} />
             </View>
             <Text style={styles.breachLead}>
               Check your passwords against known data breaches. Only an anonymized hash prefix leaves
@@ -246,7 +258,7 @@ export function PasswordHealthScreen() {
           {breach.status === 'done' ? (
             breachedAccounts.length > 0 ? (
               <>
-                <Text style={[styles.breachResult, { color: c.danger }]}>
+                <Text style={[styles.breachResult, { color: theme.colors.error }]}>
                   {breachedAccounts.length} of {breach.checked} password
                   {breach.checked === 1 ? '' : 's'} found in breaches. Change them now.
                 </Text>
@@ -258,17 +270,17 @@ export function PasswordHealthScreen() {
                       accessibilityLabel={`Open ${account.website} to change its breached password`}
                       onPress={() => openCredential(account.id)}
                       style={({ pressed }) => [styles.reusedMember, pressed && styles.pressed]}>
-                      <ShieldAlert size={15} color={c.danger} strokeWidth={1.75} />
+                      <ShieldAlert size={15} color={theme.colors.error} strokeWidth={1.75} />
                       <Text style={styles.reusedMemberText} numberOfLines={1}>
                         {account.website} · {account.username || 'No username'}
                       </Text>
-                      <ChevronRight size={15} color={c.muted} strokeWidth={2} />
+                      <ChevronRight size={15} color={theme.colors.textMuted} strokeWidth={2} />
                     </Pressable>
                   ))}
                 </View>
               </>
             ) : (
-              <Text style={[styles.breachResult, { color: c.success }]}>
+              <Text style={[styles.breachResult, { color: theme.colors.success }]}>
                 Good news — none of your {breach.checked} checked password
                 {breach.checked === 1 ? '' : 's'} appeared in known breaches.
               </Text>
@@ -276,7 +288,7 @@ export function PasswordHealthScreen() {
           ) : null}
 
           {breach.status === 'error' ? (
-            <Text style={[styles.breachResult, { color: c.warning }]}>{breach.message}</Text>
+            <Text style={[styles.breachResult, { color: theme.colors.warning }]}>{breach.message}</Text>
           ) : null}
 
           <Pressable
@@ -291,12 +303,12 @@ export function PasswordHealthScreen() {
             ]}>
             {breach.status === 'scanning' ? (
               <>
-                <ActivityIndicator size="small" color={c.accent} />
+                <ActivityIndicator size="small" color={theme.colors.accent} />
                 <Text style={styles.breachButtonText}>Checking…</Text>
               </>
             ) : (
               <>
-                <ScanSearch size={16} color={c.accent} strokeWidth={2} />
+                <ScanSearch size={16} color={theme.colors.accent} strokeWidth={2} />
                 <Text style={styles.breachButtonText}>
                   {breach.status === 'idle' ? 'Check for breaches' : 'Re-check breaches'}
                 </Text>
@@ -363,7 +375,7 @@ export function PasswordHealthScreen() {
           />
         ) : (
           <GlassCard style={styles.safeCard}>
-            <ShieldCheck size={20} color={c.success} strokeWidth={2} />
+            <ShieldCheck size={20} color={theme.colors.success} strokeWidth={2} />
             <Text style={styles.safeText}>
               {metrics.total === 0
                 ? 'No credentials saved yet.'
@@ -407,7 +419,7 @@ export function PasswordHealthScreen() {
                           customLogoUri={member.customLogoUri}
                           size={38}
                           iconSize={16}
-                          accent={c.accent}
+                          accent={theme.colors.accent}
                         />
                       </Pressable>
                     ))}
@@ -425,7 +437,7 @@ export function PasswordHealthScreen() {
 
         {metrics.old > 0 ? (
           <GlassCard style={styles.oldCard}>
-            <Clock size={18} color={c.accent} strokeWidth={1.75} />
+            <Clock size={18} color={theme.colors.accent} strokeWidth={1.75} />
             <Text style={styles.oldText}>
               {metrics.old} password{metrics.old === 1 ? '' : 's'} are older than 6 months. Rotating
               them keeps your vault fresh.
@@ -435,13 +447,13 @@ export function PasswordHealthScreen() {
 
         <View style={styles.sectionHeaderRow}>
           <Text style={[styles.sectionTitle, styles.sectionTitleInline]}>Secure Tips</Text>
-          <Lightbulb size={20} color={c.muted} strokeWidth={1.75} />
+          <Lightbulb size={20} color={theme.colors.textMuted} strokeWidth={1.75} />
         </View>
         <View style={styles.tips}>
           <GlassCard style={styles.tipsCard}>
             {TIPS.map((tip) => (
               <View key={tip} style={styles.tipRow}>
-                <CheckCircle2 size={18} color={c.success} strokeWidth={1.75} />
+                <CheckCircle2 size={18} color={theme.colors.success} strokeWidth={1.75} />
                 <Text style={styles.tipText}>{tip}</Text>
               </View>
             ))}
@@ -454,7 +466,7 @@ export function PasswordHealthScreen() {
           onPress={rescan}
           style={({ pressed }) => [styles.rescanWrapper, pressed && styles.pressed]}>
           <LinearGradient
-            colors={[c.accentStrong, c.accent]}
+            colors={[theme.colors.accentAlt, theme.colors.accent]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
             style={styles.rescan}>
@@ -468,322 +480,327 @@ export function PasswordHealthScreen() {
   );
 }
 
-function makeStyles(c: VaultColorsShape) {
+function makeStyles(t: Theme) {
   return StyleSheet.create({
-  content: {
-    paddingHorizontal: 20,
-    paddingTop: 16,
-  },
-  scoreWrapper: {
-    alignItems: 'center',
-    gap: 12,
-    marginTop: 16,
-  },
-  scoreHeadline: {
-    ...VaultType.sectionHeading,
-    color: c.heading,
-    textAlign: 'center',
-    marginTop: 8,
-  },
-  scoreBlurb: {
-    fontSize: 14,
-    lineHeight: 21,
-    color: c.muted,
-    textAlign: 'center',
-    paddingHorizontal: 12,
-    maxWidth: 320,
-  },
-  statsGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 12,
-    marginTop: 28,
-  },
-  statCard: {
-    flexBasis: '47%',
-    flexGrow: 1,
-    borderRadius: 20,
-    borderWidth: 1,
-    padding: 16,
-    gap: 8,
-  },
-  statCardTop: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    justifyContent: 'space-between',
-  },
-  statIcon: {
-    width: 36,
-    height: 36,
-    borderRadius: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  statValue: {
-    fontFamily: SerifFont.bold,
-    fontSize: 32,
-    lineHeight: 36,
-  },
-  statLabel: {
-    fontSize: 11,
-    fontWeight: '600',
-    letterSpacing: 1.2,
-    color: c.muted,
-  },
-  sectionHeaderRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginTop: 32,
-    marginBottom: 16,
-  },
-  sectionTitle: {
-    ...VaultType.sectionHeading,
-    color: c.heading,
-    marginTop: 32,
-    marginBottom: 16,
-  },
-  sectionTitleInline: {
-    marginTop: 0,
-    marginBottom: 0,
-  },
-  subsectionTitle: {
-    ...VaultType.heading,
-    color: c.heading,
-    marginTop: 32,
-    marginBottom: 16,
-  },
-  viewAll: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: c.accent,
-  },
-  breachCard: {
-    gap: 14,
-  },
-  breachHeader: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: 12,
-  },
-  breachIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: c.accentSoft,
-  },
-  breachLead: {
-    flex: 1,
-    fontSize: 13,
-    lineHeight: 19,
-    color: c.body,
-  },
-  breachResult: {
-    fontSize: 14,
-    fontWeight: '600',
-    lineHeight: 20,
-  },
-  breachList: {
-    gap: 10,
-  },
-  breachButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    height: 48,
-    borderRadius: 9999,
-    borderWidth: 1,
-    borderColor: c.accent + '55',
-    backgroundColor: c.accentSoft,
-  },
-  breachButtonText: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: c.accent,
-  },
-  disabled: {
-    opacity: 0.6,
-  },
-  attentionList: {
-    gap: 12,
-  },
-  attentionCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 14,
-  },
-  attentionIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  attentionText: {
-    flex: 1,
-    gap: 2,
-  },
-  attentionName: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: c.heading,
-  },
-  attentionMeta: {
-    fontSize: 11,
-    fontWeight: '600',
-    letterSpacing: 0.8,
-    color: c.muted,
-  },
-  actionPill: {
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 9999,
-    borderWidth: 1,
-  },
-  actionPillText: {
-    fontSize: 12,
-    fontWeight: '700',
-  },
-  safeCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  safeText: {
-    flex: 1,
-    fontSize: 14,
-    lineHeight: 20,
-    color: c.body,
-  },
-  reusedCard: {
-    gap: 12,
-    borderColor: 'rgba(255,138,138,0.3)',
-  },
-  reusedTitleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: 12,
-  },
-  reusedTitle: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: c.heading,
-    flex: 1,
-  },
-  riskBadge: {
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 9999,
-    backgroundColor: c.accentSoft,
-    borderWidth: 1,
-    borderColor: c.accent + '55',
-  },
-  riskBadgeText: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: c.accent,
-    letterSpacing: 0.3,
-  },
-  reusedBody: {
-    fontSize: 13,
-    lineHeight: 19,
-    color: c.muted,
-  },
-  reusedAvatars: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingTop: 2,
-  },
-  reusedAvatarButton: {
-    borderRadius: 9999,
-    borderWidth: 2,
-    borderColor: c.glassBackgroundStrong,
-  },
-  reusedAvatarOverlap: {
-    marginLeft: -10,
-  },
-  reusedAvatarMore: {
-    width: 38,
-    height: 38,
-    borderRadius: 9999,
-    borderWidth: 2,
-    borderColor: c.glassBackgroundStrong,
-    backgroundColor: c.accentSoft,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  reusedAvatarMoreText: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: c.accent,
-  },
-  reusedMember: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    paddingVertical: 10,
-    paddingHorizontal: 12,
-    borderRadius: 14,
-    backgroundColor: c.glassBackground,
-  },
-  reusedMemberText: {
-    flex: 1,
-    fontSize: 13,
-    fontWeight: '500',
-    color: c.heading,
-  },
-  oldCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    marginTop: 24,
-  },
-  oldText: {
-    flex: 1,
-    fontSize: 14,
-    lineHeight: 20,
-    color: c.body,
-  },
-  tips: {
-    gap: 12,
-  },
-  tipsCard: {
-    gap: 14,
-  },
-  tipRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: 12,
-  },
-  tipText: {
-    flex: 1,
-    fontSize: 14,
-    lineHeight: 20,
-    color: c.body,
-  },
-  rescanWrapper: {
-    marginTop: 32,
-    borderRadius: 9999,
-  },
-  pressed: {
-    opacity: 0.85,
-  },
-  rescan: {
-    height: 56,
-    borderRadius: 9999,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-  },
-  rescanText: {
-    fontSize: 15,
-    fontWeight: '700',
-    color: c.buttonText,
-  },
+    content: {
+      paddingHorizontal: t.layout.screenPadding,
+      paddingTop: t.spacing.lg,
+    },
+    scoreWrapper: {
+      alignItems: 'center',
+      gap: t.spacing.md,
+      marginTop: t.spacing.lg,
+    },
+    scoreHeadline: {
+      ...t.typography.headingSerif,
+      color: t.colors.text,
+      textAlign: 'center',
+      marginTop: t.spacing.sm,
+    },
+    scoreBlurb: {
+      ...t.typography.body,
+      fontSize: 14,
+      lineHeight: 21,
+      color: t.colors.textMuted,
+      textAlign: 'center',
+      paddingHorizontal: t.spacing.md,
+      maxWidth: 320,
+    },
+    statsGrid: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: t.spacing.md,
+      marginTop: t.spacing.xxl,
+    },
+    statCard: {
+      flexBasis: '47%',
+      flexGrow: 1,
+      borderRadius: t.radius.card,
+      borderWidth: 1,
+      padding: t.spacing.lg,
+      gap: t.spacing.sm,
+    },
+    statCardTop: {
+      flexDirection: 'row',
+      alignItems: 'flex-start',
+      justifyContent: 'space-between',
+    },
+    statIcon: {
+      width: 36,
+      height: 36,
+      borderRadius: t.radius.chip,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    statValue: {
+      ...t.typography.displaySerif,
+      fontSize: 32,
+      lineHeight: 36,
+    },
+    statLabel: {
+      fontSize: 11,
+      fontWeight: t.fontWeight.semibold,
+      letterSpacing: 1.2,
+      color: t.colors.textMuted,
+    },
+    sectionHeaderRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      marginTop: t.spacing.xxl,
+      marginBottom: t.spacing.lg,
+    },
+    sectionTitle: {
+      ...t.typography.headingSerif,
+      color: t.colors.text,
+      marginTop: t.spacing.xxl,
+      marginBottom: t.spacing.lg,
+    },
+    sectionTitleInline: {
+      marginTop: 0,
+      marginBottom: 0,
+    },
+    subsectionTitle: {
+      ...t.typography.titleSerif,
+      color: t.colors.text,
+      marginTop: t.spacing.xxl,
+      marginBottom: t.spacing.lg,
+    },
+    viewAll: {
+      fontSize: 13,
+      fontWeight: t.fontWeight.semibold,
+      color: t.colors.accent,
+    },
+    breachCard: {
+      gap: t.spacing.md + 2,
+    },
+    breachHeader: {
+      flexDirection: 'row',
+      alignItems: 'flex-start',
+      gap: t.spacing.md,
+    },
+    breachIcon: {
+      width: 40,
+      height: 40,
+      borderRadius: t.radius.chip,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: t.colors.accentSoft,
+    },
+    breachLead: {
+      flex: 1,
+      ...t.typography.caption,
+      lineHeight: 19,
+      color: t.colors.textSecondary,
+    },
+    breachResult: {
+      fontSize: 14,
+      fontWeight: t.fontWeight.semibold,
+      lineHeight: 20,
+    },
+    breachList: {
+      gap: t.spacing.sm + 2,
+    },
+    breachButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: t.spacing.sm,
+      height: 48,
+      borderRadius: t.radius.full,
+      borderWidth: 1,
+      borderColor: t.colors.accentSoft,
+      backgroundColor: t.colors.accentSoft,
+    },
+    breachButtonText: {
+      fontSize: 14,
+      fontWeight: t.fontWeight.bold,
+      color: t.colors.accent,
+    },
+    disabled: {
+      opacity: 0.6,
+    },
+    attentionList: {
+      gap: t.spacing.md,
+    },
+    attentionCard: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: t.spacing.md + 2,
+    },
+    attentionIcon: {
+      width: 40,
+      height: 40,
+      borderRadius: t.radius.chip,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    attentionText: {
+      flex: 1,
+      gap: 2,
+    },
+    attentionName: {
+      ...t.typography.body,
+      fontSize: 15,
+      fontWeight: t.fontWeight.semibold,
+      color: t.colors.text,
+    },
+    attentionMeta: {
+      fontSize: 11,
+      fontWeight: t.fontWeight.semibold,
+      letterSpacing: 0.8,
+      color: t.colors.textMuted,
+    },
+    actionPill: {
+      paddingHorizontal: t.spacing.md + 2,
+      paddingVertical: t.spacing.sm,
+      borderRadius: t.radius.full,
+      borderWidth: 1,
+    },
+    actionPillText: {
+      fontSize: 12,
+      fontWeight: t.fontWeight.bold,
+    },
+    safeCard: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: t.spacing.md,
+    },
+    safeText: {
+      flex: 1,
+      ...t.typography.body,
+      fontSize: 14,
+      lineHeight: 20,
+      color: t.colors.textSecondary,
+    },
+    reusedCard: {
+      gap: t.spacing.md,
+      borderColor: t.colors.error + '4d',
+    },
+    reusedTitleRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      gap: t.spacing.md,
+    },
+    reusedTitle: {
+      ...t.typography.body,
+      fontSize: 15,
+      fontWeight: t.fontWeight.semibold,
+      color: t.colors.text,
+      flex: 1,
+    },
+    riskBadge: {
+      paddingHorizontal: t.spacing.sm + 2,
+      paddingVertical: t.spacing.xs,
+      borderRadius: t.radius.full,
+      backgroundColor: t.colors.accentSoft,
+      borderWidth: 1,
+      borderColor: t.colors.accentSoft,
+    },
+    riskBadgeText: {
+      fontSize: 11,
+      fontWeight: t.fontWeight.bold,
+      color: t.colors.accent,
+      letterSpacing: 0.3,
+    },
+    reusedBody: {
+      ...t.typography.caption,
+      lineHeight: 19,
+      color: t.colors.textMuted,
+    },
+    reusedAvatars: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingTop: 2,
+    },
+    reusedAvatarButton: {
+      borderRadius: t.radius.full,
+      borderWidth: 2,
+      borderColor: t.glass.fillStrong,
+    },
+    reusedAvatarOverlap: {
+      marginLeft: -10,
+    },
+    reusedAvatarMore: {
+      width: 38,
+      height: 38,
+      borderRadius: t.radius.full,
+      borderWidth: 2,
+      borderColor: t.glass.fillStrong,
+      backgroundColor: t.colors.accentSoft,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    reusedAvatarMoreText: {
+      fontSize: 12,
+      fontWeight: t.fontWeight.bold,
+      color: t.colors.accent,
+    },
+    reusedMember: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: t.spacing.sm + 2,
+      paddingVertical: t.spacing.sm + 2,
+      paddingHorizontal: t.spacing.md,
+      borderRadius: t.radius.button,
+      backgroundColor: t.glass.fill,
+    },
+    reusedMemberText: {
+      flex: 1,
+      ...t.typography.caption,
+      color: t.colors.text,
+    },
+    oldCard: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: t.spacing.md,
+      marginTop: t.spacing.xl,
+    },
+    oldText: {
+      flex: 1,
+      ...t.typography.body,
+      fontSize: 14,
+      lineHeight: 20,
+      color: t.colors.textSecondary,
+    },
+    tips: {
+      gap: t.spacing.md,
+    },
+    tipsCard: {
+      gap: t.spacing.md + 2,
+    },
+    tipRow: {
+      flexDirection: 'row',
+      alignItems: 'flex-start',
+      gap: t.spacing.md,
+    },
+    tipText: {
+      flex: 1,
+      ...t.typography.body,
+      fontSize: 14,
+      lineHeight: 20,
+      color: t.colors.textSecondary,
+    },
+    rescanWrapper: {
+      marginTop: t.spacing.xxl,
+      borderRadius: t.radius.full,
+    },
+    pressed: {
+      opacity: 0.85,
+    },
+    rescan: {
+      height: 56,
+      borderRadius: t.radius.full,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: t.spacing.sm,
+    },
+    rescanText: {
+      fontSize: 15,
+      fontWeight: t.fontWeight.bold,
+      color: t.colors.onAccent,
+    },
   });
 }

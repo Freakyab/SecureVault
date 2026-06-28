@@ -15,15 +15,16 @@ import { useMemo, useState } from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { CredentialAvatar, GlassCard, PrimaryButton, ScreenBackground, Toggle, VaultHeader } from '@/components/vault';
+import { CredentialAvatar, ScreenBackground, VaultHeader } from '@/components/vault';
+import { GlassCard, Button, Toggle } from '@/components/ui';
 import { CREDENTIAL_CATEGORIES } from '@/constants/categories';
-import { VaultType } from '@/constants/vault-theme';
-import { useVaultColors } from '@/contexts/color-theme-context';
-import type { VaultColorsShape } from '@/theme/color-themes';
 import { useToast } from '@/contexts/toast-context';
 import { useVault } from '@/contexts/vault-context';
-import { copySensitiveToClipboard, copyToClipboard, hapticSuccess, hapticWarning } from '@/services/feedback';
+import { useHaptics } from '@/hooks/use-haptics';
+import { useTheme } from '@/hooks/use-theme';
+import { copySensitiveToClipboard, copyToClipboard } from '@/services/feedback';
 import { generatePassword, scorePasswordStrength } from '@/services/password-generator';
+import { type Theme } from '@/theme';
 
 function formatAge(iso: string) {
   const date = new Date(iso);
@@ -38,8 +39,9 @@ function formatAge(iso: string) {
 
 export function EditCredentialScreen() {
   const insets = useSafeAreaInsets();
-  const c = useVaultColors();
-  const styles = useMemo(() => makeStyles(c), [c]);
+  const theme = useTheme();
+  const haptics = useHaptics();
+  const styles = useMemo(() => makeStyles(theme), [theme]);
   const router = useRouter();
   const { showToast } = useToast();
   const { id } = useLocalSearchParams<{ id?: string }>();
@@ -69,7 +71,7 @@ export function EditCredentialScreen() {
         <VaultHeader title="Edit Credential" showBack onBack={() => router.back()} />
         <View style={styles.missing}>
           <Text style={styles.missingText}>This credential could not be found.</Text>
-          <PrimaryButton label="BACK TO VAULT" onPress={() => router.replace('/vault')} />
+          <Button onPress={() => router.replace('/vault')}>BACK TO VAULT</Button>
         </View>
       </ScreenBackground>
     );
@@ -78,7 +80,7 @@ export function EditCredentialScreen() {
   async function handleSave() {
     if (!website.trim() || !username.trim() || !password.trim()) {
       Alert.alert('Missing details', 'Website, username, and password are required.');
-      hapticWarning();
+      haptics.warning();
       return;
     }
 
@@ -98,11 +100,12 @@ export function EditCredentialScreen() {
           .map((tag) => tag.trim())
           .filter(Boolean),
       });
+      haptics.success();
       showToast('Credential updated', 'success');
       router.back();
     } catch (error) {
       Alert.alert('Could not save', error instanceof Error ? error.message : 'Please try again.');
-      hapticWarning();
+      haptics.warning();
     } finally {
       setSaving(false);
     }
@@ -116,7 +119,7 @@ export function EditCredentialScreen() {
         style: 'destructive',
         onPress: async () => {
           await deleteCredential(credential!.id);
-          hapticSuccess();
+          haptics.success();
           showToast('Credential deleted', 'info');
           router.back();
         },
@@ -141,10 +144,10 @@ export function EditCredentialScreen() {
 
       if (result.canceled || !result.assets.length) return;
       await setCredentialLogo(credential!.id, result.assets[0].uri);
-      hapticSuccess();
+      haptics.success();
       showToast('Custom logo updated', 'success');
     } catch {
-      hapticWarning();
+      haptics.warning();
       Alert.alert('Could not set logo', 'Please try a different image.');
     }
   }
@@ -169,6 +172,7 @@ export function EditCredentialScreen() {
 
   async function handleCopy(label: string, value: string) {
     if (!value) return;
+    haptics.success();
     if (label === 'Password') {
       await copySensitiveToClipboard(value);
       showToast('Password copied — clears in 30s', 'success');
@@ -199,7 +203,7 @@ export function EditCredentialScreen() {
               iconSize={28}
             />
             <View style={styles.logoEditBadge}>
-              <ImagePlus size={13} color={c.buttonText} strokeWidth={2.5} />
+              <ImagePlus size={13} color={theme.colors.onAccent} strokeWidth={2.5} />
             </View>
           </Pressable>
           <Text style={styles.identityName}>{credential.website || 'Credential'}</Text>
@@ -216,7 +220,7 @@ export function EditCredentialScreen() {
             <View style={styles.fieldHeader}>
               <Text style={styles.fieldLabel}>Username</Text>
               <Pressable accessibilityLabel="Copy username" hitSlop={8} onPress={() => handleCopy('Username', username)}>
-                <Copy size={16} color={c.accent} strokeWidth={1.75} />
+                <Copy size={16} color={theme.colors.accent} strokeWidth={1.75} />
               </Pressable>
             </View>
             <TextInput
@@ -224,7 +228,7 @@ export function EditCredentialScreen() {
               onChangeText={setUsername}
               autoCapitalize="none"
               autoCorrect={false}
-              placeholderTextColor={c.placeholder}
+              placeholderTextColor={theme.colors.textMuted}
               style={styles.input}
             />
           </View>
@@ -238,19 +242,22 @@ export function EditCredentialScreen() {
                   hitSlop={8}
                   onPress={() => setShowPassword((prev) => !prev)}>
                   {showPassword ? (
-                    <EyeOff size={16} color={c.muted} strokeWidth={1.75} />
+                    <EyeOff size={16} color={theme.colors.textMuted} strokeWidth={1.75} />
                   ) : (
-                    <Eye size={16} color={c.muted} strokeWidth={1.75} />
+                    <Eye size={16} color={theme.colors.textMuted} strokeWidth={1.75} />
                   )}
                 </Pressable>
                 <Pressable accessibilityLabel="Copy password" hitSlop={8} onPress={() => handleCopy('Password', password)}>
-                  <Copy size={16} color={c.accent} strokeWidth={1.75} />
+                  <Copy size={16} color={theme.colors.accent} strokeWidth={1.75} />
                 </Pressable>
                 <Pressable
                   accessibilityLabel="Generate new password"
                   hitSlop={8}
-                  onPress={() => setPassword(generatePassword())}>
-                  <RefreshCw size={16} color={c.accent} strokeWidth={1.75} />
+                  onPress={() => {
+                    haptics.success();
+                    setPassword(generatePassword());
+                  }}>
+                  <RefreshCw size={16} color={theme.colors.accent} strokeWidth={1.75} />
                 </Pressable>
               </View>
             </View>
@@ -260,7 +267,7 @@ export function EditCredentialScreen() {
               secureTextEntry={!showPassword}
               autoCapitalize="none"
               autoCorrect={false}
-              placeholderTextColor={c.placeholder}
+              placeholderTextColor={theme.colors.textMuted}
               style={[styles.input, styles.mono]}
             />
             <View style={styles.strengthRow}>
@@ -288,7 +295,7 @@ export function EditCredentialScreen() {
               onChangeText={setNotes}
               multiline
               placeholder="Add a note..."
-              placeholderTextColor={c.placeholder}
+              placeholderTextColor={theme.colors.textMuted}
               style={[styles.input, styles.notes]}
             />
           </View>
@@ -310,7 +317,10 @@ export function EditCredentialScreen() {
                     key={item.id}
                     accessibilityRole="button"
                     accessibilityState={{ selected: active }}
-                    onPress={() => setCategory(item.id)}
+                    onPress={() => {
+                      haptics.selection();
+                      setCategory(item.id);
+                    }}
                     style={[styles.categoryChip, active && styles.categoryChipActive]}>
                     <Text style={[styles.categoryText, active && styles.categoryTextActive]}>{item.label}</Text>
                   </Pressable>
@@ -325,8 +335,8 @@ export function EditCredentialScreen() {
             <View style={styles.toggleLabel}>
               <Star
                 size={18}
-                color={credential.isFavorite ? c.warning : c.muted}
-                fill={credential.isFavorite ? c.warning : 'transparent'}
+                color={credential.isFavorite ? theme.colors.warning : theme.colors.textMuted}
+                fill={credential.isFavorite ? theme.colors.warning : 'transparent'}
                 strokeWidth={1.75}
               />
               <Text style={styles.toggleText}>Mark as Favorite</Text>
@@ -340,7 +350,7 @@ export function EditCredentialScreen() {
           <View style={styles.divider} />
           <View style={styles.toggleRow}>
             <View style={styles.toggleLabel}>
-              <Trash2 size={18} color={c.muted} strokeWidth={1.75} />
+              <Trash2 size={18} color={theme.colors.textMuted} strokeWidth={1.75} />
               <Text style={styles.toggleText}>Archive Credential</Text>
             </View>
             <Toggle
@@ -373,25 +383,26 @@ export function EditCredentialScreen() {
                           hitSlop={8}
                           onPress={() => setRevealedHistory((prev) => ({ ...prev, [index]: !prev[index] }))}>
                           {revealed ? (
-                            <EyeOff size={16} color={c.muted} strokeWidth={1.75} />
+                            <EyeOff size={16} color={theme.colors.textMuted} strokeWidth={1.75} />
                           ) : (
-                            <Eye size={16} color={c.muted} strokeWidth={1.75} />
+                            <Eye size={16} color={theme.colors.textMuted} strokeWidth={1.75} />
                           )}
                         </Pressable>
                         <Pressable
                           accessibilityLabel="Copy previous password"
                           hitSlop={8}
                           onPress={() => handleCopy('Password', entry.password)}>
-                          <Copy size={16} color={c.accent} strokeWidth={1.75} />
+                          <Copy size={16} color={theme.colors.accent} strokeWidth={1.75} />
                         </Pressable>
                         <Pressable
                           accessibilityLabel="Restore previous password"
                           hitSlop={8}
                           onPress={() => {
+                            haptics.selection();
                             setPassword(entry.password);
                             showToast('Previous password restored to field', 'info');
                           }}>
-                          <RotateCcw size={16} color={c.accent} strokeWidth={1.75} />
+                          <RotateCcw size={16} color={theme.colors.accent} strokeWidth={1.75} />
                         </Pressable>
                       </View>
                     </View>
@@ -403,13 +414,15 @@ export function EditCredentialScreen() {
         ) : null}
 
         <View style={styles.save}>
-          <PrimaryButton label={saving ? 'SAVING…' : 'UPDATE CREDENTIAL'} onPress={handleSave} disabled={saving} />
+          <Button onPress={handleSave} disabled={saving}>
+            {saving ? 'SAVING…' : 'UPDATE CREDENTIAL'}
+          </Button>
           <Pressable
             accessibilityRole="button"
             accessibilityLabel="Delete credential"
             onPress={handleDelete}
             style={({ pressed }) => [styles.delete, pressed && styles.pressed]}>
-            <Trash2 size={16} color={c.danger} strokeWidth={2} />
+            <Trash2 size={16} color={theme.colors.error} strokeWidth={2} />
             <Text style={styles.deleteText}>Delete Credential</Text>
           </Pressable>
         </View>
@@ -429,8 +442,8 @@ function Field({
   onChangeText: (text: string) => void;
   placeholder?: string;
 }) {
-  const c = useVaultColors();
-  const styles = useMemo(() => makeStyles(c), [c]);
+  const theme = useTheme();
+  const styles = useMemo(() => makeStyles(theme), [theme]);
   return (
     <View style={styles.field}>
       <Text style={styles.fieldLabel}>{label}</Text>
@@ -438,7 +451,7 @@ function Field({
         value={value}
         onChangeText={onChangeText}
         placeholder={placeholder}
-        placeholderTextColor={c.placeholder}
+        placeholderTextColor={theme.colors.textMuted}
         autoCapitalize="none"
         autoCorrect={false}
         style={styles.input}
@@ -447,203 +460,204 @@ function Field({
   );
 }
 
-function makeStyles(c: VaultColorsShape) {
+function makeStyles(t: Theme) {
   return StyleSheet.create({
-  content: {
-    paddingHorizontal: 20,
-    paddingTop: 16,
-  },
-  missing: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 20,
-    paddingHorizontal: 32,
-  },
-  missingText: {
-    ...VaultType.body,
-    color: c.body,
-    textAlign: 'center',
-  },
-  identity: {
-    alignItems: 'center',
-    gap: 8,
-    marginBottom: 24,
-  },
-  logoWrapper: {
-    width: 72,
-    height: 72,
-  },
-  logoEditBadge: {
-    position: 'absolute',
-    right: -2,
-    bottom: -2,
-    width: 26,
-    height: 26,
-    borderRadius: 9999,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: c.accent,
-    borderWidth: 2,
-    borderColor: c.background,
-  },
-  identityName: {
-    ...VaultType.title,
-    fontSize: 24,
-    color: c.heading,
-  },
-  identityUrl: {
-    fontSize: 13,
-    color: c.muted,
-  },
-  sectionTitle: {
-    ...VaultType.heading,
-    color: c.heading,
-    marginBottom: 12,
-  },
-  card: {
-    gap: 4,
-    marginBottom: 16,
-  },
-  field: {
-    gap: 6,
-    paddingVertical: 6,
-  },
-  fieldHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  fieldLabel: {
-    fontSize: 12,
-    fontWeight: '600',
-    letterSpacing: 0.4,
-    color: c.muted,
-  },
-  fieldActions: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 16,
-  },
-  input: {
-    fontSize: 15,
-    color: c.heading,
-    padding: 0,
-  },
-  mono: {
-    letterSpacing: 1.5,
-  },
-  notes: {
-    minHeight: 48,
-    textAlignVertical: 'top',
-    lineHeight: 20,
-  },
-  divider: {
-    height: 1,
-    backgroundColor: c.glassBorder,
-    marginVertical: 8,
-  },
-  strengthRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    marginTop: 10,
-  },
-  strengthTrack: {
-    flex: 1,
-    height: 4,
-    borderRadius: 9999,
-    backgroundColor: 'rgba(255,255,255,0.1)',
-    overflow: 'hidden',
-  },
-  strengthFill: {
-    height: 4,
-    borderRadius: 9999,
-    backgroundColor: c.success,
-  },
-  strengthLabel: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: c.success,
-  },
-  categoryRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 10,
-  },
-  categoryChip: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 9999,
-    borderWidth: 1,
-    borderColor: c.glassBorder,
-    backgroundColor: c.glassBackground,
-  },
-  categoryChipActive: {
-    borderColor: c.accent,
-    backgroundColor: c.accentSoft,
-  },
-  categoryText: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: c.muted,
-  },
-  categoryTextActive: {
-    color: c.accent,
-  },
-  toggleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: 8,
-  },
-  toggleLabel: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  toggleText: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: c.heading,
-  },
-  historyRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: 12,
-    paddingVertical: 8,
-  },
-  historyText: {
-    flex: 1,
-    gap: 2,
-  },
-  historyValue: {
-    fontSize: 15,
-    color: c.heading,
-  },
-  historyAge: {
-    fontSize: 12,
-    color: c.muted,
-  },
-  save: {
-    marginTop: 24,
-    gap: 16,
-    alignItems: 'center',
-  },
-  delete: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    paddingVertical: 8,
-  },
-  pressed: {
-    opacity: 0.8,
-  },
-  deleteText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: c.danger,
-  },
+    content: {
+      paddingHorizontal: t.layout.screenPadding,
+      paddingTop: t.spacing.lg,
+    },
+    missing: {
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: t.spacing.xl,
+      paddingHorizontal: t.spacing.xxl,
+    },
+    missingText: {
+      ...t.typography.body,
+      color: t.colors.textSecondary,
+      textAlign: 'center',
+    },
+    identity: {
+      alignItems: 'center',
+      gap: t.spacing.sm,
+      marginBottom: t.spacing.xl,
+    },
+    logoWrapper: {
+      width: 72,
+      height: 72,
+    },
+    logoEditBadge: {
+      position: 'absolute',
+      right: -2,
+      bottom: -2,
+      width: 26,
+      height: 26,
+      borderRadius: t.radius.full,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: t.colors.accent,
+      borderWidth: 2,
+      borderColor: t.colors.background,
+    },
+    identityName: {
+      ...t.typography.titleSerif,
+      fontSize: 24,
+      color: t.colors.text,
+    },
+    identityUrl: {
+      fontSize: 13,
+      color: t.colors.textMuted,
+    },
+    sectionTitle: {
+      ...t.typography.titleSerif,
+      color: t.colors.text,
+      marginBottom: t.spacing.md,
+    },
+    card: {
+      gap: t.spacing.xs,
+      marginBottom: t.spacing.lg,
+    },
+    field: {
+      gap: 6,
+      paddingVertical: 6,
+    },
+    fieldHeader: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+    },
+    fieldLabel: {
+      fontSize: 12,
+      fontWeight: t.fontWeight.semibold,
+      letterSpacing: 0.4,
+      color: t.colors.textMuted,
+    },
+    fieldActions: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: t.spacing.lg,
+    },
+    input: {
+      fontSize: 15,
+      color: t.colors.text,
+      padding: 0,
+    },
+    mono: {
+      letterSpacing: 1.5,
+    },
+    notes: {
+      minHeight: 48,
+      textAlignVertical: 'top',
+      lineHeight: 20,
+    },
+    divider: {
+      height: 1,
+      backgroundColor: t.glass.border,
+      marginVertical: t.spacing.sm,
+    },
+    strengthRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: t.spacing.md,
+      marginTop: t.spacing.sm + 2,
+    },
+    strengthTrack: {
+      flex: 1,
+      height: 4,
+      borderRadius: t.radius.full,
+      backgroundColor: t.glass.fillStrong,
+      overflow: 'hidden',
+    },
+    strengthFill: {
+      height: 4,
+      borderRadius: t.radius.full,
+      backgroundColor: t.colors.success,
+    },
+    strengthLabel: {
+      fontSize: 12,
+      fontWeight: t.fontWeight.semibold,
+      color: t.colors.success,
+    },
+    categoryRow: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: t.spacing.sm + 2,
+    },
+    categoryChip: {
+      paddingHorizontal: t.spacing.lg,
+      paddingVertical: t.spacing.sm,
+      borderRadius: t.radius.full,
+      borderWidth: 1,
+      borderColor: t.glass.border,
+      backgroundColor: t.glass.fill,
+    },
+    categoryChipActive: {
+      borderColor: t.colors.accent,
+      backgroundColor: t.colors.accentSoft,
+    },
+    categoryText: {
+      fontSize: 13,
+      fontWeight: t.fontWeight.semibold,
+      color: t.colors.textMuted,
+    },
+    categoryTextActive: {
+      color: t.colors.accent,
+    },
+    toggleRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingVertical: t.spacing.sm,
+    },
+    toggleLabel: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: t.spacing.md,
+    },
+    toggleText: {
+      ...t.typography.body,
+      fontSize: 15,
+      fontWeight: t.fontWeight.semibold,
+      color: t.colors.text,
+    },
+    historyRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      gap: t.spacing.md,
+      paddingVertical: t.spacing.sm,
+    },
+    historyText: {
+      flex: 1,
+      gap: 2,
+    },
+    historyValue: {
+      fontSize: 15,
+      color: t.colors.text,
+    },
+    historyAge: {
+      fontSize: 12,
+      color: t.colors.textMuted,
+    },
+    save: {
+      marginTop: t.spacing.xl,
+      gap: t.spacing.lg,
+      alignItems: 'center',
+    },
+    delete: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: t.spacing.sm,
+      paddingVertical: t.spacing.sm,
+    },
+    pressed: {
+      opacity: 0.8,
+    },
+    deleteText: {
+      fontSize: 14,
+      fontWeight: t.fontWeight.semibold,
+      color: t.colors.error,
+    },
   });
 }

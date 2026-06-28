@@ -3,9 +3,9 @@ import { LucideIcon } from 'lucide-react-native';
 import { useEffect, useMemo, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 
-import { useVaultColors } from '@/contexts/color-theme-context';
+import { useTheme } from '@/hooks/use-theme';
 import { faviconUrl, getLogoStatus, resolveDomain, setLogoStatus } from '@/services/site-branding';
-import type { VaultColorsShape } from '@/theme/color-themes';
+import { type Theme } from '@/theme';
 
 interface CredentialAvatarProps {
   /** Fallback icon when no logo is available. */
@@ -36,9 +36,9 @@ export function CredentialAvatar({
   iconSize = 20,
   accent,
 }: CredentialAvatarProps) {
-  const c = useVaultColors();
-  const styles = useMemo(() => makeStyles(c), [c]);
-  const resolvedAccent = accent ?? c.accent;
+  const theme = useTheme();
+  const styles = useMemo(() => makeStyles(theme), [theme]);
+  const resolvedAccent = accent ?? theme.colors.accent;
   const domain = resolveDomain(url) ?? resolveDomain(website);
   const [failed, setFailed] = useState(false);
 
@@ -87,12 +87,12 @@ export function CredentialAvatar({
   );
 }
 
-function makeStyles(c: VaultColorsShape) {
+function makeStyles(t: Theme) {
   return StyleSheet.create({
     tile: {
       alignItems: 'center',
       justifyContent: 'center',
-      backgroundColor: c.glassBackgroundStrong,
+      backgroundColor: t.glass.fillStrong,
       borderWidth: 1,
       overflow: 'hidden',
     },

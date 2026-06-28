@@ -2,8 +2,8 @@ import { ChevronRight, Copy, LucideIcon, Star } from 'lucide-react-native';
 import { useMemo } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { useVaultColors } from '@/contexts/color-theme-context';
-import type { VaultColorsShape } from '@/theme/color-themes';
+import { useTheme } from '@/hooks/use-theme';
+import { type Theme } from '@/theme';
 
 import { CredentialAvatar } from './credential-avatar';
 
@@ -50,18 +50,18 @@ export function CredentialRow({
   isFavorite = false,
   disabled = false,
 }: CredentialRowProps) {
-  const c = useVaultColors();
-  const styles = useMemo(() => makeStyles(c), [c]);
-  const resolvedAccent = accent ?? c.accent;
+  const theme = useTheme();
+  const styles = useMemo(() => makeStyles(theme), [theme]);
+  const resolvedAccent = accent ?? theme.colors.accent;
 
   const badgeMetaByKey = useMemo<Record<keyof CredentialRowBadges, { label: string; color: string }>>(
     () => ({
-      breached: { label: 'Breached', color: c.danger },
-      reused: { label: 'Reused', color: c.danger },
-      weak: { label: 'Weak', color: c.warning },
-      old: { label: 'Old', color: c.accent },
+      breached: { label: 'Breached', color: theme.colors.error },
+      reused: { label: 'Reused', color: theme.colors.error },
+      weak: { label: 'Weak', color: theme.colors.warning },
+      old: { label: 'Old', color: theme.colors.accent },
     }),
-    [c],
+    [theme],
   );
 
   const hasActions = Boolean(onCopy || onToggleFavorite);
@@ -111,7 +111,7 @@ export function CredentialRow({
               hitSlop={10}
               onPress={onCopy}
               style={({ pressed }) => [styles.actionButton, pressed && styles.pressed]}>
-              <Copy size={18} color={c.muted} strokeWidth={1.75} />
+              <Copy size={18} color={theme.colors.textMuted} strokeWidth={1.75} />
             </Pressable>
           ) : null}
           {onToggleFavorite ? (
@@ -124,32 +124,32 @@ export function CredentialRow({
               style={({ pressed }) => [styles.actionButton, pressed && styles.pressed]}>
               <Star
                 size={18}
-                color={isFavorite ? c.accent : c.muted}
-                fill={isFavorite ? c.accent : 'transparent'}
+                color={isFavorite ? theme.colors.accent : theme.colors.textMuted}
+                fill={isFavorite ? theme.colors.accent : 'transparent'}
                 strokeWidth={1.75}
               />
             </Pressable>
           ) : null}
         </View>
       ) : (
-        <ChevronRight size={18} color={c.muted} strokeWidth={2} />
+        <ChevronRight size={18} color={theme.colors.textMuted} strokeWidth={2} />
       )}
     </Pressable>
   );
 }
 
-function makeStyles(c: VaultColorsShape) {
+function makeStyles(t: Theme) {
   return StyleSheet.create({
     row: {
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'space-between',
-      paddingVertical: 12,
-      paddingHorizontal: 16,
-      borderRadius: 20,
+      paddingVertical: t.spacing.md,
+      paddingHorizontal: t.spacing.lg,
+      borderRadius: t.radius.card,
       borderWidth: 1,
-      borderColor: c.glassBorder,
-      backgroundColor: c.glassBackground,
+      borderColor: t.glass.border,
+      backgroundColor: t.glass.fill,
     },
     pressed: {
       opacity: 0.8,
@@ -160,7 +160,7 @@ function makeStyles(c: VaultColorsShape) {
     left: {
       flexDirection: 'row',
       alignItems: 'center',
-      gap: 16,
+      gap: t.spacing.lg,
       flexShrink: 1,
     },
     text: {
@@ -170,40 +170,40 @@ function makeStyles(c: VaultColorsShape) {
     nameRow: {
       flexDirection: 'row',
       alignItems: 'center',
-      gap: 8,
+      gap: t.spacing.sm,
       flexShrink: 1,
     },
     name: {
-      fontSize: 16,
-      fontWeight: '600',
-      color: c.heading,
+      ...t.typography.body,
+      fontWeight: t.fontWeight.semibold,
+      color: t.colors.text,
       flexShrink: 1,
     },
     badge: {
-      paddingHorizontal: 8,
+      paddingHorizontal: t.spacing.sm,
       paddingVertical: 2,
-      borderRadius: 9999,
+      borderRadius: t.radius.full,
       borderWidth: 1,
     },
     badgeText: {
       fontSize: 10,
-      fontWeight: '700',
+      fontWeight: t.fontWeight.bold,
       letterSpacing: 0.3,
     },
     detail: {
+      ...t.typography.caption,
       fontSize: 12,
-      fontWeight: '500',
-      color: c.muted,
+      color: t.colors.textMuted,
     },
     actions: {
       flexDirection: 'row',
       alignItems: 'center',
-      gap: 6,
+      gap: t.spacing.xs + 2,
     },
     actionButton: {
       width: 36,
       height: 36,
-      borderRadius: 9999,
+      borderRadius: t.radius.full,
       alignItems: 'center',
       justifyContent: 'center',
     },

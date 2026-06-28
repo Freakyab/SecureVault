@@ -15,28 +15,30 @@ import {
 } from 'lucide-react-native';
 import { useMemo, useState } from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { BottomNav, CredentialRow, EmptyState, GlassCard, ScreenBackground } from '@/components/vault';
+import { PressableScale, GlassCard, Input } from '@/components/ui';
+import { BottomNav, CredentialRow, EmptyState, ScreenBackground } from '@/components/vault';
 import { CATEGORY_FILTERS, CREDENTIAL_CATEGORIES } from '@/constants/categories';
-import { Fonts } from '@/constants/theme';
-import { VaultType, vaultShadow } from '@/constants/vault-theme';
-import { useVaultColors } from '@/contexts/color-theme-context';
-import type { VaultColorsShape } from '@/theme/color-themes';
 import { useToast } from '@/contexts/toast-context';
 import { useVault } from '@/contexts/vault-context';
+import { useHaptics } from '@/hooks/use-haptics';
 import { useNavigationLock } from '@/hooks/use-navigation-lock';
+import { useTheme } from '@/hooks/use-theme';
 import { filterCredentials } from '@/services/credential-search';
-import { copySensitiveToClipboard, hapticSuccess } from '@/services/feedback';
+import { copySensitiveToClipboard } from '@/services/feedback';
 import { computeHealthMetrics } from '@/services/health-checks';
+import { type Theme } from '@/theme';
 
 const VIEW_FILTERS = ['Active', 'Favorites', 'Archived'] as const;
 type ViewFilter = (typeof VIEW_FILTERS)[number];
 
 export function MainVaultScreen() {
   const insets = useSafeAreaInsets();
-  const c = useVaultColors();
-  const styles = useMemo(() => makeStyles(c), [c]);
+  const theme = useTheme();
+  const haptics = useHaptics();
+  const styles = useMemo(() => makeStyles(theme), [theme]);
   const router = useRouter();
   const params = useLocalSearchParams<{ category?: string }>();
   const { credentials, toggleFavorite, lockVault } = useVault();
@@ -127,10 +129,12 @@ export function MainVaultScreen() {
 
   async function copyPassword(password: string, website: string) {
     await copySensitiveToClipboard(password);
+    haptics.success();
     showToast(`${website} password copied — clears in 30s`, 'success');
   }
 
   async function onToggleFavorite(id: string, website: string, isFavorite: boolean) {
+    haptics.selection();
     await toggleFavorite(id);
     showToast(isFavorite ? `${website} removed from favorites` : `${website} added to favorites`, 'info');
   }
@@ -150,7 +154,7 @@ export function MainVaultScreen() {
         style: 'destructive',
         onPress: () => {
           lockVault();
-          hapticSuccess();
+          haptics.success();
           showToast('Vault locked', 'info');
           router.replace('/unlock');
         },
@@ -168,7 +172,7 @@ export function MainVaultScreen() {
         ]}>
         <View style={styles.brandRow}>
           <View style={styles.brandLeading}>
-            <Shield size={18} color={c.accent} strokeWidth={2} />
+            <Shield size={18} color={theme.colors.accent} strokeWidth={2} />
             <Text style={styles.brandWordmark}>SecureVault</Text>
           </View>
           <View style={styles.brandActions}>
@@ -176,24 +180,24 @@ export function MainVaultScreen() {
               accessibilityRole="button"
               accessibilityLabel="Export vault backup"
               hitSlop={10}
-              onPress={() => router.push('/settings')}
+              onPress={() => {
+                haptics.selection();
+                showToast('Export feature coming soon', 'info');
+              }}
               style={styles.brandIconButton}>
-              <Upload size={18} color={c.heading} strokeWidth={1.75} />
+              <Upload size={18} color={theme.colors.text} strokeWidth={1.75} />
             </Pressable>
             <Pressable
               accessibilityRole="button"
               accessibilityLabel="Import vault backup"
               hitSlop={10}
-              onPress={() => router.push('/settings')}
+              onPress={() => {
+                haptics.selection();
+                showToast('Import feature coming soon', 'info');
+              }}
               style={styles.brandIconButton}>
-              <Download size={18} color={c.heading} strokeWidth={1.75} />
+              <Download size={18} color={theme.colors.text} strokeWidth={1.75} />
             </Pressable>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel="Open settings"
-              onPress={() => router.push('/settings')}
-              style={styles.avatar}
-            />
           </View>
         </View>
 
@@ -208,28 +212,23 @@ export function MainVaultScreen() {
             onPress={() => runLocked(() => router.push('/add-credential'))}
             style={({ pressed }) => pressed && styles.pressed}>
             <LinearGradient
-              colors={[c.accentStrong, c.accent]}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              style={styles.newItemButton}>
-              <Plus size={16} color={c.buttonText} strokeWidth={2.5} />
+            colors={[theme.colors.accentAlt, theme.colors.accent]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.newItemButton}>
+            <Plus size={16} color={theme.colors.onAccent} strokeWidth={2.5} />
               <Text style={styles.newItemText}>NEW ITEM</Text>
             </LinearGradient>
           </Pressable>
         </View>
 
-        <View style={styles.search}>
-          <Search size={17} color={c.muted} strokeWidth={1.75} />
-          <TextInput
-            placeholder="Search your vault..."
-            placeholderTextColor={c.placeholder}
-            value={query}
-            onChangeText={setQuery}
-            autoCapitalize="none"
-            autoCorrect={false}
-            style={styles.searchInput}
-          />
-        </View>
+        <Input
+          placeholder="Search your vault..."
+          value={query}
+          onChangeText={setQuery}
+          style={styles.searchInput}
+          containerStyle={{ marginTop: theme.spacing.xl }}
+        />
 
         <View style={styles.viewFilters}>
           {VIEW_FILTERS.map((item) => {
@@ -256,7 +255,7 @@ export function MainVaultScreen() {
             ]}>
             <SlidersHorizontal
               size={15}
-              color={isFilterPanelOpen || hasAdvancedFilters ? c.heading : c.muted}
+              color={isFilterPanelOpen || hasAdvancedFilters ? theme.colors.text : theme.colors.textMuted}
               strokeWidth={2}
             />
             <Text
@@ -323,7 +322,7 @@ export function MainVaultScreen() {
             style={({ pressed }) => pressed && styles.pressed}>
             <GlassCard style={styles.alertCard}>
               <View style={styles.alertHeader}>
-                <AlertTriangle size={18} color={c.accent} strokeWidth={2} />
+                <AlertTriangle size={18} color={theme.colors.accent} strokeWidth={2} />
                 <Text style={styles.alertEyebrow}>SECURITY PULSE</Text>
               </View>
               <Text style={styles.alertTitle}>Review {health.weak + health.reused} password risks</Text>
@@ -332,7 +331,7 @@ export function MainVaultScreen() {
               </Text>
               <View style={styles.alertButton}>
                 <Text style={styles.alertButtonText}>View Health</Text>
-                <ArrowRight size={15} color={c.accent} strokeWidth={2.5} />
+                <ArrowRight size={15} color={theme.colors.accent} strokeWidth={2.5} />
               </View>
             </GlassCard>
           </Pressable>
@@ -342,7 +341,7 @@ export function MainVaultScreen() {
           <Text style={styles.statsEyebrow}>VAULT HEALTH</Text>
           <View style={styles.progressTrack}>
             <LinearGradient
-              colors={[c.accentStrong, c.accent]}
+              colors={[theme.colors.accentAlt, theme.colors.accent]}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 0 }}
               style={[styles.progressFill, { width: `${health.score}%` }]}
@@ -364,28 +363,33 @@ export function MainVaultScreen() {
                 <View style={styles.divider} />
               </View>
               <View style={styles.groupList}>
-                {group.items.map((credential) => (
-                  <CredentialRow
+                {group.items.map((credential, index) => (
+                  <Animated.View
                     key={credential.id}
-                    name={credential.website}
-                    detail={credential.username || 'No username'}
-                    icon={KeyRound}
-                    accent={c.accent}
-                    website={credential.website}
-                    url={credential.url}
-                    customLogoUri={credential.customLogoUri}
-                    badges={{
-                      weak: weakIds.has(credential.id),
-                      reused: reusedIds.has(credential.id),
-                      old: oldIds.has(credential.id),
-                    }}
-                    isFavorite={credential.isFavorite}
-                    onPress={() => openCredential(credential.id)}
-                    onCopy={() => copyPassword(credential.password, credential.website)}
-                    onToggleFavorite={() =>
-                      onToggleFavorite(credential.id, credential.website, credential.isFavorite)
-                    }
-                  />
+                    entering={FadeInDown.duration(theme.motion.duration.cardExpand).delay(
+                      index * theme.motion.stagger.list,
+                    )}>
+                    <CredentialRow
+                      name={credential.website}
+                      detail={credential.username || 'No username'}
+                      icon={KeyRound}
+                      accent={theme.colors.accent}
+                      website={credential.website}
+                      url={credential.url}
+                      customLogoUri={credential.customLogoUri}
+                      badges={{
+                        weak: weakIds.has(credential.id),
+                        reused: reusedIds.has(credential.id),
+                        old: oldIds.has(credential.id),
+                      }}
+                      isFavorite={credential.isFavorite}
+                      onPress={() => openCredential(credential.id)}
+                      onCopy={() => copyPassword(credential.password, credential.website)}
+                      onToggleFavorite={() =>
+                        onToggleFavorite(credential.id, credential.website, credential.isFavorite)
+                      }
+                    />
+                  </Animated.View>
                 ))}
               </View>
             </View>
@@ -409,19 +413,19 @@ export function MainVaultScreen() {
         )}
       </ScrollView>
 
-      <Pressable
-        accessibilityRole="button"
+      <PressableScale
         accessibilityLabel="Lock vault and return to unlock"
         onPress={handleLockVault}
-        style={({ pressed }) => [styles.fab, { bottom: insets.bottom + 90 }, pressed && styles.pressed]}>
+        haptic
+        style={[styles.fab, { bottom: insets.bottom + 90 }]}>
         <LinearGradient
-          colors={[c.accentStrong, c.accent]}
+          colors={[theme.colors.accentAlt, theme.colors.accent]}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
           style={styles.fabInner}>
-          <Lock size={24} color={c.buttonText} strokeWidth={2.25} />
+          <Lock size={24} color={theme.colors.onAccent} strokeWidth={2.25} />
         </LinearGradient>
-      </Pressable>
+      </PressableScale>
 
       <BottomNav active="vault" />
     </ScreenBackground>
@@ -436,318 +440,315 @@ function emptyMessage(view: ViewFilter, total: number, query: string): string {
   return 'No active credentials in this category.';
 }
 
-function makeStyles(c: VaultColorsShape) {
+function makeStyles(t: Theme) {
   return StyleSheet.create({
-  content: {
-    paddingHorizontal: 20,
-  },
-  brandRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  brandLeading: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  brandWordmark: {
-    ...VaultType.brand,
-    color: c.accent,
-  },
-  brandActions: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  brandIconButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 9999,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: c.glassBackground,
-    borderWidth: 1,
-    borderColor: c.glassBorder,
-  },
-  avatar: {
-    width: 36,
-    height: 36,
-    borderRadius: 9999,
-    backgroundColor: c.avatarBackground,
-    borderWidth: 1,
-    borderColor: c.avatarBorder,
-  },
-  headerRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginTop: 20,
-  },
-  headerLeading: {
-    flexShrink: 1,
-  },
-  title: {
-    ...VaultType.title,
-    color: c.heading,
-  },
-  subtitle: {
-    fontSize: 14,
-    color: c.muted,
-    marginTop: 2,
-  },
-  newItemButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    paddingHorizontal: 18,
-    paddingVertical: 12,
-    borderRadius: 9999,
-  },
-  newItemText: {
-    fontSize: 13,
-    fontWeight: '700',
-    letterSpacing: 0.6,
-    color: c.buttonText,
-  },
-  search: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    marginTop: 24,
-    height: 50,
-    paddingHorizontal: 16,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: c.glassBorder,
-    backgroundColor: c.glassBackground,
-  },
-  searchInput: {
-    flex: 1,
-    fontSize: 15,
-    color: c.heading,
-    padding: 0,
-  },
-  viewFilters: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flexWrap: 'wrap',
-    gap: 8,
-    marginTop: 16,
-  },
-  viewChip: {
-    alignItems: 'center',
-    paddingHorizontal: 18,
-    paddingVertical: 10,
-    borderRadius: 9999,
-    borderWidth: 1,
-    borderColor: c.glassBorder,
-    backgroundColor: c.glassBackground,
-  },
-  viewChipActive: {
-    backgroundColor: c.accentStrong,
-    borderColor: c.accentStrong,
-  },
-  viewChipText: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: c.muted,
-  },
-  viewChipTextActive: {
-    color: c.heading,
-  },
-  filterToggle: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-    borderRadius: 9999,
-    borderWidth: 1,
-    borderColor: c.glassBorder,
-    backgroundColor: c.glassBackground,
-  },
-  filterToggleActive: {
-    backgroundColor: c.accentSoft,
-    borderColor: c.accent,
-  },
-  filterToggleText: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: c.muted,
-  },
-  filterToggleTextActive: {
-    color: c.heading,
-  },
-  filterPanel: {
-    marginTop: 12,
-    padding: 16,
-    borderRadius: 24,
-    gap: 0,
-  },
-  filterPanelTitle: {
-    ...VaultType.label,
-    color: c.accent,
-    opacity: 0.8,
-  },
-  filterPanelSectionTitle: {
-    marginTop: 16,
-  },
-  filters: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-    marginTop: 12,
-  },
-  chip: {
-    paddingHorizontal: 18,
-    paddingVertical: 8,
-    borderRadius: 9999,
-    borderWidth: 1,
-    borderColor: c.glassBorder,
-    backgroundColor: c.glassBackground,
-  },
-  chipActive: {
-    backgroundColor: c.accentSoft,
-    borderColor: c.accent,
-  },
-  chipText: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: c.muted,
-  },
-  chipTextActive: {
-    color: c.accent,
-  },
-  tagChip: {
-    paddingHorizontal: 14,
-    paddingVertical: 6,
-    borderRadius: 9999,
-    borderWidth: 1,
-    borderColor: c.glassBorder,
-    backgroundColor: 'transparent',
-  },
-  tagChipActive: {
-    backgroundColor: c.accentStrong,
-    borderColor: c.accentStrong,
-  },
-  tagChipText: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: c.muted,
-  },
-  tagChipTextActive: {
-    color: c.heading,
-  },
-  pressed: {
-    opacity: 0.85,
-  },
-  alertCard: {
-    marginTop: 24,
-    gap: 10,
-    borderColor: c.accent + '4d',
-  },
-  alertHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  alertEyebrow: {
-    ...VaultType.label,
-    color: c.accent,
-  },
-  alertTitle: {
-    fontFamily: Fonts.serif,
-    fontSize: 22,
-    lineHeight: 30,
-    color: c.heading,
-  },
-  alertBody: {
-    fontSize: 14,
-    lineHeight: 20,
-    color: c.body,
-  },
-  alertButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    marginTop: 4,
-  },
-  alertButtonText: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: c.accent,
-  },
-  statsCard: {
-    marginTop: 16,
-    gap: 12,
-  },
-  statsEyebrow: {
-    ...VaultType.label,
-    color: c.accent,
-    opacity: 0.8,
-  },
-  progressTrack: {
-    height: 4,
-    borderRadius: 9999,
-    backgroundColor: 'rgba(255,255,255,0.1)',
-    overflow: 'hidden',
-  },
-  progressFill: {
-    height: 4,
-    borderRadius: 9999,
-  },
-  statsValue: {
-    fontFamily: Fonts.serif,
-    fontSize: 44,
-    lineHeight: 52,
-    color: c.accent,
-  },
-  statsCaption: {
-    fontSize: 14,
-    color: c.body,
-  },
-  group: {
-    marginTop: 24,
-  },
-  groupHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 16,
-    marginBottom: 16,
-  },
-  groupTitle: {
-    ...VaultType.label,
-    color: c.accent,
-    opacity: 0.8,
-  },
-  divider: {
-    flex: 1,
-    height: 1,
-    backgroundColor: c.glassBorder,
-  },
-  groupList: {
-    gap: 12,
-  },
-  emptyText: {
-    fontSize: 14,
-    lineHeight: 20,
-    color: c.body,
-  },
-  fab: {
-    position: 'absolute',
-    right: 24,
-    width: 56,
-    height: 56,
-    borderRadius: 9999,
-    ...vaultShadow(c.accentStrong),
-  },
-  fabInner: {
-    width: 56,
-    height: 56,
-    borderRadius: 9999,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
+    content: {
+      paddingHorizontal: t.layout.screenPadding,
+    },
+    brandRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+    },
+    brandLeading: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: t.spacing.sm,
+    },
+    brandWordmark: {
+      ...t.typography.headingSerif,
+      fontSize: 24,
+      color: t.colors.accent,
+    },
+    brandActions: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: t.spacing.sm,
+    },
+    brandIconButton: {
+      width: 36,
+      height: 36,
+      borderRadius: t.radius.full,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: t.glass.fill,
+      borderWidth: 1,
+      borderColor: t.glass.border,
+    },
+    avatar: {
+      width: 36,
+      height: 36,
+      borderRadius: t.radius.full,
+      backgroundColor: t.colors.surfaceAlt,
+      borderWidth: 1,
+      borderColor: t.glass.border,
+    },
+    headerRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      marginTop: t.spacing.xl,
+    },
+    headerLeading: {
+      flexShrink: 1,
+    },
+    title: {
+      ...t.typography.displaySerif,
+      color: t.colors.text,
+    },
+    subtitle: {
+      ...t.typography.caption,
+      fontSize: 14,
+      color: t.colors.textMuted,
+      marginTop: 2,
+    },
+    newItemButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: t.spacing.sm,
+      paddingHorizontal: t.spacing.lg + 2,
+      paddingVertical: t.spacing.md,
+      borderRadius: t.radius.full,
+    },
+    newItemText: {
+      fontSize: 13,
+      fontWeight: t.fontWeight.bold,
+      letterSpacing: 0.6,
+      color: t.colors.onAccent,
+    },
+    search: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: t.spacing.md,
+      marginTop: t.spacing.xl,
+      height: 50,
+      paddingHorizontal: t.spacing.lg,
+      borderRadius: t.radius.button,
+      borderWidth: 1,
+      borderColor: t.glass.border,
+      backgroundColor: t.glass.fill,
+    },
+    searchInput: {
+      flex: 1,
+      fontSize: 15,
+      color: t.colors.text,
+      padding: 0,
+    },
+    viewFilters: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      flexWrap: 'wrap',
+      gap: t.spacing.sm,
+      marginTop: t.spacing.lg,
+    },
+    viewChip: {
+      alignItems: 'center',
+      paddingHorizontal: t.spacing.lg + 2,
+      paddingVertical: t.spacing.sm + 2,
+      borderRadius: t.radius.full,
+      borderWidth: 1,
+      borderColor: t.glass.border,
+      backgroundColor: t.glass.fill,
+    },
+    viewChipActive: {
+      backgroundColor: t.colors.accentAlt,
+      borderColor: t.colors.accentAlt,
+    },
+    viewChipText: {
+      fontSize: 13,
+      fontWeight: t.fontWeight.semibold,
+      color: t.colors.textMuted,
+    },
+    viewChipTextActive: {
+      color: t.colors.text,
+    },
+    filterToggle: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: t.spacing.sm,
+      paddingHorizontal: t.spacing.md + 2,
+      paddingVertical: t.spacing.sm + 2,
+      borderRadius: t.radius.full,
+      borderWidth: 1,
+      borderColor: t.glass.border,
+      backgroundColor: t.glass.fill,
+    },
+    filterToggleActive: {
+      backgroundColor: t.colors.accentSoft,
+      borderColor: t.colors.accent,
+    },
+    filterToggleText: {
+      fontSize: 13,
+      fontWeight: t.fontWeight.semibold,
+      color: t.colors.textMuted,
+    },
+    filterToggleTextActive: {
+      color: t.colors.text,
+    },
+    filterPanel: {
+      marginTop: t.spacing.md,
+      padding: t.spacing.lg,
+      borderRadius: t.radius.sheet,
+      gap: 0,
+    },
+    filterPanelTitle: {
+      ...t.typography.label,
+      color: t.colors.accent,
+      opacity: 0.8,
+    },
+    filterPanelSectionTitle: {
+      marginTop: t.spacing.lg,
+    },
+    filters: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: t.spacing.sm,
+      marginTop: t.spacing.md,
+    },
+    chip: {
+      paddingHorizontal: t.spacing.lg + 2,
+      paddingVertical: t.spacing.sm,
+      borderRadius: t.radius.full,
+      borderWidth: 1,
+      borderColor: t.glass.border,
+      backgroundColor: t.glass.fill,
+    },
+    chipActive: {
+      backgroundColor: t.colors.accentSoft,
+      borderColor: t.colors.accent,
+    },
+    chipText: {
+      fontSize: 13,
+      fontWeight: t.fontWeight.semibold,
+      color: t.colors.textMuted,
+    },
+    chipTextActive: {
+      color: t.colors.accent,
+    },
+    tagChip: {
+      paddingHorizontal: t.spacing.md + 2,
+      paddingVertical: t.spacing.xs + 2,
+      borderRadius: t.radius.full,
+      borderWidth: 1,
+      borderColor: t.glass.border,
+      backgroundColor: 'transparent',
+    },
+    tagChipActive: {
+      backgroundColor: t.colors.accentAlt,
+      borderColor: t.colors.accentAlt,
+    },
+    tagChipText: {
+      fontSize: 12,
+      fontWeight: t.fontWeight.semibold,
+      color: t.colors.textMuted,
+    },
+    tagChipTextActive: {
+      color: t.colors.text,
+    },
+    pressed: {
+      opacity: 0.85,
+    },
+    alertCard: {
+      marginTop: t.spacing.xl,
+      gap: t.spacing.sm + 2,
+      borderColor: t.colors.accentSoft,
+    },
+    alertHeader: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: t.spacing.md,
+    },
+    alertEyebrow: {
+      ...t.typography.label,
+      color: t.colors.accent,
+    },
+    alertTitle: {
+      ...t.typography.headingSerif,
+      color: t.colors.text,
+    },
+    alertBody: {
+      ...t.typography.body,
+      fontSize: 14,
+      lineHeight: 20,
+      color: t.colors.textSecondary,
+    },
+    alertButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: t.spacing.xs + 2,
+      marginTop: t.spacing.xs,
+    },
+    alertButtonText: {
+      fontSize: 14,
+      fontWeight: t.fontWeight.bold,
+      color: t.colors.accent,
+    },
+    statsCard: {
+      marginTop: t.spacing.lg,
+      gap: t.spacing.md,
+    },
+    statsEyebrow: {
+      ...t.typography.label,
+      color: t.colors.accent,
+      opacity: 0.8,
+    },
+    progressTrack: {
+      height: 4,
+      borderRadius: t.radius.full,
+      backgroundColor: t.glass.fillStrong,
+      overflow: 'hidden',
+    },
+    progressFill: {
+      height: 4,
+      borderRadius: t.radius.full,
+    },
+    statsValue: {
+      ...t.typography.displaySerif,
+      fontSize: 44,
+      lineHeight: 52,
+      color: t.colors.accent,
+    },
+    statsCaption: {
+      ...t.typography.body,
+      fontSize: 14,
+      color: t.colors.textSecondary,
+    },
+    group: {
+      marginTop: t.spacing.xl,
+    },
+    groupHeader: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: t.spacing.lg,
+      marginBottom: t.spacing.lg,
+    },
+    groupTitle: {
+      ...t.typography.label,
+      color: t.colors.accent,
+      opacity: 0.8,
+    },
+    divider: {
+      flex: 1,
+      height: 1,
+      backgroundColor: t.glass.border,
+    },
+    groupList: {
+      gap: t.spacing.md,
+    },
+    fab: {
+      position: 'absolute',
+      right: t.spacing.xl,
+      width: 56,
+      height: 56,
+      borderRadius: t.radius.full,
+      ...t.shadows.lg,
+    },
+    fabInner: {
+      width: 56,
+      height: 56,
+      borderRadius: t.radius.full,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
   });
 }

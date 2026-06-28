@@ -1,8 +1,26 @@
-import { Stack } from 'expo-router';
+import { Tabs } from 'expo-router';
 
-// The app uses a custom floating BottomNav rendered per-screen and switches
-// tabs via router.replace, so this group is a plain stack with no transition
-// animation between tabs.
+import { useVaultColors } from '@/contexts/color-theme-context';
+
+// The app renders its own floating BottomNav inside each screen, but the route
+// group should still behave like tabs so screens stay mounted between switches.
 export default function TabsLayout() {
-  return <Stack screenOptions={{ headerShown: false, animation: 'none' }} />;
+  const colors = useVaultColors();
+
+  return (
+    <Tabs
+      backBehavior="history"
+      screenOptions={{
+        headerShown: false,
+        sceneStyle: { backgroundColor: colors.background },
+        tabBarStyle: { display: 'none' },
+      }}>
+      <Tabs.Screen name="dashboard" />
+      <Tabs.Screen name="vault" />
+      <Tabs.Screen name="generator" />
+      <Tabs.Screen name="health" />
+      <Tabs.Screen name="settings" />
+      <Tabs.Screen name="my-vault" />
+    </Tabs>
+  );
 }

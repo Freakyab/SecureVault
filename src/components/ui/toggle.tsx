@@ -1,8 +1,8 @@
 import { useMemo } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
-import { useVaultColors } from '@/contexts/color-theme-context';
-import type { VaultColorsShape } from '@/theme/color-themes';
+import { useTheme } from '@/hooks/use-theme';
+import { type Theme } from '@/theme';
 
 interface ToggleProps {
   value: boolean;
@@ -11,7 +11,7 @@ interface ToggleProps {
   disabled?: boolean;
 }
 
-function makeStyles(c: VaultColorsShape) {
+function makeStyles(t: Theme) {
   return StyleSheet.create({
     track: {
       width: 48,
@@ -22,7 +22,7 @@ function makeStyles(c: VaultColorsShape) {
       justifyContent: 'center',
     },
     trackOn: {
-      backgroundColor: c.accentStrong,
+      backgroundColor: t.colors.accent,
     },
     trackDisabled: {
       opacity: 0.5,
@@ -40,8 +40,8 @@ function makeStyles(c: VaultColorsShape) {
 }
 
 export function Toggle({ value, onChange, label = 'Toggle', disabled = false }: ToggleProps) {
-  const c = useVaultColors();
-  const styles = useMemo(() => makeStyles(c), [c]);
+  const theme = useTheme();
+  const styles = useMemo(() => makeStyles(theme), [theme]);
 
   return (
     <Pressable

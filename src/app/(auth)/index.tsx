@@ -5,9 +5,13 @@ import { View } from 'react-native';
 import { OnboardingScreen } from '@/components/screens/onboarding';
 import { useVault } from '@/contexts/vault-context';
 import { getOnboardingComplete, setOnboardingComplete } from '@/services/onboarding';
+import { useTheme } from '@/hooks/use-theme';
+import { useHaptics } from '@/hooks/use-haptics';
 
 export default function Index() {
   const router = useRouter();
+  const theme = useTheme();
+  const haptics = useHaptics();
   const { isInitialized, isLoading, isUnlocked } = useVault();
   const [hasCompletedOnboarding, setHasCompletedOnboarding] = useState(false);
   const [isOnboardingLoading, setIsOnboardingLoading] = useState(true);
@@ -34,13 +38,16 @@ export default function Index() {
   async function finishOnboarding() {
     try {
       await setOnboardingComplete();
+      haptics.success();
+    } catch (error) {
+      console.error('Failed to persist onboarding state:', error);
     } finally {
       setHasCompletedOnboarding(true);
       router.replace('/setup');
     }
   }
 
-  if (isLoading || isOnboardingLoading) return <View />;
+  if (isLoading || isOnboardingLoading) return <View style={{ flex: 1, backgroundColor: theme.colors.background }} />;
   if (isInitialized && isUnlocked) return <Redirect href="/dashboard" />;
   if (isInitialized) return <Redirect href="/unlock" />;
   if (hasCompletedOnboarding) return <Redirect href="/setup" />;

@@ -20,12 +20,14 @@ import {
   TextInput,
   View,
 } from 'react-native';
+import Animated, { FadeIn } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { PrimaryButton, Toggle } from '@/components/vault';
-import { Fonts } from '@/constants/theme';
-import { useVaultColors } from '@/contexts/color-theme-context';
-import type { VaultColorsShape } from '@/theme/color-themes';
+import { Button, Toggle } from '@/components/ui';
+import { AnimatedBlobs, BLOB_PALETTES } from '@/components/ui/animated-blobs';
+import { useHaptics } from '@/hooks/use-haptics';
+import { useTheme } from '@/hooks/use-theme';
+import { type Theme } from '@/theme';
 import { BiometricAvailability, canUseBiometrics, getBiometricAvailability } from '@/services/biometric';
 
 interface SetupMasterPasswordScreenProps {
@@ -34,8 +36,9 @@ interface SetupMasterPasswordScreenProps {
 
 export function SetupMasterPasswordScreen({ onCreate }: SetupMasterPasswordScreenProps) {
   const insets = useSafeAreaInsets();
-  const c = useVaultColors();
-  const styles = useMemo(() => makeStyles(c), [c]);
+  const theme = useTheme();
+  const haptics = useHaptics();
+  const styles = useMemo(() => makeStyles(theme), [theme]);
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -70,6 +73,7 @@ export function SetupMasterPasswordScreen({ onCreate }: SetupMasterPasswordScree
 
   function handleBiometricChange(next: boolean) {
     if (next && !biometricSupported) {
+      haptics.warning();
       Alert.alert(
         'Biometrics unavailable',
         biometric?.hasHardware
@@ -78,6 +82,7 @@ export function SetupMasterPasswordScreen({ onCreate }: SetupMasterPasswordScree
       );
       return;
     }
+    haptics.selection();
     setBiometricEnabled(next);
   }
 
@@ -94,11 +99,13 @@ export function SetupMasterPasswordScreen({ onCreate }: SetupMasterPasswordScree
     if (isCreating) return;
 
     if (password.length < 12) {
+      haptics.warning();
       Alert.alert('Use a stronger password', 'Your master password must be at least 12 characters.');
       return;
     }
 
     if (password !== confirmPassword) {
+      haptics.warning();
       Alert.alert('Passwords do not match', 'Confirm your master password before creating the vault.');
       return;
     }
@@ -113,7 +120,9 @@ export function SetupMasterPasswordScreen({ onCreate }: SetupMasterPasswordScree
       await yieldToUi();
       await onCreate?.(password, biometricEnabled);
       setLoadingMessage('Opening your vault…');
+      haptics.success();
     } catch (error) {
+      haptics.error();
       setCreateError(error instanceof Error ? error.message : 'Could not create vault. Please try again.');
     } finally {
       setIsCreating(false);
@@ -141,9 +150,14 @@ export function SetupMasterPasswordScreen({ onCreate }: SetupMasterPasswordScree
 
   return (
     <View style={styles.root}>
-      {/* Ambient aurora glows */}
-      <View pointerEvents="none" style={styles.auroraTopLeft} />
-      <View pointerEvents="none" style={styles.auroraBottomRight} />
+      <AnimatedBlobs 
+        colors={
+          theme.colors.accent === '#2D6CF6' ? BLOB_PALETTES.blue : 
+          theme.colors.accent === '#b06af0' ? BLOB_PALETTES.purple : 
+          BLOB_PALETTES.gold
+        } 
+        intensity={0.8}
+      />
 
       {/* Header */}
       <View style={[styles.header, { paddingTop: insets.top, height: 64 + insets.top }]}>
@@ -156,15 +170,17 @@ export function SetupMasterPasswordScreen({ onCreate }: SetupMasterPasswordScree
         showsVerticalScrollIndicator={false}
         contentContainerStyle={[
           styles.scrollContent,
-          { paddingBottom: insets.bottom + 32 },
+          { paddingBottom: insets.bottom + theme.spacing.xxl },
         ]}>
         {/* Lock badge */}
-        <View style={styles.lockBadgeWrapper}>
+        <Animated.View
+          entering={FadeIn.duration(theme.motion.duration.cardExpand)}
+          style={styles.lockBadgeWrapper}>
           <View style={styles.lockBadgeGlow} />
           <View style={styles.lockBadge}>
-            <Lock size={32} color={c.heading} strokeWidth={1.75} />
+            <Lock size={32} color={theme.colors.text} strokeWidth={1.75} />
           </View>
-        </View>
+        </Animated.View>
 
         {/* Headlines */}
         <Text style={styles.title}>Initialize Your Vault</Text>
@@ -183,7 +199,7 @@ export function SetupMasterPasswordScreen({ onCreate }: SetupMasterPasswordScree
                 value={password}
                 onChangeText={setPassword}
                 placeholder="Minimum 12 characters"
-                placeholderTextColor={c.placeholder}
+                placeholderTextColor={theme.colors.textMuted}
                 secureTextEntry={!showPassword}
                 autoCapitalize="none"
                 autoCorrect={false}
@@ -194,9 +210,9 @@ export function SetupMasterPasswordScreen({ onCreate }: SetupMasterPasswordScree
                 hitSlop={12}
                 onPress={() => setShowPassword((prev) => !prev)}>
                 {showPassword ? (
-                  <EyeOff size={20} color={c.body} strokeWidth={1.75} />
+                  <EyeOff size={20} color={theme.colors.textSecondary} strokeWidth={1.75} />
                 ) : (
-                  <Eye size={20} color={c.body} strokeWidth={1.75} />
+                  <Eye size={20} color={theme.colors.textSecondary} strokeWidth={1.75} />
                 )}
               </Pressable>
             </View>
@@ -210,7 +226,7 @@ export function SetupMasterPasswordScreen({ onCreate }: SetupMasterPasswordScree
                 value={confirmPassword}
                 onChangeText={setConfirmPassword}
                 placeholder="Repeat your password"
-                placeholderTextColor={c.placeholder}
+                placeholderTextColor={theme.colors.textMuted}
                 secureTextEntry={!showPassword}
                 autoCapitalize="none"
                 autoCorrect={false}
@@ -223,7 +239,7 @@ export function SetupMasterPasswordScreen({ onCreate }: SetupMasterPasswordScree
           <View style={[styles.biometricCard, !biometricSupported && styles.biometricCardDisabled]}>
             <View style={styles.biometricInfo}>
               <View style={styles.biometricIcon}>
-                <Fingerprint size={24} color={c.accent} strokeWidth={1.75} />
+                <Fingerprint size={24} color={theme.colors.accent} strokeWidth={1.75} />
               </View>
               <View style={styles.biometricText}>
                 <Text style={styles.biometricTitle}>Enable Biometric Unlock</Text>
@@ -240,7 +256,7 @@ export function SetupMasterPasswordScreen({ onCreate }: SetupMasterPasswordScree
 
           {/* Caution note */}
           <View style={styles.cautionNote}>
-            <AlertTriangle size={16} color={c.accent} strokeWidth={1.75} />
+            <AlertTriangle size={16} color={theme.colors.accent} strokeWidth={1.75} />
             <Text style={styles.cautionText}>
               I understand that SecureVault uses zero-knowledge encryption and my password is never
               stored on any server.
@@ -249,290 +265,263 @@ export function SetupMasterPasswordScreen({ onCreate }: SetupMasterPasswordScree
 
           {/* Action button */}
           {createError ? <Text style={styles.createError}>{createError}</Text> : null}
-          <PrimaryButton
-            label={isCreating ? 'CREATING VAULT…' : 'CREATE VAULT'}
-            icon={isCreating ? undefined : ArrowRight}
+          <Button
             onPress={() => void handleCreate()}
             disabled={isCreating}
-            loading={isCreating}
-          />
+            loading={isCreating}>
+            {isCreating ? 'CREATING VAULT…' : 'CREATE VAULT'}
+          </Button>
 
           {/* Footer meta */}
           <View style={styles.footerMeta}>
-            <ShieldCheck size={12} color={c.placeholder} strokeWidth={1.75} />
+            <ShieldCheck size={12} color={theme.colors.textMuted} strokeWidth={1.75} />
             <Text style={styles.footerMetaText}>AES-256 Military Grade Encryption</Text>
           </View>
         </View>
       </ScrollView>
 
-      <Modal visible={isCreating} transparent animationType="fade" statusBarTranslucent>
+      <Modal visible={isCreating} transparent animationType="none" statusBarTranslucent>
         <View style={styles.loadingOverlay}>
-          <View style={styles.loadingCard}>
+          <Animated.View
+            entering={FadeIn.duration(theme.motion.duration.modal)}
+            style={styles.loadingCard}>
             <View style={styles.loadingBadge}>
-              <Lock size={28} color={c.heading} strokeWidth={1.75} />
+              <Lock size={28} color={theme.colors.text} strokeWidth={1.75} />
             </View>
-            <ActivityIndicator color={c.accent} size="large" />
+            <ActivityIndicator color={theme.colors.accent} size="large" />
             <Text style={styles.loadingTitle}>Creating your vault</Text>
             <Text style={styles.loadingSubtitle}>{loadingMessage}</Text>
             <Text style={styles.loadingHint}>This secure step can take up to 15 seconds.</Text>
-          </View>
+          </Animated.View>
         </View>
       </Modal>
     </View>
   );
 }
 
-function makeStyles(palette: VaultColorsShape) {
+function makeStyles(t: Theme) {
   return StyleSheet.create({
-  root: {
-    flex: 1,
-    backgroundColor: palette.background,
-  },
-  auroraTopLeft: {
-    position: 'absolute',
-    top: -120,
-    left: -60,
-    width: 200,
-    height: 360,
-    borderRadius: 9999,
-    backgroundColor: 'rgba(127,176,255,0.12)',
-    opacity: 0.9,
-  },
-  auroraBottomRight: {
-    position: 'absolute',
-    bottom: -80,
-    right: -60,
-    width: 220,
-    height: 440,
-    borderRadius: 9999,
-    backgroundColor: 'rgba(45,108,246,0.18)',
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'flex-end',
-    justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingBottom: 12,
-    backgroundColor: palette.headerBackground,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: palette.headerBorder,
-  },
-  brand: {
-    fontFamily: Fonts.serif,
-    fontSize: 24,
-    fontWeight: '500',
-    letterSpacing: -0.6,
-    color: palette.accent,
-  },
-  avatar: {
-    width: 40,
-    height: 40,
-    borderRadius: 9999,
-    backgroundColor: palette.avatarBackground,
-    borderWidth: 1,
-    borderColor: palette.avatarBorder,
-  },
-  scrollContent: {
-    paddingHorizontal: 20,
-    paddingTop: 40,
-    alignItems: 'center',
-    maxWidth: 448,
-    width: '100%',
-    alignSelf: 'center',
-  },
-  lockBadgeWrapper: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 24,
-  },
-  lockBadgeGlow: {
-    position: 'absolute',
-    width: 96,
-    height: 96,
-    borderRadius: 9999,
-    backgroundColor: 'rgba(45,108,246,0.4)',
-    opacity: 0.5,
-  },
-  lockBadge: {
-    width: 80,
-    height: 80,
-    borderRadius: 9999,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: palette.glassBackground,
-    borderWidth: 1,
-    borderColor: palette.glassBorder,
-  },
-  title: {
-    fontFamily: Fonts.serif,
-    fontSize: 28,
-    fontWeight: '600',
-    lineHeight: 36,
-    color: palette.heading,
-    textAlign: 'center',
-  },
-  subtitle: {
-    marginTop: 12,
-    fontSize: 16,
-    lineHeight: 24,
-    color: palette.body,
-    textAlign: 'center',
-    maxWidth: 320,
-  },
-  form: {
-    marginTop: 40,
-    width: '100%',
-    gap: 32,
-  },
-  field: {
-    gap: 8,
-  },
-  label: {
-    fontSize: 12,
-    fontWeight: '500',
-    letterSpacing: 1.2,
-    color: palette.accent,
-    opacity: 0.7,
-  },
-  inputRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: palette.inputUnderline,
-    paddingVertical: 8,
-  },
-  input: {
-    flex: 1,
-    fontSize: 18,
-    color: palette.heading,
-    padding: 0,
-  },
-  biometricCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: 25,
-    borderRadius: 32,
-    borderWidth: 1,
-    borderColor: palette.glassBorder,
-    backgroundColor: palette.glassBackground,
-  },
-  biometricCardDisabled: {
-    opacity: 0.6,
-  },
-  biometricInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 16,
-    flexShrink: 1,
-  },
-  biometricIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: 9999,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'rgba(45,108,246,0.2)',
-    borderWidth: 1,
-    borderColor: 'rgba(127,176,255,0.2)',
-  },
-  biometricText: {
-    flexShrink: 1,
-  },
-  biometricTitle: {
-    fontSize: 14,
-    fontWeight: '600',
-    letterSpacing: 0.7,
-    color: palette.heading,
-  },
-  biometricSubtitle: {
-    marginTop: 4,
-    fontSize: 12,
-    fontWeight: '500',
-    color: palette.body,
-    opacity: 0.6,
-  },
-  cautionNote: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: 12,
-    paddingHorizontal: 8,
-  },
-  cautionText: {
-    flex: 1,
-    fontSize: 12,
-    lineHeight: 16,
-    fontWeight: '500',
-    color: 'rgba(183,196,220,0.8)',
-  },
-  createError: {
-    fontSize: 13,
-    lineHeight: 18,
-    fontWeight: '500',
-    color: '#ff8a8a',
-    textAlign: 'center',
-  },
-  loadingOverlay: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 24,
-    backgroundColor: 'rgba(18,26,46,0.92)',
-  },
-  loadingCard: {
-    width: '100%',
-    maxWidth: 320,
-    alignItems: 'center',
-    gap: 16,
-    paddingHorizontal: 24,
-    paddingVertical: 32,
-    borderRadius: 32,
-    borderWidth: 1,
-    borderColor: palette.glassBorder,
-    backgroundColor: palette.glassBackground,
-  },
-  loadingBadge: {
-    width: 72,
-    height: 72,
-    borderRadius: 24,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'rgba(45,108,246,0.2)',
-    borderWidth: 1,
-    borderColor: 'rgba(127,176,255,0.2)',
-  },
-  loadingTitle: {
-    fontFamily: Fonts.serif,
-    fontSize: 22,
-    fontWeight: '600',
-    color: palette.heading,
-    textAlign: 'center',
-  },
-  loadingSubtitle: {
-    fontSize: 14,
-    lineHeight: 20,
-    fontWeight: '500',
-    color: palette.body,
-    textAlign: 'center',
-  },
-  loadingHint: {
-    fontSize: 12,
-    lineHeight: 16,
-    fontWeight: '500',
-    color: palette.placeholder,
-    textAlign: 'center',
-  },
-  footerMeta: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-  },
-  footerMetaText: {
-    fontSize: 12,
-    fontWeight: '500',
-    color: palette.placeholder,
-  },
+    root: {
+      flex: 1,
+      backgroundColor: t.colors.background,
+    },
+    header: {
+      flexDirection: 'row',
+      alignItems: 'flex-end',
+      justifyContent: 'space-between',
+      paddingHorizontal: t.layout.screenPadding,
+      paddingBottom: t.spacing.md,
+      backgroundColor: t.colors.surface,
+      borderBottomWidth: StyleSheet.hairlineWidth,
+      borderBottomColor: t.glass.border,
+    },
+    brand: {
+      ...t.typography.headingSerif,
+      fontSize: 24,
+      color: t.colors.accent,
+    },
+    avatar: {
+      width: 40,
+      height: 40,
+      borderRadius: t.radius.full,
+      backgroundColor: t.colors.surfaceAlt,
+      borderWidth: 1,
+      borderColor: t.glass.border,
+    },
+    scrollContent: {
+      paddingHorizontal: t.layout.screenPadding,
+      paddingTop: t.spacing.xxl + t.spacing.sm,
+      alignItems: 'center',
+      maxWidth: 448,
+      width: '100%',
+      alignSelf: 'center',
+    },
+    lockBadgeWrapper: {
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginBottom: t.spacing.xl,
+    },
+    lockBadgeGlow: {
+      position: 'absolute',
+      width: 96,
+      height: 96,
+      borderRadius: t.radius.full,
+      backgroundColor: t.colors.accentSoft,
+      opacity: 0.5,
+    },
+    lockBadge: {
+      width: 80,
+      height: 80,
+      borderRadius: t.radius.full,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: t.glass.fill,
+      borderWidth: 1,
+      borderColor: t.glass.border,
+    },
+    title: {
+      ...t.typography.displaySerif,
+      color: t.colors.text,
+      textAlign: 'center',
+    },
+    subtitle: {
+      ...t.typography.body,
+      marginTop: t.spacing.md,
+      color: t.colors.textSecondary,
+      textAlign: 'center',
+      maxWidth: 320,
+    },
+    form: {
+      marginTop: t.spacing.xxl + t.spacing.sm,
+      width: '100%',
+      gap: t.spacing.xxl,
+    },
+    field: {
+      gap: t.spacing.sm,
+    },
+    label: {
+      ...t.typography.label,
+      letterSpacing: 1.2,
+      color: t.colors.accent,
+      opacity: 0.7,
+    },
+    inputRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: t.spacing.md,
+      borderBottomWidth: 1,
+      borderBottomColor: t.glass.border,
+      paddingVertical: t.spacing.sm,
+    },
+    input: {
+      flex: 1,
+      ...t.typography.body,
+      fontSize: 18,
+      color: t.colors.text,
+      padding: 0,
+    },
+    biometricCard: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      padding: t.spacing.xl,
+      borderRadius: t.radius.sheet,
+      borderWidth: 1,
+      borderColor: t.glass.border,
+      backgroundColor: t.glass.fill,
+    },
+    biometricCardDisabled: {
+      opacity: 0.6,
+    },
+    biometricInfo: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: t.spacing.lg,
+      flexShrink: 1,
+    },
+    biometricIcon: {
+      width: 48,
+      height: 48,
+      borderRadius: t.radius.full,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: t.colors.accentSoft,
+      borderWidth: 1,
+      borderColor: t.glass.border,
+    },
+    biometricText: {
+      flexShrink: 1,
+    },
+    biometricTitle: {
+      ...t.typography.caption,
+      fontSize: 14,
+      fontWeight: t.fontWeight.semibold,
+      letterSpacing: 0.7,
+      color: t.colors.text,
+    },
+    biometricSubtitle: {
+      ...t.typography.label,
+      marginTop: t.spacing.xs,
+      fontSize: 12,
+      color: t.colors.textSecondary,
+      opacity: 0.7,
+    },
+    cautionNote: {
+      flexDirection: 'row',
+      alignItems: 'flex-start',
+      gap: t.spacing.md,
+      paddingHorizontal: t.spacing.sm,
+    },
+    cautionText: {
+      flex: 1,
+      ...t.typography.label,
+      fontSize: 12,
+      lineHeight: 16,
+      color: t.colors.textSecondary,
+      opacity: 0.85,
+    },
+    createError: {
+      ...t.typography.caption,
+      color: t.colors.error,
+      textAlign: 'center',
+    },
+    loadingOverlay: {
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingHorizontal: t.spacing.xl,
+      backgroundColor: 'rgba(0,0,0,0.72)',
+    },
+    loadingCard: {
+      width: '100%',
+      maxWidth: 320,
+      alignItems: 'center',
+      gap: t.spacing.lg,
+      paddingHorizontal: t.spacing.xl,
+      paddingVertical: t.spacing.xxl,
+      borderRadius: t.radius.sheet,
+      borderWidth: 1,
+      borderColor: t.glass.border,
+      backgroundColor: t.colors.surface,
+    },
+    loadingBadge: {
+      width: 72,
+      height: 72,
+      borderRadius: t.radius.sheet,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: t.colors.accentSoft,
+      borderWidth: 1,
+      borderColor: t.glass.border,
+    },
+    loadingTitle: {
+      ...t.typography.headingSerif,
+      color: t.colors.text,
+      textAlign: 'center',
+    },
+    loadingSubtitle: {
+      ...t.typography.body,
+      fontSize: 14,
+      color: t.colors.textSecondary,
+      textAlign: 'center',
+    },
+    loadingHint: {
+      ...t.typography.label,
+      fontSize: 12,
+      lineHeight: 16,
+      color: t.colors.textMuted,
+      textAlign: 'center',
+    },
+    footerMeta: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: t.spacing.sm,
+    },
+    footerMetaText: {
+      ...t.typography.label,
+      fontSize: 12,
+      color: t.colors.textMuted,
+    },
   });
 }

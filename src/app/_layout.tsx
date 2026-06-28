@@ -3,18 +3,24 @@ import {
   PlayfairDisplay_600SemiBold,
   PlayfairDisplay_700Bold,
   useFonts,
-} from '@expo-google-fonts/playfair-display';
-import { DarkTheme, ThemeProvider } from '@react-navigation/native';
-import { Stack } from 'expo-router';
-import * as SplashScreen from 'expo-splash-screen';
-import { StatusBar } from 'expo-status-bar';
-import { useEffect, useMemo } from 'react';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
+} from "@expo-google-fonts/playfair-display";
+import { DarkTheme, ThemeProvider } from "@react-navigation/native";
+import { Stack } from "expo-router";
+import * as SplashScreen from "expo-splash-screen";
+import { StatusBar } from "expo-status-bar";
+import { useEffect, useMemo } from "react";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 
-import { ColorThemeVaultSync, useVaultColors } from '@/contexts/color-theme-context';
-import { SecureVaultThemeProvider } from '@/contexts/securevault-theme-context';
-import { ToastProvider } from '@/contexts/toast-context';
-import { VaultProvider, useVault } from '@/contexts/vault-context';
+import { AnimatedSplashOverlay } from "@/components/animated-icon";
+import { ErrorBoundary } from "@/components/error-boundary";
+import { VaultLoadingScreen } from "@/components/vault-loading-screen";
+import {
+  ColorThemeVaultSync,
+  useVaultColors,
+} from "@/contexts/color-theme-context";
+import { SecureVaultThemeProvider } from "@/contexts/securevault-theme-context";
+import { ToastProvider } from "@/contexts/toast-context";
+import { VaultProvider, useVault } from "@/contexts/vault-context";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -24,7 +30,12 @@ function VaultThemeSync() {
 }
 
 function AppNavigation() {
+  const { isLoading } = useVault();
   const colors = useVaultColors();
+
+  if (isLoading) {
+    return <VaultLoadingScreen />;
+  }
 
   const navTheme = useMemo(
     () => ({
@@ -48,10 +59,10 @@ function AppNavigation() {
           screenOptions={{
             headerShown: false,
             contentStyle: { backgroundColor: colors.background },
-            animation: 'slide_from_right',
+            animation: "slide_from_right",
           }}>
-          <Stack.Screen name="(auth)" options={{ animation: 'none' }} />
-          <Stack.Screen name="(tabs)" options={{ animation: 'none' }} />
+          <Stack.Screen name="(auth)" options={{ animation: "none" }} />
+          <Stack.Screen name="(tabs)" options={{ animation: "none" }} />
         </Stack>
       </ToastProvider>
     </ThemeProvider>
@@ -59,11 +70,11 @@ function AppNavigation() {
 }
 
 export default function RootLayout() {
-  const [fontsLoaded] = useFonts({
+  const [fontsLoaded] = useFonts([
     PlayfairDisplay_500Medium,
     PlayfairDisplay_600SemiBold,
     PlayfairDisplay_700Bold,
-  });
+  ]);
 
   useEffect(() => {
     if (fontsLoaded) SplashScreen.hideAsync();
@@ -72,13 +83,16 @@ export default function RootLayout() {
   if (!fontsLoaded) return null;
 
   return (
-    <SafeAreaProvider>
-      <SecureVaultThemeProvider>
-        <VaultProvider>
-          <VaultThemeSync />
-          <AppNavigation />
-        </VaultProvider>
-      </SecureVaultThemeProvider>
-    </SafeAreaProvider>
+    <ErrorBoundary>
+      <SafeAreaProvider>
+        <SecureVaultThemeProvider>
+          <VaultProvider>
+            <AnimatedSplashOverlay />
+            <VaultThemeSync />
+            <AppNavigation />
+          </VaultProvider>
+        </SecureVaultThemeProvider>
+      </SafeAreaProvider>
+    </ErrorBoundary>
   );
 }

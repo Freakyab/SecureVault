@@ -4,7 +4,8 @@ import { useMemo, useState } from 'react';
 import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { IconTile, InputField, PrimaryButton, ScreenBackground, VaultHeader } from '@/components/vault';
+import { IconTile, ScreenBackground, VaultHeader } from '@/components/vault';
+import { Input, Button } from '@/components/ui';
 import { VaultType } from '@/constants/vault-theme';
 import { useVaultColors } from '@/contexts/color-theme-context';
 import type { VaultColorsShape } from '@/theme/color-themes';
@@ -76,35 +77,33 @@ export function ChangePasswordScreen() {
         </Text>
 
         <View style={styles.form}>
-          <InputField
+          <Input
             label="CURRENT PASSWORD"
             placeholder="Enter current password"
             value={current}
             onChangeText={setCurrent}
-            secureToggle
           />
-          <InputField
+          <Input
             label="NEW PASSWORD"
             placeholder={`Minimum ${MIN_LENGTH} characters`}
             value={next}
             onChangeText={setNext}
-            secureToggle
           />
-          <InputField
+          <Input
             label="CONFIRM NEW PASSWORD"
             placeholder="Repeat new password"
             value={confirm}
             onChangeText={setConfirm}
-            secureToggle
           />
         </View>
 
         <View style={styles.cta}>
-          <PrimaryButton
-            label={saving ? 'UPDATING…' : 'UPDATE PASSWORD'}
+          <Button
             onPress={handleSubmit}
             disabled={saving}
-          />
+          >
+            {saving ? 'UPDATING…' : 'UPDATE PASSWORD'}
+          </Button>
         </View>
       </ScrollView>
     </ScreenBackground>

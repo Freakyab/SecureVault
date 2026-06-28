@@ -25,7 +25,7 @@ import {
 } from '@/types/credential';
 
 /** Blocks screenshots and screen recording while the vault is unlocked. */
-const SCREEN_CAPTURE_PROTECTION_ENABLED = true;
+const SCREEN_CAPTURE_PROTECTION_ENABLED = false;
 
 interface CredentialInput {
   website: string;
@@ -58,6 +58,7 @@ interface VaultContextValue {
   toggleFavorite: (id: string) => Promise<void>;
   toggleArchive: (id: string) => Promise<void>;
   importCredentials: (incoming: Credential[]) => Promise<{ added: number; skipped: number }>;
+  bulkUpdateCategories: (updates: Record<string, string>) => Promise<{ updated: number }>;
   getCredential: (id: string) => Credential | undefined;
   updateSettings: (partial: Partial<VaultSettings>) => Promise<void>;
   changeMasterPassword: (current: string, next: string) => Promise<void>;
@@ -104,12 +105,19 @@ export function VaultProvider({ children }: PropsWithChildren) {
 
     async function hydrateVault() {
       try {
-        const snapshot = await loadVaultSnapshot();
-        if (!isMounted) return;
-        setIsInitialized(snapshot.isInitialized);
-        setMetadata(snapshot.metadata);
-        setSettings(snapshot.settings);
-        setCredentials(snapshot.credentials);
+        try {
+          const snapshot = await loadVaultSnapshot();
+          if (!isMounted) return;
+          setIsInitialized(snapshot.isInitialized);
+          setMetadata(snapshot.metadata);
+          setSettings(snapshot.settings);
+          setCredentials(snapshot.credentials);
+        } catch (error) {
+          console.error('[VaultHydrationError] Critical error during vault hydration:', error);
+          // Fallback to a safe, uninitialized state instead of crashing
+          setIsInitialized(false);
+          setSettings({ ...DEFAULT_VAULT_SETTINGS });
+        }
       } finally {
         if (isMounted) setIsLoading(false);
       }
@@ -127,7 +135,16 @@ export function VaultProvider({ children }: PropsWithChildren) {
   // -1 = never, 0 = immediately, otherwise N minutes.
   useEffect(() => {
     function handleAppStateChange(next: AppStateStatus) {
-      if (next === 'background' || next === 'inactive') {
+      if (next === 'background') {
+        if (backgroundedAtRef.current === null) backgroundedAtRef.current = Date.now();
+        
+        if (settingsRef.current.autoLockMinutes === 0 && isUnlockedRef.current) {
+          clearUnlockedSession();
+        }
+        return;
+      }
+
+      if (next === 'inactive') {
         if (backgroundedAtRef.current === null) backgroundedAtRef.current = Date.now();
         return;
       }
@@ -139,10 +156,7 @@ export function VaultProvider({ children }: PropsWithChildren) {
 
         const minutes = settingsRef.current.autoLockMinutes;
         if (minutes < 0) return; // Never auto-lock.
-        if (minutes === 0) {
-          clearUnlockedSession();
-          return;
-        }
+        
         if (backgroundedAt && Date.now() - backgroundedAt >= minutes * 60_000) {
           clearUnlockedSession();
         }
@@ -230,8 +244,11 @@ export function VaultProvider({ children }: PropsWithChildren) {
   async function commitCredentials(nextCredentials: Credential[]) {
     const key = encryptionKeyRef.current;
     if (!key) throw new Error('Unlock your vault before saving changes.');
-    setCredentials(nextCredentials);
+    
+    // Persist to disk first to ensure structural integrity before updating UI
     const snapshot = await persistCredentials(nextCredentials, key);
+    
+    // Update state atomically with the resulting snapshot
     setMetadata(snapshot.metadata);
     setCredentials(snapshot.credentials);
   }
@@ -331,6 +348,28 @@ export function VaultProvider({ children }: PropsWithChildren) {
     return { added, skipped };
   }
 
+  async function bulkUpdateCategories(updates: Record<string, string>) {
+    if (!isUnlocked) throw new Error('Unlock your vault before updating categories.');
+    
+    const nextCredentials = credentials.map((credential) => {
+      const newCategory = updates[credential.id];
+      if (newCategory && newCategory !== credential.category) {
+        return {
+          ...credential,
+          category: newCategory,
+          updatedAt: new Date().toISOString(),
+        };
+      }
+      return credential;
+    });
+
+    const updatedCount = Object.keys(updates).length;
+    if (updatedCount > 0) {
+      await commitCredentials(nextCredentials);
+    }
+    return { updated: updatedCount };
+  }
+
   function getCredential(id: string) {
     return credentials.find((credential) => credential.id === id);
   }
@@ -387,6 +426,7 @@ export function VaultProvider({ children }: PropsWithChildren) {
     toggleFavorite,
     toggleArchive,
     importCredentials,
+    bulkUpdateCategories,
     getCredential,
     updateSettings,
     changeMasterPassword,

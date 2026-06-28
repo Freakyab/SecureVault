@@ -1,9 +1,8 @@
 import { ReactNode, useMemo } from 'react';
 import { StyleProp, StyleSheet, View, ViewStyle } from 'react-native';
 
-import { useVaultColors } from '@/contexts/color-theme-context';
-import { VaultRadii } from '@/constants/vault-theme';
-import type { VaultColorsShape } from '@/theme/color-themes';
+import { useTheme } from '@/hooks/use-theme';
+import { type Theme } from '@/theme';
 
 interface GlassCardProps {
   children: ReactNode;
@@ -11,25 +10,25 @@ interface GlassCardProps {
   strong?: boolean;
 }
 
-function makeStyles(c: VaultColorsShape) {
+function makeStyles(t: Theme) {
   return StyleSheet.create({
     card: {
-      borderRadius: VaultRadii.lg,
+      borderRadius: t.radius.sheet,
       borderWidth: 1,
-      borderColor: c.glassBorder,
-      backgroundColor: c.glassBackground,
-      padding: 20,
+      borderColor: t.glass.border,
+      backgroundColor: t.glass.fill,
+      padding: t.layout.cardPadding,
     },
     strong: {
-      backgroundColor: c.glassBackgroundStrong,
+      backgroundColor: t.glass.fillStrong,
     },
   });
 }
 
 /** Glassmorphic surface used throughout the design for cards and tiles. */
 export function GlassCard({ children, style, strong = false }: GlassCardProps) {
-  const c = useVaultColors();
-  const styles = useMemo(() => makeStyles(c), [c]);
+  const theme = useTheme();
+  const styles = useMemo(() => makeStyles(theme), [theme]);
 
   return <View style={[styles.card, strong && styles.strong, style]}>{children}</View>;
 }

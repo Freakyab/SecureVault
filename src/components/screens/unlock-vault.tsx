@@ -1,12 +1,15 @@
 import { Fingerprint, Settings, Shield } from 'lucide-react-native';
 import { useMemo, useState } from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { IconTile, InputField, PrimaryButton, ScreenBackground, VaultHeader } from '@/components/vault';
-import { VaultType } from '@/constants/vault-theme';
-import { useVaultColors } from '@/contexts/color-theme-context';
-import type { VaultColorsShape } from '@/theme/color-themes';
+import { AnimatedIcon } from '@/components/animated-icon';
+import { IconTile, ScreenBackground, VaultHeader } from '@/components/vault';
+import { Input, Button } from '@/components/ui';
+import { useHaptics } from '@/hooks/use-haptics';
+import { useTheme } from '@/hooks/use-theme';
+import { type Theme } from '@/theme';
 
 interface UnlockVaultScreenProps {
   onUnlock?: (password: string) => void;
@@ -22,17 +25,25 @@ export function UnlockVaultScreen({
   biometricLabel = 'Face ID',
 }: UnlockVaultScreenProps) {
   const insets = useSafeAreaInsets();
-  const c = useVaultColors();
-  const styles = useMemo(() => makeStyles(c), [c]);
+  const theme = useTheme();
+  const haptics = useHaptics();
+  const styles = useMemo(() => makeStyles(theme), [theme]);
   const [password, setPassword] = useState('');
 
   function handleUnlock() {
     if (!password.trim()) {
+      haptics.warning();
       Alert.alert('Enter your master password', 'Your vault needs your master password to unlock.');
       return;
     }
 
+    haptics.press();
     onUnlock?.(password);
+  }
+
+  function handleBiometric() {
+    haptics.selection();
+    onBiometricUnlock?.();
   }
 
   return (
@@ -42,21 +53,22 @@ export function UnlockVaultScreen({
       <ScrollView
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + 32 }]}>
-        <View style={styles.shieldWrapper}>
-          <IconTile icon={Shield} size={96} iconSize={36} color={c.accent} />
-        </View>
+        contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + theme.spacing.xxl }]}>
+        <Animated.View
+          entering={FadeInDown.duration(theme.motion.duration.cardExpand)}
+          style={styles.shieldWrapper}>
+          <AnimatedIcon />
+        </Animated.View>
 
         <Text style={styles.title}>Welcome Back</Text>
         <Text style={styles.subtitle}>Enter your master password to unlock your secure vault.</Text>
 
         <View style={styles.form}>
-          <InputField
+          <Input
             label="MASTER PASSWORD"
             placeholder="••••••••••••"
             value={password}
             onChangeText={setPassword}
-            secureToggle
           />
 
           {biometricAvailable ? (
@@ -64,16 +76,18 @@ export function UnlockVaultScreen({
               <Pressable
                 accessibilityRole="button"
                 accessibilityLabel={`Unlock with ${biometricLabel}`}
-                onPress={() => onBiometricUnlock?.()}
+                onPress={handleBiometric}
                 style={({ pressed }) => [styles.biometricButton, pressed && styles.pressed]}>
-                <Fingerprint size={28} color={c.accent} strokeWidth={1.75} />
+                <Fingerprint size={28} color={theme.colors.accent} strokeWidth={1.75} />
               </Pressable>
               <Text style={styles.biometricCaption}>Tap to unlock with {biometricLabel}</Text>
             </View>
           ) : null}
 
           <View style={styles.cta}>
-            <PrimaryButton label="UNLOCK" onPress={handleUnlock} />
+            <Button onPress={handleUnlock}>
+              UNLOCK
+            </Button>
           </View>
         </View>
       </ScrollView>
@@ -81,68 +95,60 @@ export function UnlockVaultScreen({
   );
 }
 
-function makeStyles(c: VaultColorsShape) {
+function makeStyles(t: Theme) {
   return StyleSheet.create({
-  content: {
-    paddingHorizontal: 20,
-    paddingTop: 56,
-    alignItems: 'center',
-    maxWidth: 448,
-    width: '100%',
-    alignSelf: 'center',
-  },
-  shieldWrapper: {
-    marginBottom: 32,
-  },
-  title: {
-    ...VaultType.title,
-    color: c.heading,
-    textAlign: 'center',
-  },
-  subtitle: {
-    ...VaultType.body,
-    marginTop: 12,
-    color: c.body,
-    textAlign: 'center',
-    maxWidth: 300,
-  },
-  form: {
-    marginTop: 48,
-    width: '100%',
-    gap: 40,
-  },
-  biometric: {
-    alignItems: 'center',
-    gap: 12,
-  },
-  biometricButton: {
-    width: 64,
-    height: 64,
-    borderRadius: 9999,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: c.accentSoft,
-    borderWidth: 1,
-    borderColor: 'rgba(127,176,255,0.2)',
-  },
-  pressed: {
-    opacity: 0.8,
-  },
-  biometricCaption: {
-    ...VaultType.caption,
-    color: c.muted,
-  },
-  cta: {
-    gap: 16,
-    alignItems: 'center',
-  },
-  linkButton: {
-    paddingVertical: 8,
-  },
-  linkText: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: c.accent,
-  },
+    content: {
+      paddingHorizontal: t.layout.screenPadding,
+      paddingTop: t.spacing.xxl + t.spacing.xl,
+      alignItems: 'center',
+      maxWidth: 448,
+      width: '100%',
+      alignSelf: 'center',
+    },
+    shieldWrapper: {
+      marginBottom: t.spacing.xxl,
+    },
+    title: {
+      ...t.typography.displaySerif,
+      color: t.colors.text,
+      textAlign: 'center',
+    },
+    subtitle: {
+      ...t.typography.body,
+      marginTop: t.spacing.md,
+      color: t.colors.textSecondary,
+      textAlign: 'center',
+      maxWidth: 300,
+    },
+    form: {
+      marginTop: t.spacing.xxl + t.spacing.lg,
+      width: '100%',
+      gap: t.spacing.xxl + t.spacing.sm,
+    },
+    biometric: {
+      alignItems: 'center',
+      gap: t.spacing.md,
+    },
+    biometricButton: {
+      width: 64,
+      height: 64,
+      borderRadius: t.radius.full,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: t.colors.accentSoft,
+      borderWidth: 1,
+      borderColor: t.glass.border,
+    },
+    pressed: {
+      opacity: 0.8,
+    },
+    biometricCaption: {
+      ...t.typography.caption,
+      color: t.colors.textMuted,
+    },
+    cta: {
+      gap: t.spacing.lg,
+      alignItems: 'center',
+    },
   });
 }

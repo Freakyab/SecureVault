@@ -66,8 +66,12 @@ export function computeHealthMetrics(allCredentials: Credential[], now = Date.no
   const riskyIds = new Set([...weakIds, ...reusedIds]);
   const strong = Math.max(credentials.length - riskyIds.size, 0);
 
-  const deductions = weak * 12 + reused * 10 + old * 4;
-  const score = credentials.length === 0 ? 100 : Math.max(0, 100 - deductions);
+  // Calculate score as a weighted percentage of the vault's overall health.
+  // Instead of absolute deductions, we use the ratio of safe passwords, 
+  // while still applying a small penalty for 'old' passwords.
+  const safeRatio = credentials.length === 0 ? 1 : strong / credentials.length;
+  const oldPenalty = credentials.length === 0 ? 0 : (old / credentials.length) * 0.2;
+  const score = Math.round((safeRatio - oldPenalty) * 100);
 
   return {
     total: credentials.length,
@@ -75,7 +79,7 @@ export function computeHealthMetrics(allCredentials: Credential[], now = Date.no
     weak,
     reused,
     old,
-    score,
+    score: Math.max(0, Math.min(100, score)),
     weakIds,
     reusedIds,
     oldIds,

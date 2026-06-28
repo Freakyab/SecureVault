@@ -6,16 +6,19 @@ import type { ReactNode } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import Animated, { FadeInDown } from 'react-native-reanimated';
+
 import { EditCredentialScreen } from '@/components/screens/edit-credential';
-import { CredentialAvatar, GlassCard, PrimaryButton, ScreenBackground, VaultHeader } from '@/components/vault';
+import { CredentialAvatar, ScreenBackground, VaultHeader } from '@/components/vault';
+import { GlassCard, Button } from '@/components/ui';
 import { getCategory } from '@/constants/categories';
-import { VaultType } from '@/constants/vault-theme';
-import { useVaultColors } from '@/contexts/color-theme-context';
 import { useVault } from '@/contexts/vault-context';
 import { useToast } from '@/contexts/toast-context';
+import { useHaptics } from '@/hooks/use-haptics';
+import { useTheme } from '@/hooks/use-theme';
 import { copySensitiveToClipboard, copyToClipboard } from '@/services/feedback';
+import { type Theme } from '@/theme';
 import type { Credential } from '@/types/credential';
-import type { VaultColorsShape } from '@/theme/color-themes';
 
 function maskPassword(password: string) {
   return password ? '*'.repeat(Math.min(12, Math.max(8, password.length))) : 'No password';
@@ -44,8 +47,9 @@ interface EntryReadOnlyViewProps {
 function EntryReadOnlyView({ credential, onEdit }: EntryReadOnlyViewProps) {
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const c = useVaultColors();
-  const styles = useMemo(() => makeStyles(c), [c]);
+  const theme = useTheme();
+  const haptics = useHaptics();
+  const styles = useMemo(() => makeStyles(theme), [theme]);
   const { showToast } = useToast();
   const [showPassword, setShowPassword] = useState(false);
 
@@ -55,7 +59,7 @@ function EntryReadOnlyView({ credential, onEdit }: EntryReadOnlyViewProps) {
         <VaultHeader title="Credential" showBack onBack={() => router.back()} />
         <View style={styles.missing}>
           <Text style={styles.missingText}>This credential could not be found.</Text>
-          <PrimaryButton label="BACK TO VAULT" onPress={() => router.replace('/vault')} />
+          <Button onPress={() => router.replace('/vault')}>BACK TO VAULT</Button>
         </View>
       </ScreenBackground>
     );
@@ -66,6 +70,7 @@ function EntryReadOnlyView({ credential, onEdit }: EntryReadOnlyViewProps) {
 
   async function copyValue(label: string, value?: string, sensitive = false) {
     if (!value) return;
+    haptics.success();
     if (sensitive) {
       await copySensitiveToClipboard(value);
       showToast(`${label} copied — clears in 30s`, 'success');
@@ -81,7 +86,9 @@ function EntryReadOnlyView({ credential, onEdit }: EntryReadOnlyViewProps) {
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + 40 }]}>
-        <View style={styles.identity}>
+        <Animated.View
+          entering={FadeInDown.duration(theme.motion.duration.cardExpand)}
+          style={styles.identity}>
           <CredentialAvatar
             icon={KeyRound}
             website={credential.website}
@@ -92,7 +99,7 @@ function EntryReadOnlyView({ credential, onEdit }: EntryReadOnlyViewProps) {
           />
           <Text style={styles.identityName}>{credential.website || 'Credential'}</Text>
           {credential.accountLabel ? <Text style={styles.identityMeta}>{credential.accountLabel}</Text> : null}
-        </View>
+        </Animated.View>
 
         <GlassCard style={styles.card}>
           <DetailRow
@@ -128,9 +135,9 @@ function EntryReadOnlyView({ credential, onEdit }: EntryReadOnlyViewProps) {
                 hitSlop={8}
                 onPress={() => setShowPassword((visible) => !visible)}>
                 {showPassword ? (
-                  <EyeOff size={17} color={c.muted} strokeWidth={1.75} />
+                  <EyeOff size={17} color={theme.colors.textMuted} strokeWidth={1.75} />
                 ) : (
-                  <Eye size={17} color={c.muted} strokeWidth={1.75} />
+                  <Eye size={17} color={theme.colors.textMuted} strokeWidth={1.75} />
                 )}
               </Pressable>
             }
@@ -148,7 +155,7 @@ function EntryReadOnlyView({ credential, onEdit }: EntryReadOnlyViewProps) {
           </>
         ) : null}
 
-        <PrimaryButton label="EDIT CREDENTIAL" icon={Edit3} onPress={onEdit} />
+        <Button onPress={onEdit}>EDIT CREDENTIAL</Button>
       </ScrollView>
     </ScreenBackground>
   );
@@ -163,13 +170,13 @@ interface DetailRowProps {
 }
 
 function DetailRow({ icon: Icon, label, value, onCopy, trailing }: DetailRowProps) {
-  const c = useVaultColors();
-  const styles = useMemo(() => makeStyles(c), [c]);
+  const theme = useTheme();
+  const styles = useMemo(() => makeStyles(theme), [theme]);
 
   return (
     <View style={styles.row}>
       <View style={styles.rowIcon}>
-        <Icon size={18} color={c.accent} strokeWidth={1.75} />
+        <Icon size={18} color={theme.colors.accent} strokeWidth={1.75} />
       </View>
       <View style={styles.rowText}>
         <Text style={styles.rowLabel}>{label}</Text>
@@ -181,7 +188,7 @@ function DetailRow({ icon: Icon, label, value, onCopy, trailing }: DetailRowProp
         {trailing}
         {onCopy ? (
           <Pressable accessibilityRole="button" accessibilityLabel={`Copy ${label}`} hitSlop={8} onPress={onCopy}>
-            <Copy size={17} color={c.accent} strokeWidth={1.75} />
+            <Copy size={17} color={theme.colors.accent} strokeWidth={1.75} />
           </Pressable>
         ) : null}
       </View>
@@ -189,26 +196,26 @@ function DetailRow({ icon: Icon, label, value, onCopy, trailing }: DetailRowProp
   );
 }
 
-function makeStyles(c: VaultColorsShape) {
+function makeStyles(t: Theme) {
   return StyleSheet.create({
     content: {
-      paddingHorizontal: 20,
-      gap: 18,
+      paddingHorizontal: t.layout.screenPadding,
+      gap: t.spacing.lg + 2,
     },
     identity: {
       alignItems: 'center',
-      gap: 8,
-      marginTop: 12,
-      marginBottom: 4,
+      gap: t.spacing.sm,
+      marginTop: t.spacing.md,
+      marginBottom: t.spacing.xs,
     },
     identityName: {
-      ...VaultType.title,
-      color: c.heading,
+      ...t.typography.titleSerif,
+      color: t.colors.text,
       textAlign: 'center',
     },
     identityMeta: {
       fontSize: 13,
-      color: c.muted,
+      color: t.colors.textMuted,
       textAlign: 'center',
     },
     card: {
@@ -217,16 +224,16 @@ function makeStyles(c: VaultColorsShape) {
     row: {
       flexDirection: 'row',
       alignItems: 'center',
-      gap: 12,
-      paddingVertical: 4,
+      gap: t.spacing.md,
+      paddingVertical: t.spacing.xs,
     },
     rowIcon: {
       width: 38,
       height: 38,
-      borderRadius: 14,
+      borderRadius: t.radius.button,
       alignItems: 'center',
       justifyContent: 'center',
-      backgroundColor: c.accentSoft,
+      backgroundColor: t.colors.accentSoft,
     },
     rowText: {
       flex: 1,
@@ -234,45 +241,47 @@ function makeStyles(c: VaultColorsShape) {
     },
     rowLabel: {
       fontSize: 11,
-      fontWeight: '700',
+      fontWeight: t.fontWeight.bold,
       letterSpacing: 0.8,
-      color: c.muted,
+      color: t.colors.textMuted,
       textTransform: 'uppercase',
     },
     rowValue: {
+      ...t.typography.body,
       fontSize: 15,
       lineHeight: 21,
-      color: c.heading,
+      color: t.colors.text,
     },
     actions: {
       flexDirection: 'row',
       alignItems: 'center',
-      gap: 12,
+      gap: t.spacing.md,
     },
     divider: {
       height: 1,
-      marginVertical: 12,
-      backgroundColor: c.hairline,
+      marginVertical: t.spacing.md,
+      backgroundColor: t.glass.border,
     },
     sectionTitle: {
-      ...VaultType.label,
-      color: c.muted,
+      ...t.typography.label,
+      color: t.colors.textMuted,
       marginTop: 2,
     },
     notes: {
+      ...t.typography.body,
       fontSize: 14,
       lineHeight: 21,
-      color: c.body,
+      color: t.colors.textSecondary,
     },
     missing: {
       flex: 1,
       justifyContent: 'center',
-      gap: 20,
-      paddingHorizontal: 24,
+      gap: t.spacing.xl,
+      paddingHorizontal: t.spacing.xl,
     },
     missingText: {
-      ...VaultType.body,
-      color: c.body,
+      ...t.typography.body,
+      color: t.colors.textSecondary,
       textAlign: 'center',
     },
   });
