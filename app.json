@@ -1,13 +1,13 @@
 {
   "expo": {
     "name": "SecureVault",
-    "slug": "pass-code-expo-temp",
+    "slug": "securevault",
     "description": "SecureVault is an offline-first password manager: store credentials, generate strong passwords, and monitor password health locally on your device.",
     "primaryColor": "#2D6CF6",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "passcodeexpotemp",
+    "scheme": "securevault",
     "newArchEnabled": true,
     "userInterfaceStyle": "automatic",
     "ios": {
@@ -20,7 +20,7 @@
         "foregroundImage": "./assets/images/icon.png"
       },
       "predictiveBackGestureEnabled": false,
-      "package": "com.anonymous.passcodeexpotemp"
+      "package": "com.securevault.app"
     },
     "web": {
       "output": "static",
