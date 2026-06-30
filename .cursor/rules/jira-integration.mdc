@@ -1,0 +1,127 @@
+---
+description: Jira integration for SecureVault — sync bugs, manage issues, and track work via the Atlassian MCP server
+globs: docs/bug/**/*, docs/task/**/*, Mds/BUGS.md, Mds/TASKS.md, scripts/jira-sync-bugs.js, scripts/jira-sync-tasks.js
+alwaysApply: false
+---
+
+# Jira Integration — SecureVault
+
+This project is connected to Jira via the **Atlassian MCP server** (`mcp-atlassian`) configured in Cline.
+
+## Jira Instance
+
+- **URL**: `https://aryanbhisikar02.atlassian.net`
+- **Project Key**: `KAN`
+- **Issue Types**: `Bug`, `Task`
+- **Components**: `Bugs`, `Tasks`
+
+## Project Structure — Component-Based Grouping
+
+All issues live under the **KAN (SecureVault)** project. They are separated by **Components**:
+
+| Group | Component | Issue Type | Script |
+|-------|-----------|------------|--------|
+| 🐛 **Bugs** | `Bugs` | `Bug` | `scripts/jira-sync-bugs.js` |
+| 📋 **Tasks** | `Tasks` | `Task` | `scripts/jira-sync-tasks.js` (future) |
+
+### JQL Filtering
+
+To view only bugs:
+```
+project = KAN AND component = Bugs
+```
+
+To view only tasks:
+```
+project = KAN AND component = Tasks
+```
+
+## Workflows
+
+### 1. Sync Active Bugs to Jira
+
+Use the bulk sync script to create all open bugs from `Mds/BUGS.md` as Jira issues:
+
+```bash
+node scripts/jira-sync-bugs.js
+```
+
+The script reads credentials from the Cline MCP config at:
+`%APPDATA%\Code\User\globalStorage\saoudrizwan.claude-dev\settings\cline_mcp_settings.json`
+
+### 2. Adding a New Bug
+
+1. Create a standardized bug report (via **bug-reporter** skill) in `docs/bug/`
+2. Update the index in `Mds/BUGS.md`
+3. Run `node scripts/jira-sync-bugs.js` to push to Jira → it auto-assigns `Bugs` component
+
+### 3. Adding a New Task (coming soon)
+
+1. Create a task description in `docs/task/`
+2. Update the index in `Mds/TASKS.md`
+3. Run `node scripts/jira-sync-tasks.js` to push to Jira → it auto-assigns `Tasks` component
+
+### 4. Updating Status
+
+- Bug/Task status is tracked **in both** local MD files and Jira
+- Update Jira status directly via the Cline Jira MCP tools
+- Keep local files in sync as the source of truth
+
+## Active Bugs (last synced)
+
+| ID | Title | Priority | Jira Issue |
+|----|-------|----------|------------|
+| BUG-022 | Export backup is plaintext and uses the non-clearing clipboard | P1 | [KAN-4](https://aryanbhisikar02.atlassian.net/browse/KAN-4) |
+| BUG-024 | "Quick Fix All" button in Password Health is a no-op | P1 | [KAN-5](https://aryanbhisikar02.atlassian.net/browse/KAN-5) |
+| BUG-027 | Generated passwords don't guarantee selected character types | P2 | [KAN-6](https://aryanbhisikar02.atlassian.net/browse/KAN-6) |
+| BUG-028 | Auto-lock "Immediately" fires during legit OS prompts | P2 | [KAN-7](https://aryanbhisikar02.atlassian.net/browse/KAN-7) |
+| BUG-029 | Credential writes use stale closures / no serialization (race) | P2 | [KAN-8](https://aryanbhisikar02.atlassian.net/browse/KAN-8) |
+| BUG-030 | Generator password copy does not auto-clear the clipboard | P2 | [KAN-9](https://aryanbhisikar02.atlassian.net/browse/KAN-9) |
+| BUG-031 | Backup import/export drops `customLogoUri` | P3 | [KAN-10](https://aryanbhisikar02.atlassian.net/browse/KAN-10) |
+| BUG-032 | Breach result wording mixes accounts vs passwords | P3 | [KAN-11](https://aryanbhisikar02.atlassian.net/browse/KAN-11) |
+| BUG-033 | Health stat cards can sum to more than total (weak/reused overlap) | P3 | [KAN-12](https://aryanbhisikar02.atlassian.net/browse/KAN-12) |
+| BUG-034 | `autoLockLabel` has an unreachable "Never" branch | P3 | [KAN-13](https://aryanbhisikar02.atlassian.net/browse/KAN-13) |
+| BUG-035 | Onboarding completion not persisted on web | P3 | [KAN-14](https://aryanbhisikar02.atlassian.net/browse/KAN-14) |
+| BUG-036 | `useNavigationLock` lacks try/finally around the action | P3 | [KAN-15](https://aryanbhisikar02.atlassian.net/browse/KAN-15) |
+| BUG-037 | Edit "back" skips the read-only credential detail view | P3 | [KAN-16](https://aryanbhisikar02.atlassian.net/browse/KAN-16) |
+
+## JQL Quick Reference
+
+```jql
+# All active bugs
+project = KAN AND component = Bugs AND status != Done
+
+# All active tasks
+project = KAN AND component = Tasks AND status != Done
+
+# High priority bugs
+project = KAN AND component = Bugs AND priority = High
+
+# Everything in SecureVault
+project = KAN
+```
+
+## MCP Configuration
+
+The Atlassian MCP server is configured in `cline_mcp_settings.json`:
+
+```json
+{
+  "mcpServers": {
+    "github.com/pashpashpash/mcp-atlassian": {
+      "command": "mcp-atlassian",
+      "args": [],
+      "env": {
+        "JIRA_URL": "https://aryanbhisikar02.atlassian.net",
+        "JIRA_USERNAME": "aryanbhisikar02@gmail.com",
+        "JIRA_API_TOKEN": "<stored-in-config>"
+      }
+    }
+  }
+}
+```
+
+## API Reference
+
+- Jira REST API v3: `https://developer.atlassian.com/cloud/jira/platform/rest/v3/`
+- MCP Atlassian: `https://github.com/pashpashpash/mcp-atlassian`

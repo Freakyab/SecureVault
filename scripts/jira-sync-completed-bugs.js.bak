@@ -1,0 +1,61 @@
+// ── Sync Completed Bugs to Jira (as Done) ──────────────────────────────────
+// Run: node scripts/jira-sync-completed-bugs.js
+
+const JIRA_PROJECT_KEY = 'KAN';
+const COMPONENT_NAME = 'Bugs';
+const ISSUE_TYPE_NAME = 'Bug';
+
+const COMPLETED_BUGS = [
+  { id: 'BUG-020', summary: 'Password generator uses Math.random() instead of CSPRNG', priority: 'P0', resolved: '2026-06-14' },
+  { id: 'BUG-021', summary: 'Biometric vault key not bound to biometric auth in keystore', priority: 'P0', resolved: '2026-06-14' },
+  { id: 'BUG-002', summary: 'No master password after onboarding', priority: 'P0', resolved: '2026-06-13' },
+  { id: 'BUG-005', summary: 'Save credential fails with error', priority: 'P0', resolved: '2026-06-13' },
+  { id: 'BUG-006', summary: 'Create vault / master password fails', priority: 'P0', resolved: '2026-06-13' },
+  { id: 'BUG-015', summary: 'Create Vault button does not work on setup screen', priority: 'P0', resolved: '2026-06-14' },
+  { id: 'BUG-003', summary: 'No close button on Add Credential screen', priority: 'P1', resolved: '2026-06-13' },
+  { id: 'BUG-007', summary: 'Home menu icon locks app with master password', priority: 'P1', resolved: '2026-06-13' },
+  { id: 'BUG-010', summary: 'Multiple Edit Credential dialogs open', priority: 'P1', resolved: '2026-06-14' },
+  { id: 'BUG-011', summary: 'Health score does not update after add/delete', priority: 'P1', resolved: '2026-06-14' },
+  { id: 'BUG-012', summary: 'Biometric enable switch cannot be toggled', priority: 'P1', resolved: '2026-06-14' },
+  { id: 'BUG-013', summary: 'Onboarding back swipe exposes SecureVault before setup', priority: 'P1', resolved: '2026-06-13' },
+  { id: 'BUG-016', summary: 'Biometric unlock switch not working (setup + settings)', priority: 'P1', resolved: '2026-06-14' },
+  { id: 'BUG-017', summary: 'Tab switch feels frozen / janky before navigating', priority: 'P1', resolved: '2026-06-14' },
+  { id: 'BUG-023', summary: 'Dark Mode toggle does nothing', priority: 'P1', resolved: '2026-06-14' },
+  { id: 'BUG-025', summary: '"My Vault" screen renders hardcoded mock data', priority: 'P1', resolved: '2026-06-14' },
+  { id: 'BUG-004', summary: 'Website suggestion buttons do not update URL', priority: 'P2', resolved: '2026-06-13' },
+  { id: 'BUG-008', summary: 'Vault header icon is on wrong side', priority: 'P2', resolved: '2026-06-13' },
+  { id: 'BUG-009', summary: 'Security alerts are not clickable', priority: 'P2', resolved: '2026-06-14' },
+  { id: 'BUG-014', summary: 'White screen flash when switching tabs', priority: 'P2', resolved: '2026-06-14' },
+  { id: 'BUG-018', summary: 'White screen flash when pressing back', priority: 'P2', resolved: '2026-06-14' },
+  { id: 'BUG-026', summary: 'Placeholder actions (Dashboard bell, Vault import/export icons)', priority: 'P2', resolved: '2026-06-14' },
+  { id: 'BUG-019', summary: 'Active tab indicator is clipped at the top', priority: 'P3', resolved: '2026-06-14' },
+];
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+
+const PRIORITY_MAP = { P0: 'Highest', P1: 'High', P2: 'Medium', P3: 'Low' };
+
+function getCredentials() {
+  const fs = require('fs');
+  const path = require('path');
+  const configPath = path.join(process.env.APPDATA, 'Code', 'User', 'globalStorage', 'saoudrizwan.claude-dev', 'settings', 'cline_mcp_settings.json');
+  const raw = fs.readFileSync(configPath, 'utf-8');
+  const config = JSON.parse(raw);
+  const server = config.mcpServers?.['github.com/pashpashpash/mcp-atlassian'];
+  if (!server) throw new Error('Atlassian MCP server not found');
+  return { jiraUrl: server.env.JIRA_URL, email: server.env.JIRA_USERNAME, token: server.env.JIRA_API_TOKEN };
+}
+
+function basicAuth(email, token) {
+  return 'Basic ' + Buffer.from(email + ':' + token).toString('base64');
+}
+
+function toAdf(text) {
+  const lines = text.split('\n').filter(l => l.trim());
+  const content = lines.map(line => {
+    if (line.startsWith('h3. ')) return { type: 'paragraph', content: [{ type: 'text', text: line.slice(4), marks: [{ type: 'strong' }] }] };
+    return { type: 'paragraph', content: [{ type: 'text', text: line }] };
+  });
+  return { type: 'doc', version: 1, content };
+}
+

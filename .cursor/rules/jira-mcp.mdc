@@ -1,0 +1,71 @@
+---
+description: Jira MCP server configuration for accessing Atlassian Jira through the MCP Atlassian integration
+globs: **/*.{ts,tsx,js,jsx,py,md}
+alwaysApply: false
+---
+
+# Jira MCP Server Configuration
+
+The Jira MCP server is configured in the Cline MCP settings file at:
+
+**`c:\Users\aryan\AppData\Roaming\Code\User\globalStorage\saoudrizwan.claude-dev\settings\cline_mcp_settings.json`**
+
+## Server Details
+
+- **Server Name**: `github.com/pashpashpash/mcp-atlassian`
+- **Type**: Python-based MCP server
+- **Repository**: `C:\Users\aryan\Documents\Cline\MCP\mcp-atlassian`
+- **Executable**: `C:\Users\aryan\AppData\Local\Programs\Python\Python312\Scripts\mcp-atlassian.exe`
+
+## Jira Instance
+
+- **URL**: `https://aryanbhisikar02.atlassian.net`
+- **Username**: `aryanbhisikar02@gmail.com`
+
+## Available Tools
+
+| Tool                      | Description                                             |
+| ------------------------- | ------------------------------------------------------- |
+| `jira_get_issue`          | Get details of a specific Jira issue (e.g., `PROJ-123`) |
+| `jira_search`             | Search Jira issues using JQL                            |
+| `jira_get_project_issues` | Get all issues for a specific Jira project              |
+
+## Available Resources
+
+- `jira://{project_key}` - Access Jira project and its issues
+- `jira://{project_key}/issues/{issue_key}` - Access specific Jira issues
+
+## Usage Examples
+
+```json
+// Get project issues
+{
+  "project_key": "KAN",
+  "limit": 10
+}
+
+// Search issues
+{
+  "jql": "project = KAN AND status = 'To Do'",
+  "limit": 10
+}
+
+// Get specific issue
+{
+  "issue_key": "KAN-1"
+}
+```
+
+## Configuration
+
+The server uses environment variables for authentication:
+
+- `JIRA_URL` - Atlassian instance URL
+- `JIRA_USERNAME` - Email address for authentication
+- `JIRA_API_TOKEN` - API token from https://id.atlassian.com/manage-profile/security/api-tokens
+
+## Notes
+
+- The server is installed as an editable Python package (`pip install -e`)
+- Python 3.12 is used as the runtime
+- The server runs via stdio transport
