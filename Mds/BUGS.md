@@ -4,54 +4,46 @@ The bug tracker has been migrated to a modular structure. Each bug is now tracke
 
 ## 🐞 Active Bug Index
 
-| ID | Title | File |
-|----|-------|------|
-| BUG-020 | Password generator uses `Math.random()` instead of a CSPRNG | [BUG-020-password-generator-uses-math-random-instead-of-csprng.md](./docs/bug/BUG-020-password-generator-uses-math-random-instead-of-csprng.md) |
-| BUG-021 | Biometric vault key not bound to biometric auth in keystore | [BUG-021-biometric-vault-key-not-bound-to-biometric-auth-in-keystore.md](./docs/bug/BUG-021-biometric-vault-key-not-bound-to-biometric-auth-in-keystore.md) |
+| ID      | Title                                                          | File                                                                                                                                                              |
+| ------- | -------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | BUG-022 | Export backup is plaintext and uses the non-clearing clipboard | [BUG-022-export-backup-is-plaintext-and-uses-the-non-clearing-clipboard.md](./docs/bug/BUG-022-export-backup-is-plaintext-and-uses-the-non-clearing-clipboard.md) |
-| BUG-023 | Dark Mode toggle does nothing | [BUG-023-dark-mode-toggle-does-nothing.md](./docs/bug/BUG-023-dark-mode-toggle-does-nothing.md) |
-| BUG-024 | "Quick Fix All" button in Password Health is a no-op | [BUG-024-quick-fix-all-button-in-password-health-is-a-no-op.md](./docs/bug/BUG-024-quick-fix-all-button-in-password-health-is-a-no-op.md) |
-| BUG-025 | "My Vault" screen renders hardcoded mock data | [BUG-025-my-vault-screen-renders-hardcoded-mock-data.md](./docs/bug/BUG-025-my-vault-screen-renders-hardcoded-mock-data.md) |
-| BUG-026 | Placeholder actions (Dashboard bell, Vault import/export icons) | [BUG-026-placeholder-actions-dashboard-bell-vault-import-export-icons.md](./docs/bug/BUG-026-placeholder-actions-dashboard-bell-vault-import-export-icons.md) |
-| BUG-027 | Generated passwords don't guarantee selected character types | [BUG-027-generated-passwords-dont-guarantee-selected-character-types.md](./docs/bug/BUG-027-generated-passwords-dont-guarantee-selected-character-types.md) |
-| BUG-028 | Auto-lock "Immediately" fires during legit OS prompts | [BUG-028-auto-lock-immediately-fires-during-legit-os-prompts.md](./docs/bug/BUG-028-auto-lock-immediately-fires-during-legit-os-prompts.md) |
-| BUG-029 | Credential writes use stale closures / no serialization (race) | [BUG-029-credential-writes-use-stale-closures-no-serialization-race.md](./docs/bug/BUG-029-credential-writes-use-stale-closures-no-serialization-race.md) |
-| BUG-030 | Generator password copy does not auto-clear the clipboard | [BUG-030-generator-password-copy-does-not-auto-clear-the-clipboard.md](./docs/bug/BUG-030-generator-password-copy-does-not-auto-clear-the-clipboard.md) |
-| BUG-031 | Backup import/export drops `customLogoUri` | [BUG-031-backup-import-export-drops-customlogouri.md](./docs/bug/BUG-031-backup-import-export-drops-customlogouri.md) |
-| BUG-032 | Breach result wording mixes accounts vs passwords | [BUG-032-breach-result-wording-mixes-accounts-vs-passwords.md](./docs/bug/BUG-032-breach-result-wording-mixes-accounts-vs-passwords.md) |
-| BUG-033 | Health stat cards can sum to more than total | [BUG-033-health-stat-cards-can-sum-to-more-than-total.md](./docs/bug/BUG-033-health-stat-cards-can-sum-to-more-than-total.md) |
-| BUG-034 | `autoLockLabel` has an unreachable "Never" branch | [BUG-034-autolocklabel-has-an-unreachable-never-branch.md](./docs/bug/BUG-034-autolocklabel-has-an-unreachable-never-branch.md) |
-| BUG-035 | Onboarding completion not persisted on web | [BUG-035-onboarding-completion-not-persisted-on-web.md](./docs/bug/BUG-035-onboarding-completion-not-persisted-on-web.md) |
-| BUG-036 | `useNavigationLock` lacks try/finally around the action | [BUG-036-usenavigationlock-lacks-try-finally-around-the-action.md](./docs/bug/BUG-036-usenavigationlock-lacks-try-finally-around-the-action.md) |
-| BUG-037 | Edit "back" skips the read-only credential detail view | [BUG-037-edit-back-skips-the-read-only-credential-detail-view.md](./docs/bug/BUG-037-edit-back-skips-the-read-only-credential-detail-view.md) |
+| BUG-024 | "Quick Fix All" button in Password Health is a no-op           | [BUG-024-quick-fix-all-button-in-password-health-is-a-no-op.md](./docs/bug/BUG-024-quick-fix-all-button-in-password-health-is-a-no-op.md)                         |
+| BUG-027 | Generated passwords don't guarantee selected character types   | [BUG-027-generated-passwords-dont-guarantee-selected-character-types.md](./docs/bug/BUG-027-generated-passwords-dont-guarantee-selected-character-types.md)       |
+| BUG-028 | Auto-lock "Immediately" fires during legit OS prompts          | [BUG-028-auto-lock-immediately-fires-during-legit-os-prompts.md](./docs/bug/BUG-028-auto-lock-immediately-fires-during-legit-os-prompts.md)                       |
+| BUG-029 | Credential writes use stale closures / no serialization (race) | [BUG-029-credential-writes-use-stale-closures-no-serialization-race.md](./docs/bug/BUG-029-credential-writes-use-stale-closures-no-serialization-race.md)         |
+| BUG-030 | Generator password copy does not auto-clear the clipboard      | [BUG-030-generator-password-copy-does-not-auto-clear-the-clipboard.md](./docs/bug/BUG-030-generator-password-copy-does-not-auto-clear-the-clipboard.md)           |
+| BUG-031 | Backup import/export drops `customLogoUri`                     | [BUG-031-backup-import-export-drops-customlogouri.md](./docs/bug/BUG-031-backup-import-export-drops-customlogouri.md)                                             |
+| BUG-032 | Breach result wording mixes accounts vs passwords              | [BUG-032-breach-result-wording-mixes-accounts-vs-passwords.md](./docs/bug/BUG-032-breach-result-wording-mixes-accounts-vs-passwords.md)                           |
+| BUG-033 | Health stat cards can sum to more than total                   | [BUG-033-health-stat-cards-can-sum-to-more-than-total.md](./docs/bug/BUG-033-health-stat-cards-can-sum-to-more-than-total.md)                                     |
+| BUG-034 | `autoLockLabel` has an unreachable "Never" branch              | [BUG-034-autolocklabel-has-an-unreachable-never-branch.md](./docs/bug/BUG-034-autolocklabel-has-an-unreachable-never-branch.md)                                   |
+| BUG-035 | Onboarding completion not persisted on web                     | [BUG-035-onboarding-completion-not-persisted-on-web.md](./docs/bug/BUG-035-onboarding-completion-not-persisted-on-web.md)                                         |
+| BUG-036 | `useNavigationLock` lacks try/finally around the action        | [BUG-036-usenavigationlock-lacks-try-finally-around-the-action.md](./docs/bug/BUG-036-usenavigationlock-lacks-try-finally-around-the-action.md)                   |
+| BUG-037 | Edit "back" skips the read-only credential detail view         | [BUG-037-edit-back-skips-the-read-only-credential-detail-view.md](./docs/bug/BUG-037-edit-back-skips-the-read-only-credential-detail-view.md)                     |
 
 ## ✅ Completed Bug Index
 
-| ID | Title | File |
-|----|-------|------|
-| BUG-002 | No master password after onboarding | [BUG-002-no-master-password-after-onboarding.md](./docs/bug/BUG-002-no-master-password-after-onboarding.md) |
-| BUG-003 | No close button on Add Credential screen | [BUG-003-no-close-button-on-add-credential-screen.md](./docs/bug/BUG-003-no-close-button-on-add-credential-screen.md) |
-| BUG-004 | Website suggestion buttons don’t update URL | [BUG-004-website-suggestion-buttons-dont-update-url.md](./docs/bug/BUG-004-website-suggestion-buttons-dont-update-url.md) |
-| BUG-005 | Save credential fails with error | [BUG-005-save-credential-fails-with-error.md](./docs/bug/BUG-005-save-credential-fails-with-error.md) |
-| BUG-006 | Create vault / master password fails | [BUG-006-create-vault-master-password-fails.md](./docs/bug/BUG-006-create-vault-master-password-fails.md) |
-| BUG-007 | Home menu icon locks app with master password | [BUG-007-home-menu-icon-locks-app-with-master-password.md](./docs/bug/BUG-007-home-menu-icon-locks-app-with-master-password.md) |
-| BUG-008 | Vault header icon is on wrong side | [BUG-008-vault-header-icon-is-on-wrong-side.md](./docs/bug/BUG-008-vault-header-icon-is-on-wrong-side.md) |
-| BUG-009 | Security alerts are not clickable | [BUG-009-security-alerts-are-not-clickable.md](./docs/bug/BUG-009-security-alerts-are-not-clickable.md) |
-| BUG-010 | Multiple Edit Credential dialogs open | [BUG-010-multiple-edit-credential-dialogs-open.md](./docs/bug/BUG-010-multiple-edit-credential-dialogs-open.md) |
-| BUG-011 | Health score does not update after add/delete | [BUG-011-health-score-does-not-update-after-add-delete.md](./docs/bug/BUG-011-health-score-does-not-update-after-add-delete.md) |
-| BUG-012 | Biometric enable switch cannot be toggled | [BUG-012-biometric-enable-switch-cannot-be-toggled.md](./docs/bug/BUG-012-biometric-enable-switch-cannot-be-toggled.md) |
-| BUG-013 | Onboarding back swipe exposes SecureVault before setup | [BUG-013-onboarding-back-swipe-exposes-securevault-before-setup.md](./docs/bug/BUG-013-onboarding-back-swipe-exposes-securevault-before-setup.md) |
-| BUG-014 | White screen flash when switching tabs | [BUG-014-white-screen-flash-when-switching-tabs.md](./docs/bug/BUG-014-white-screen-flash-when-switching-tabs.md) |
-| BUG-015 | Create Vault button does not work on setup screen | [BUG-015-create-vault-button-does-not-work-on-setup-screen.md](./docs/bug/BUG-015-create-vault-button-does-not-work-on-setup-screen.md) |
-| BUG-016 | Biometric unlock switch not working (setup + settings) | [BUG-016-biometric-unlock-switch-not-working-setup-settings.md](./docs/bug/BUG-016-biometric-unlock-switch-not-working-setup-settings.md) |
-| BUG-017 | Tab switch feels frozen / janky before navigating | [BUG-017-tab-switch-feels-frozen-janky-before-navigating.md](./docs/bug/BUG-017-tab-switch-feels-frozen-janky-before-navigating.md) |
-| BUG-018 | White screen flash when pressing back | [BUG-018-white-screen-flash-when-pressing-back.md](./docs/bug/BUG-018-white-screen-flash-when-pressing-back.md) |
-| BUG-019 | Active tab indicator is clipped at the top | [BUG-019-active-tab-indicator-is-clipped-at-the-top.md](./docs/bug/BUG-019-active-tab-indicator-is-clipped-at-the-top.md) |
-
----
-
-### 📦 Archive
-The original split logs are preserved for reference:
-- [Part 1](./BUGS.part-01.md)
-- [Part 2](./BUGS.part-02.md)
-- [Part 3](./BUGS.part-03.md)
+| ID      | Title                                                           | File                                                                                                                                                          |
+| ------- | --------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| BUG-023 | Dark Mode toggle does nothing                                   | [BUG-023-dark-mode-toggle-does-nothing.md](./docs/bug/BUG-023-dark-mode-toggle-does-nothing.md)                                                               |
+| BUG-025 | "My Vault" screen renders hardcoded mock data                   | [BUG-025-my-vault-screen-renders-hardcoded-mock-data.md](./docs/bug/BUG-025-my-vault-screen-renders-hardcoded-mock-data.md)                                   |
+| BUG-026 | Placeholder actions (Dashboard bell, Vault import/export icons) | [BUG-026-placeholder-actions-dashboard-bell-vault-import-export-icons.md](./docs/bug/BUG-026-placeholder-actions-dashboard-bell-vault-import-export-icons.md) |
+| BUG-020 | Password generator uses `Math.random()` instead of a CSPRNG     | [BUG-020-password-generator-uses-math-random-instead-of-csprng.md](./docs/bug/BUG-020-password-generator-uses-math-random-instead-of-csprng.md)               |
+| BUG-021 | Biometric vault key not bound to biometric auth in keystore     | [BUG-021-biometric-vault-key-not-bound-to-biometric-auth-in-keystore.md](./docs/bug/BUG-021-biometric-vault-key-not-bound-to-biometric-auth-in-keystore.md)   |
+| BUG-002 | No master password after onboarding                             | [BUG-002-no-master-password-after-onboarding.md](./docs/bug/BUG-002-no-master-password-after-onboarding.md)                                                   |
+| BUG-003 | No close button on Add Credential screen                        | [BUG-003-no-close-button-on-add-credential-screen.md](./docs/bug/BUG-003-no-close-button-on-add-credential-screen.md)                                         |
+| BUG-004 | Website suggestion buttons don’t update URL                     | [BUG-004-website-suggestion-buttons-dont-update-url.md](./docs/bug/BUG-004-website-suggestion-buttons-dont-update-url.md)                                     |
+| BUG-005 | Save credential fails with error                                | [BUG-005-save-credential-fails-with-error.md](./docs/bug/BUG-005-save-credential-fails-with-error.md)                                                         |
+| BUG-006 | Create vault / master password fails                            | [BUG-006-create-vault-master-password-fails.md](./docs/bug/BUG-006-create-vault-master-password-fails.md)                                                     |
+| BUG-007 | Home menu icon locks app with master password                   | [BUG-007-home-menu-icon-locks-app-with-master-password.md](./docs/bug/BUG-007-home-menu-icon-locks-app-with-master-password.md)                               |
+| BUG-008 | Vault header icon is on wrong side                              | [BUG-008-vault-header-icon-is-on-wrong-side.md](./docs/bug/BUG-008-vault-header-icon-is-on-wrong-side.md)                                                     |
+| BUG-009 | Security alerts are not clickable                               | [BUG-009-security-alerts-are-not-clickable.md](./docs/bug/BUG-009-security-alerts-are-not-clickable.md)                                                       |
+| BUG-010 | Multiple Edit Credential dialogs open                           | [BUG-010-multiple-edit-credential-dialogs-open.md](./docs/bug/BUG-010-multiple-edit-credential-dialogs-open.md)                                               |
+| BUG-011 | Health score does not update after add/delete                   | [BUG-011-health-score-does-not-update-after-add-delete.md](./docs/bug/BUG-011-health-score-does-not-update-after-add-delete.md)                               |
+| BUG-012 | Biometric enable switch cannot be toggled                       | [BUG-012-biometric-enable-switch-cannot-be-toggled.md](./docs/bug/BUG-012-biometric-enable-switch-cannot-be-toggled.md)                                       |
+| BUG-013 | Onboarding back swipe exposes SecureVault before setup          | [BUG-013-onboarding-back-swipe-exposes-securevault-before-setup.md](./docs/bug/BUG-013-onboarding-back-swipe-exposes-securevault-before-setup.md)             |
+| BUG-014 | White screen flash when switching tabs                          | [BUG-014-white-screen-flash-when-switching-tabs.md](./docs/bug/BUG-014-white-screen-flash-when-switching-tabs.md)                                             |
+| BUG-015 | Create Vault button does not work on setup screen               | [BUG-015-create-vault-button-does-not-work-on-setup-screen.md](./docs/bug/BUG-015-create-vault-button-does-not-work-on-setup-screen.md)                       |
+| BUG-016 | Biometric unlock switch not working (setup + settings)          | [BUG-016-biometric-unlock-switch-not-working-setup-settings.md](./docs/bug/BUG-016-biometric-unlock-switch-not-working-setup-settings.md)                     |
+| BUG-017 | Tab switch feels frozen / janky before navigating               | [BUG-017-tab-switch-feels-frozen-janky-before-navigating.md](./docs/bug/BUG-017-tab-switch-feels-frozen-janky-before-navigating.md)                           |
+| BUG-018 | White screen flash when pressing back                           | [BUG-018-white-screen-flash-when-pressing-back.md](./docs/bug/BUG-018-white-screen-flash-when-pressing-back.md)                                               |
+| BUG-019 | Active tab indicator is clipped at the top                      | [BUG-019-active-tab-indicator-is-clipped-at-the-top.md](./docs/bug/BUG-019-active-tab-indicator-is-clipped-at-the-top.md)                                     |

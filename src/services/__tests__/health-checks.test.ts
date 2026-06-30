@@ -77,4 +77,14 @@ describe('computeHealthMetrics', () => {
     expect(metrics.weak).toBe(1);
     expect(metrics.score).toBeLessThan(100);
   });
+
+  it('omits old-password signals when reminders are disabled', () => {
+    const metrics = computeHealthMetrics(
+      [makeCredential({ updatedAt: new Date('2024-01-01').toISOString() })],
+      new Date('2026-01-01').getTime(),
+      { includeOldPasswords: false },
+    );
+    expect(metrics.old).toBe(0);
+    expect(metrics.oldIds).toHaveLength(0);
+  });
 });

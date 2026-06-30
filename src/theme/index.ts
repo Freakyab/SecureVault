@@ -42,9 +42,19 @@ export interface Theme {
 /** Build a resolved theme object for the given color scheme and accent palette. */
 export function getTheme(scheme: ColorSchemeName, colorThemeId: ColorThemeId = DEFAULT_COLOR_THEME_ID): Theme {
   const preset = COLOR_THEMES[colorThemeId];
-  const schemeColors: ColorScheme = preset.dark.colors;
-  const schemeGlass = preset.dark.glass;
-  const schemeGradients = preset.dark.gradients;
+  const schemeColors: ColorScheme = {
+    ...colors[scheme],
+    accent: preset.dark.colors.accent,
+    accentAlt: preset.dark.colors.accentAlt,
+    accentSoft: preset.dark.colors.accentSoft,
+    onAccent: preset.dark.colors.onAccent,
+  };
+  const schemeGlass = glass[scheme];
+  const schemeGradients = {
+    ...gradients[scheme],
+    accent: preset.dark.gradients.accent,
+    glow: preset.dark.gradients.glow,
+  };
 
   return {
     scheme,

@@ -8,16 +8,16 @@
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "passcodeexpotemp",
+    "newArchEnabled": true,
     "userInterfaceStyle": "automatic",
     "ios": {
-      "icon": "./assets/expo.icon"
+      "icon": "./assets/images/icon.png"
     },
     "android": {
+      "icon": "./assets/images/icon.png",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/images/android-icon-foreground.png",
-        "backgroundImage": "./assets/images/android-icon-background.png",
-        "monochromeImage": "./assets/images/android-icon-monochrome.png"
+        "foregroundImage": "./assets/images/icon.png"
       },
       "predictiveBackGestureEnabled": false,
       "package": "com.anonymous.passcodeexpotemp"
@@ -28,6 +28,16 @@
     },
     "plugins": [
       "expo-router",
+      [
+        "expo-font",
+        {
+          "fonts": [
+            "./assets/fonts/PlayfairDisplay_500Medium.ttf",
+            "./assets/fonts/PlayfairDisplay_600SemiBold.ttf",
+            "./assets/fonts/PlayfairDisplay_700Bold.ttf"
+          ]
+        }
+      ],
       [
         "expo-splash-screen",
         {

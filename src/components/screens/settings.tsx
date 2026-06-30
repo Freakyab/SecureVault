@@ -31,23 +31,14 @@ import { useVault } from '@/contexts/vault-context';
 import { useHaptics } from '@/hooks/use-haptics';
 import { useTheme } from '@/hooks/use-theme';
 import { BiometricAvailability, canUseBiometrics, getBiometricAvailability } from '@/services/biometric';
-import { copyToClipboard } from '@/services/feedback';
+import { copyToClipboard, copySensitiveToClipboard } from '@/services/feedback';
 import { parseVaultBackup, serializeVaultBackup } from '@/services/vault-backup';
 import { parseGoogleCSV } from '@/services/google-csv-import';
 import { suggestCategoriesBulk } from '@/services/ai-categorization';
 import { exportVaultToFile } from '@/services/vault-export';
 import { decryptBackup } from '@/services/vault-secure-backup';
 import { type Theme } from '@/theme';
-import { AUTO_LOCK_PRESETS, type ColorThemePreference } from '@/types/credential';
-
-interface RowProps {
-  icon: LucideIcon;
-  label: string;
-  detail?: string;
-  trailing?: ReactNode;
-  danger?: boolean;
-  onPress?: () => void;
-}
+import { AUTO_LOCK_PRESETS, type AppThemePreference, type ColorThemePreference } from '@/types/credential';
 
 interface RowProps {
   icon: LucideIcon;
@@ -100,6 +91,12 @@ function autoLockLabel(minutes: number) {
   return `${minutes} min`;
 }
 
+function themePreferenceLabel(preference: AppThemePreference) {
+  if (preference === 'light') return 'Light';
+  if (preference === 'system') return 'System';
+  return 'Dark';
+}
+
 export function SettingsScreen() {
   const insets = useSafeAreaInsets();
   const theme = useTheme();
@@ -118,6 +115,7 @@ export function SettingsScreen() {
     bulkUpdateCategories,
   } = useVault();
   const [showAutoLockPicker, setShowAutoLockPicker] = useState(false);
+  const [showThemePreferencePicker, setShowThemePreferencePicker] = useState(false);
   const [biometric, setBiometric] = useState<BiometricAvailability | null>(null);
 
   useEffect(() => {
@@ -153,6 +151,12 @@ export function SettingsScreen() {
     showToast(`Auto-lock set to ${autoLockLabel(minutes)}`, 'info');
   }
 
+  async function handleThemePreferenceSelect(preference: AppThemePreference) {
+    await updateSettings({ themePreference: preference });
+    setShowThemePreferencePicker(false);
+    showToast(`Theme mode set to ${themePreferenceLabel(preference)}`, 'info');
+  }
+
   function handleLockVault() {
     Alert.alert('Lock vault', 'SecureVault will require your master password to open again.', [
       { text: 'Cancel', style: 'cancel' },
@@ -176,14 +180,15 @@ export function SettingsScreen() {
     }
     Alert.alert(
       'Export vault backup',
-      `Copy a backup of ${credentials.length} credentials to your clipboard. The backup is plaintext — paste it somewhere private.`,
+      `Copy a backup of ${credentials.length} credentials to your clipboard. The backup is plaintext — it will be automatically cleared after 30 seconds.`,
+
       [
         { text: 'Cancel', style: 'cancel' },
         {
           text: 'Copy Backup',
           onPress: async () => {
-            await copyToClipboard(serializeVaultBackup(credentials));
-            showToast('Backup copied to clipboard', 'success');
+            await copySensitiveToClipboard(serializeVaultBackup(credentials));
+            showToast('Backup copied — auto-clears in 30s', 'success');
           },
         },
       ],
@@ -520,10 +525,49 @@ export function SettingsScreen() {
               })}
             </View>
           ) : null}
+          <View style={styles.separator} />
+          <SettingsRow
+            icon={Timer}
+            label="Password Age Reminders"
+            detail={settings.passwordAgeReminders ? 'Enabled in health checks' : 'Hidden in health checks'}
+            trailing={
+              <Toggle
+                value={settings.passwordAgeReminders}
+                onChange={(enabled) => updateSettings({ passwordAgeReminders: enabled })}
+                label="Password age reminders"
+              />
+            }
+          />
         </GlassCard>
 
         <Text style={styles.sectionLabel}>APPEARANCE</Text>
         <GlassCard style={styles.group}>
+          <SettingsRow
+            icon={Moon}
+            label="Theme Mode"
+            detail={themePreferenceLabel(settings.themePreference)}
+            onPress={() => setShowThemePreferencePicker((prev) => !prev)}
+          />
+          {showThemePreferencePicker ? (
+            <View style={styles.presetRow}>
+              {(['system', 'dark', 'light'] as const).map((item) => {
+                const active = settings.themePreference === item;
+                return (
+                  <Pressable
+                    key={item}
+                    accessibilityRole="button"
+                    accessibilityState={{ selected: active }}
+                    onPress={() => handleThemePreferenceSelect(item)}
+                    style={[styles.presetChip, active && styles.presetChipActive]}>
+                    <Text style={[styles.presetText, active && styles.presetTextActive]}>
+                      {themePreferenceLabel(item)}
+                    </Text>
+                  </Pressable>
+                );
+              })}
+            </View>
+          ) : null}
+          <View style={styles.separator} />
           <View style={styles.colorThemeRow}>
             <View style={styles.rowLeft}>
               <View style={styles.rowIcon}>

@@ -1,9 +1,4 @@
-import {
-  PlayfairDisplay_500Medium,
-  PlayfairDisplay_600SemiBold,
-  PlayfairDisplay_700Bold,
-  useFonts,
-} from "@expo-google-fonts/playfair-display";
+import { useFonts } from "expo-font";
 import { DarkTheme, ThemeProvider } from "@react-navigation/native";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
@@ -14,12 +9,10 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { AnimatedSplashOverlay } from "@/components/animated-icon";
 import { ErrorBoundary } from "@/components/error-boundary";
 import { VaultLoadingScreen } from "@/components/vault-loading-screen";
-import {
-  ColorThemeVaultSync,
-  useVaultColors,
-} from "@/contexts/color-theme-context";
+import { ColorThemeVaultSync } from "@/contexts/color-theme-context";
 import { SecureVaultThemeProvider } from "@/contexts/securevault-theme-context";
 import { ToastProvider } from "@/contexts/toast-context";
+import { useTheme } from "@/hooks/use-theme";
 import { VaultProvider, useVault } from "@/contexts/vault-context";
 
 SplashScreen.preventAutoHideAsync();
@@ -31,34 +24,34 @@ function VaultThemeSync() {
 
 function AppNavigation() {
   const { isLoading } = useVault();
-  const colors = useVaultColors();
-
-  if (isLoading) {
-    return <VaultLoadingScreen />;
-  }
+  const theme = useTheme();
 
   const navTheme = useMemo(
     () => ({
       ...DarkTheme,
       colors: {
         ...DarkTheme.colors,
-        background: colors.background,
-        card: colors.background,
-        text: colors.heading,
-        primary: colors.accent,
+        background: theme.colors.background,
+        card: theme.colors.background,
+        text: theme.colors.text,
+        primary: theme.colors.accent,
       },
     }),
-    [colors],
+    [theme.colors.accent, theme.colors.background, theme.colors.text],
   );
+
+  if (isLoading) {
+    return <VaultLoadingScreen />;
+  }
 
   return (
     <ThemeProvider value={navTheme}>
       <ToastProvider>
-        <StatusBar style="light" />
+        <StatusBar style={theme.scheme === "light" ? "dark" : "light"} />
         <Stack
           screenOptions={{
             headerShown: false,
-            contentStyle: { backgroundColor: colors.background },
+            contentStyle: { backgroundColor: theme.colors.background },
             animation: "slide_from_right",
           }}>
           <Stack.Screen name="(auth)" options={{ animation: "none" }} />
@@ -70,15 +63,21 @@ function AppNavigation() {
 }
 
 export default function RootLayout() {
-  const [fontsLoaded] = useFonts([
-    PlayfairDisplay_500Medium,
-    PlayfairDisplay_600SemiBold,
-    PlayfairDisplay_700Bold,
-  ]);
+  const [fontsLoaded, fontError] = useFonts({
+    PlayfairDisplay_500Medium: require("../../assets/fonts/PlayfairDisplay_500Medium.ttf"),
+    PlayfairDisplay_600SemiBold: require("../../assets/fonts/PlayfairDisplay_600SemiBold.ttf"),
+    PlayfairDisplay_700Bold: require("../../assets/fonts/PlayfairDisplay_700Bold.ttf"),
+  });
 
   useEffect(() => {
-    if (fontsLoaded) SplashScreen.hideAsync();
-  }, [fontsLoaded]);
+    if (fontsLoaded || fontError) {
+      void SplashScreen.hideAsync();
+    }
+  }, [fontError, fontsLoaded]);
+
+  if (fontError) {
+    throw fontError;
+  }
 
   if (!fontsLoaded) return null;
 

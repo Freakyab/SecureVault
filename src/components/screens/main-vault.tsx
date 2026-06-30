@@ -1,5 +1,7 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
+import * as DocumentPicker from 'expo-document-picker';
+import * as FileSystem from 'expo-file-system/legacy';
 import {
   AlertTriangle,
   ArrowRight,
@@ -8,13 +10,12 @@ import {
   KeyRound,
   Lock,
   Plus,
-  Search,
   Shield,
   SlidersHorizontal,
   Upload,
 } from 'lucide-react-native';
 import { useMemo, useState } from 'react';
-import { Alert, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -29,6 +30,8 @@ import { useTheme } from '@/hooks/use-theme';
 import { filterCredentials } from '@/services/credential-search';
 import { copySensitiveToClipboard } from '@/services/feedback';
 import { computeHealthMetrics } from '@/services/health-checks';
+import { decryptBackup } from '@/services/vault-secure-backup';
+import { exportVaultToFile } from '@/services/vault-export';
 import { type Theme } from '@/theme';
 
 const VIEW_FILTERS = ['Active', 'Favorites', 'Archived'] as const;
@@ -41,7 +44,7 @@ export function MainVaultScreen() {
   const styles = useMemo(() => makeStyles(theme), [theme]);
   const router = useRouter();
   const params = useLocalSearchParams<{ category?: string }>();
-  const { credentials, toggleFavorite, lockVault } = useVault();
+  const { credentials, settings, toggleFavorite, lockVault, importCredentials } = useVault();
   const { showToast } = useToast();
   const runLocked = useNavigationLock();
   const [view, setView] = useState<ViewFilter>('Active');
@@ -52,7 +55,10 @@ export function MainVaultScreen() {
   const [query, setQuery] = useState('');
   const [isFilterPanelOpen, setIsFilterPanelOpen] = useState(false);
 
-  const health = useMemo(() => computeHealthMetrics(credentials), [credentials]);
+  const health = useMemo(
+    () => computeHealthMetrics(credentials, Date.now(), { includeOldPasswords: settings.passwordAgeReminders }),
+    [credentials, settings.passwordAgeReminders],
+  );
   const weakIds = useMemo(() => new Set(health.weakIds), [health.weakIds]);
   const reusedIds = useMemo(() => new Set(health.reusedIds), [health.reusedIds]);
   const oldIds = useMemo(() => new Set(health.oldIds), [health.oldIds]);
@@ -162,6 +168,85 @@ export function MainVaultScreen() {
     ]);
   }
 
+  function handleExportBackup() {
+    if (credentials.length === 0) {
+      haptics.warning();
+      showToast('No credentials to export yet', 'info');
+      return;
+    }
+
+    Alert.prompt(
+      'Backup Password',
+      'Enter a password to encrypt your backup file. You will need this password to restore later.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Export',
+          onPress: async (password?: string) => {
+            if (!password || password.trim().length < 4) {
+              Alert.alert('Invalid Password', 'Please enter a password of at least 4 characters.');
+              return;
+            }
+            try {
+              await exportVaultToFile(credentials, password);
+              haptics.success();
+              showToast('Encrypted vault backup exported', 'success');
+            } catch (error) {
+              haptics.warning();
+              Alert.alert('Export failed', error instanceof Error ? error.message : 'Could not save backup file.');
+            }
+          },
+        },
+      ],
+      'secure-text',
+    );
+  }
+
+  async function handleImportBackup() {
+    try {
+      const result = await DocumentPicker.getDocumentAsync({
+        type: ['application/json', 'text/json'],
+      });
+      if (result.canceled) return;
+
+      const file = result.assets[0];
+      const content = await FileSystem.readAsStringAsync(file.uri);
+
+      Alert.prompt(
+        'Restore Backup',
+        'Enter the password used to encrypt this backup file.',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          {
+            text: 'Restore',
+            onPress: async (password?: string) => {
+              if (!password || password.trim().length < 4) {
+                Alert.alert('Invalid Password', 'Please enter the correct backup password.');
+                return;
+              }
+              try {
+                const incoming = await decryptBackup(content, password);
+                const { added, skipped } = await importCredentials(incoming);
+                haptics.success();
+                showToast(`Restored ${added} · skipped ${skipped} duplicates`, 'success');
+              } catch (error) {
+                haptics.warning();
+                Alert.alert(
+                  'Restore failed',
+                  error instanceof Error ? error.message : 'Could not decrypt backup. Check your password.',
+                );
+              }
+            },
+          },
+        ],
+        'secure-text',
+      );
+    } catch (error) {
+      haptics.warning();
+      Alert.alert('Import failed', error instanceof Error ? error.message : 'Could not read selected file.');
+    }
+  }
+
   return (
     <ScreenBackground>
       <ScrollView
@@ -180,10 +265,7 @@ export function MainVaultScreen() {
               accessibilityRole="button"
               accessibilityLabel="Export vault backup"
               hitSlop={10}
-              onPress={() => {
-                haptics.selection();
-                showToast('Export feature coming soon', 'info');
-              }}
+              onPress={handleExportBackup}
               style={styles.brandIconButton}>
               <Upload size={18} color={theme.colors.text} strokeWidth={1.75} />
             </Pressable>
@@ -191,10 +273,7 @@ export function MainVaultScreen() {
               accessibilityRole="button"
               accessibilityLabel="Import vault backup"
               hitSlop={10}
-              onPress={() => {
-                haptics.selection();
-                showToast('Import feature coming soon', 'info');
-              }}
+              onPress={handleImportBackup}
               style={styles.brandIconButton}>
               <Download size={18} color={theme.colors.text} strokeWidth={1.75} />
             </Pressable>

@@ -71,7 +71,25 @@ const dark: ColorScheme = {
   ...semantic,
 };
 
-export const colors = { dark } as const;
+const light: ColorScheme = {
+  background: '#F4F7FF',
+  surface: '#FFFFFF',
+  surfaceAlt: '#E9EEF9',
+  border: 'rgba(28, 48, 89, 0.14)',
+
+  text: '#15223A',
+  textSecondary: '#41597E',
+  textMuted: 'rgba(65, 89, 126, 0.65)',
+
+  accent: '#2D6CF6',
+  accentAlt: '#184ED0',
+  accentSoft: 'rgba(45, 108, 246, 0.16)',
+  onAccent: '#FFFFFF',
+
+  ...semantic,
+};
+
+export const colors = { dark, light } as const;
 
 export type ColorSchemeName = keyof typeof colors;
 
@@ -86,6 +104,12 @@ export const glass = {
     border: 'rgba(160, 180, 220, 0.16)',
     highlight: 'rgba(255, 255, 255, 0.06)',
   },
+  light: {
+    fill: 'rgba(255, 255, 255, 0.86)',
+    fillStrong: 'rgba(255, 255, 255, 0.94)',
+    border: 'rgba(28, 48, 89, 0.14)',
+    highlight: 'rgba(255, 255, 255, 0.95)',
+  },
 } as const;
 
 /**
@@ -99,5 +123,11 @@ export const gradients = {
     hero: ['rgba(45, 108, 246, 0.38)', 'rgba(127, 176, 255, 0.08)'],
     surface: ['rgba(255, 255, 255, 0.06)', 'rgba(255, 255, 255, 0.02)'],
     glow: ['rgba(127, 176, 255, 0.18)', 'rgba(45, 108, 246, 0.0)'],
+  },
+  light: {
+    accent: ['#184ED0', '#2D6CF6'],
+    hero: ['rgba(45, 108, 246, 0.24)', 'rgba(255, 255, 255, 0.78)'],
+    surface: ['rgba(255, 255, 255, 0.96)', 'rgba(255, 255, 255, 0.82)'],
+    glow: ['rgba(45, 108, 246, 0.16)', 'rgba(45, 108, 246, 0.0)'],
   },
 } as const;

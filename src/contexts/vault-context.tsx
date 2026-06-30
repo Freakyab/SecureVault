@@ -25,7 +25,7 @@ import {
 } from '@/types/credential';
 
 /** Blocks screenshots and screen recording while the vault is unlocked. */
-const SCREEN_CAPTURE_PROTECTION_ENABLED = false;
+const SCREEN_CAPTURE_PROTECTION_ENABLED = true;
 
 interface CredentialInput {
   website: string;

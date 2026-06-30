@@ -1,3 +1,5 @@
+import * as Crypto from 'expo-crypto';
+
 export interface GeneratorOptions {
   length: number;
   uppercase: boolean;
@@ -32,13 +34,27 @@ export function buildCharPool(options: GeneratorOptions) {
 
 export function generatePassword(
   options: GeneratorOptions = DEFAULT_GENERATOR_OPTIONS,
-  randomInt: (max: number) => number = (max) => Math.floor(Math.random() * max),
+  randomInt: (max: number) => number = secureRandomInt,
 ): string {
   const pool = buildCharPool(options);
   if (!pool) throw new Error('Select at least one character type.');
 
   const safeLength = Math.max(4, Math.min(options.length, 128));
   return Array.from({ length: safeLength }, () => pool[randomInt(pool.length)]).join('');
+}
+
+function secureRandomInt(max: number): number {
+  if (!Number.isInteger(max) || max <= 0) throw new Error('Random bound must be a positive integer.');
+
+  // Rejection sampling avoids modulo bias when max does not divide 2^32.
+  const limit = 0x1_0000_0000 - (0x1_0000_0000 % max);
+  const bucket = new Uint32Array(1);
+
+  do {
+    Crypto.getRandomValues(bucket);
+  } while (bucket[0] >= limit);
+
+  return bucket[0] % max;
 }
 
 export interface PasswordStrength {

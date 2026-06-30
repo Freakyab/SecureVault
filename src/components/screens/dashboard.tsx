@@ -13,6 +13,7 @@ import {
 } from "lucide-react-native";
 import { useEffect, useMemo, useState } from "react";
 import {
+  Alert,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -28,8 +29,8 @@ import { PressableScale } from "@/components/ui/pressable-scale";
 import { BottomNav, CredentialRow, EmptyState } from "@/components/vault";
 import { CREDENTIAL_CATEGORIES } from "@/constants/categories";
 import { useColorTheme } from "@/contexts/color-theme-context";
-import { useToast } from "@/contexts/toast-context";
 import { useVault } from "@/contexts/vault-context";
+import { useHaptics } from "@/hooks/use-haptics";
 import { useNavigationLock } from "@/hooks/use-navigation-lock";
 import { useTheme } from "@/hooks/use-theme";
 import { filterCredentials } from "@/services/credential-search";
@@ -65,8 +66,8 @@ export function DashboardScreen() {
   const { colorThemeId } = useColorTheme();
   const p = useThemePresets();
   const s = useMemo(() => makeStyles(theme), [theme]);
-  const { showToast } = useToast();
-  const { credentials } = useVault();
+  const haptics = useHaptics();
+  const { credentials, settings } = useVault();
   const runLocked = useNavigationLock();
   const [query, setQuery] = useState("");
   const searched = query.trim().length > 0;
@@ -76,8 +77,8 @@ export function DashboardScreen() {
     [credentials],
   );
   const health = useMemo(
-    () => computeHealthMetrics(credentials),
-    [credentials],
+    () => computeHealthMetrics(credentials, Date.now(), { includeOldPasswords: settings.passwordAgeReminders }),
+    [credentials, settings.passwordAgeReminders],
   );
   const weakIds = useMemo(() => new Set(health.weakIds), [health.weakIds]);
   const reusedIds = useMemo(
@@ -103,6 +104,18 @@ export function DashboardScreen() {
     return activeCredentials.slice(0, 3);
   }, [activeCredentials, query, searched]);
 
+  function openSecurityAlerts() {
+    haptics.selection();
+    const message =
+      alerts > 0
+        ? `${health.weak} weak and ${health.reused} reused passwords need attention.`
+        : "No active password alerts right now.";
+    Alert.alert("Security Alerts", message, [
+      { text: "Close", style: "cancel" },
+      { text: "Open Health", onPress: () => router.push("/health") },
+    ]);
+  }
+
   function openCredential(id: string) {
     runLocked(() => router.push({ pathname: "/entry/[id]", params: { id } }));
   }
@@ -126,7 +139,7 @@ export function DashboardScreen() {
           <PressableScale
             accessibilityLabel="Notifications"
             hitSlop={12}
-            onPress={() => showToast("No new notifications", "info")}
+            onPress={openSecurityAlerts}
             style={p.iconButton}>
             <Bell size={20} color={theme.colors.accent} strokeWidth={1.75} />
           </PressableScale>

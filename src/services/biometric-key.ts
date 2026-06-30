@@ -15,6 +15,7 @@ export async function storeBiometricKey(keyHex: string): Promise<void> {
   try {
     await SecureStore.setItemAsync(BIOMETRIC_KEY_STORAGE, keyHex, {
       keychainAccessible: SecureStore.WHEN_UNLOCKED_THIS_DEVICE_ONLY,
+      requireAuthentication: true,
     });
   } catch {
     // Secure storage may be unavailable on some emulators; biometric unlock
@@ -25,7 +26,10 @@ export async function storeBiometricKey(keyHex: string): Promise<void> {
 export async function getBiometricKey(): Promise<string | null> {
   if (Platform.OS === 'web') return null;
   try {
-    return await SecureStore.getItemAsync(BIOMETRIC_KEY_STORAGE);
+    return await SecureStore.getItemAsync(BIOMETRIC_KEY_STORAGE, {
+      requireAuthentication: true,
+      authenticationPrompt: 'Authenticate to unlock SecureVault.',
+    });
   } catch {
     return null;
   }

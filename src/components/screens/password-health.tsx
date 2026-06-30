@@ -15,7 +15,7 @@ import {
 } from 'lucide-react-native';
 import type { LucideIcon } from 'lucide-react-native';
 import { useMemo, useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -35,6 +35,7 @@ import { useNavigationLock } from '@/hooks/use-navigation-lock';
 import { useTheme } from '@/hooks/use-theme';
 import { scanCredentialsForBreaches } from '@/services/breach-check';
 import { computeHealthMetrics } from '@/services/health-checks';
+import { generatePassword } from '@/services/password-generator';
 import { type Theme } from '@/theme';
 
 type BreachState =
@@ -73,11 +74,15 @@ export function PasswordHealthScreen() {
   };
   const router = useRouter();
   const { showToast } = useToast();
-  const { credentials } = useVault();
+  const { credentials, settings, updateCredential } = useVault();
   const runLocked = useNavigationLock();
-  const metrics = useMemo(() => computeHealthMetrics(credentials), [credentials]);
+  const metrics = useMemo(
+    () => computeHealthMetrics(credentials, Date.now(), { includeOldPasswords: settings.passwordAgeReminders }),
+    [credentials, settings.passwordAgeReminders],
+  );
   const [breach, setBreach] = useState<BreachState>({ status: 'idle' });
   const [showAllAttention, setShowAllAttention] = useState(false);
+  const [isFixingAll, setIsFixingAll] = useState(false);
 
   async function runBreachScan() {
     if (metrics.total === 0) {
@@ -159,9 +164,62 @@ export function PasswordHealthScreen() {
     runLocked(() => router.push({ pathname: '/entry/[id]', params: { id } }));
   }
 
-  function rescan() {
-    haptics.success();
-    showToast(`Vault re-scanned — health ${metrics.score}%`, 'info');
+  async function quickFixAll() {
+    if (isFixingAll) return;
+    if (attention.length === 0) {
+      haptics.success();
+      showToast('No password issues to fix right now', 'info');
+      return;
+    }
+
+    Alert.alert(
+      'Quick Fix All',
+      `Generate strong unique passwords for ${attention.length} credential${
+        attention.length === 1 ? '' : 's'
+      } that need attention?`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Fix All',
+          onPress: async () => {
+            setIsFixingAll(true);
+            try {
+              const targets = new Set(attention.map((item) => item.id));
+              let fixed = 0;
+
+              for (const credential of credentials) {
+                if (!targets.has(credential.id) || credential.isArchived) continue;
+                const nextPassword = generatePassword();
+                await updateCredential(credential.id, {
+                  website: credential.website,
+                  url: credential.url,
+                  username: credential.username,
+                  password: nextPassword,
+                  category: credential.category,
+                  accountLabel: credential.accountLabel,
+                  notes: credential.notes,
+                  folder: credential.folder,
+                  tags: credential.tags,
+                  customLogoUri: credential.customLogoUri,
+                });
+                fixed += 1;
+              }
+
+              haptics.success();
+              showToast(`Updated ${fixed} credential${fixed === 1 ? '' : 's'} with strong passwords`, 'success');
+            } catch (error) {
+              haptics.error();
+              Alert.alert(
+                'Quick fix failed',
+                error instanceof Error ? error.message : 'Could not update all credentials.',
+              );
+            } finally {
+              setIsFixingAll(false);
+            }
+          },
+        },
+      ],
+    );
   }
 
   const tier =
@@ -463,14 +521,17 @@ export function PasswordHealthScreen() {
         <Pressable
           accessibilityRole="button"
           accessibilityLabel="Quick fix all password issues"
-          onPress={rescan}
-          style={({ pressed }) => [styles.rescanWrapper, pressed && styles.pressed]}>
+          accessibilityState={{ disabled: isFixingAll }}
+          disabled={isFixingAll}
+          onPress={quickFixAll}
+          style={({ pressed }) => [styles.rescanWrapper, pressed && styles.pressed, isFixingAll && styles.disabled]}>
           <LinearGradient
             colors={[theme.colors.accentAlt, theme.colors.accent]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
             style={styles.rescan}>
-            <Text style={styles.rescanText}>Quick Fix All</Text>
+            {isFixingAll ? <ActivityIndicator size="small" color={theme.colors.onAccent} /> : null}
+            <Text style={styles.rescanText}>{isFixingAll ? 'Applying Fixes…' : 'Quick Fix All'}</Text>
           </LinearGradient>
         </Pressable>
       </ScrollView>

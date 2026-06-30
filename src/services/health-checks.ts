@@ -20,6 +20,10 @@ export interface HealthMetrics {
   reusedGroups: ReusedGroup[];
 }
 
+interface HealthMetricOptions {
+  includeOldPasswords?: boolean;
+}
+
 export function isWeakPassword(password: string) {
   const hasLower = /[a-z]/.test(password);
   const hasUpper = /[A-Z]/.test(password);
@@ -37,9 +41,14 @@ export function isOldCredential(credential: Credential, now = Date.now()) {
   return ageDays >= OLD_PASSWORD_THRESHOLD_DAYS;
 }
 
-export function computeHealthMetrics(allCredentials: Credential[], now = Date.now()): HealthMetrics {
+export function computeHealthMetrics(
+  allCredentials: Credential[],
+  now = Date.now(),
+  options: HealthMetricOptions = {},
+): HealthMetrics {
   // Archived credentials are excluded from health summaries by design.
   const credentials = allCredentials.filter((credential) => !credential.isArchived);
+  const includeOldPasswords = options.includeOldPasswords ?? true;
 
   const passwordGroups = credentials.reduce<Record<string, string[]>>((groups, credential) => {
     if (!credential.password) return groups;
@@ -56,9 +65,9 @@ export function computeHealthMetrics(allCredentials: Credential[], now = Date.no
   const weakIds = credentials
     .filter((credential) => isWeakPassword(credential.password))
     .map((credential) => credential.id);
-  const oldIds = credentials
-    .filter((credential) => isOldCredential(credential, now))
-    .map((credential) => credential.id);
+  const oldIds = includeOldPasswords
+    ? credentials.filter((credential) => isOldCredential(credential, now)).map((credential) => credential.id)
+    : [];
 
   const weak = weakIds.length;
   const reused = reusedIds.length;
@@ -70,7 +79,7 @@ export function computeHealthMetrics(allCredentials: Credential[], now = Date.no
   // Instead of absolute deductions, we use the ratio of safe passwords, 
   // while still applying a small penalty for 'old' passwords.
   const safeRatio = credentials.length === 0 ? 1 : strong / credentials.length;
-  const oldPenalty = credentials.length === 0 ? 0 : (old / credentials.length) * 0.2;
+  const oldPenalty = includeOldPasswords && credentials.length > 0 ? (old / credentials.length) * 0.2 : 0;
   const score = Math.round((safeRatio - oldPenalty) * 100);
 
   return {
