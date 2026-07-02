@@ -22,6 +22,7 @@ export interface VaultColorsShape {
   body: string;
   muted: string;
   placeholder: string;
+  textLabel: string;
   accent: string;
   accentStrong: string;
   accentSoft: string;
@@ -87,6 +88,7 @@ export const COLOR_THEMES: Record<ColorThemeId, ColorThemePreset> = {
       body: '#B7C4DC',
       muted: 'rgba(183,196,220,0.6)',
       placeholder: 'rgba(183,196,220,0.4)',
+      textLabel: '#B7C4DC',
       accent: '#7FB0FF',
       accentStrong: '#2D6CF6',
       accentSoft: 'rgba(45,108,246,0.22)',
@@ -109,6 +111,7 @@ export const COLOR_THEMES: Record<ColorThemeId, ColorThemePreset> = {
         text: '#EAF1FF',
         textSecondary: '#B7C4DC',
         textMuted: 'rgba(183, 196, 220, 0.6)',
+        textLabel: '#B7C4DC',
         accent: '#7FB0FF',
         accentAlt: '#2D6CF6',
         accentSoft: 'rgba(45, 108, 246, 0.22)',
@@ -146,6 +149,7 @@ export const COLOR_THEMES: Record<ColorThemeId, ColorThemePreset> = {
       body: '#cfc2d5',
       muted: 'rgba(207,194,213,0.6)',
       placeholder: 'rgba(207,194,213,0.4)',
+      textLabel: '#cfc2d5',
       accent: '#b06af0',
       accentStrong: '#7b2cbf',
       accentSoft: 'rgba(123,44,191,0.25)',
@@ -168,6 +172,7 @@ export const COLOR_THEMES: Record<ColorThemeId, ColorThemePreset> = {
         text: '#eedcff',
         textSecondary: '#cfc2d5',
         textMuted: 'rgba(207, 194, 213, 0.6)',
+        textLabel: '#cfc2d5',
         accent: '#b06af0',
         accentAlt: '#7b2cbf',
         accentSoft: 'rgba(123, 44, 191, 0.25)',
@@ -205,6 +210,7 @@ export const COLOR_THEMES: Record<ColorThemeId, ColorThemePreset> = {
       body: '#CBC2A8',
       muted: 'rgba(203,194,168,0.6)',
       placeholder: 'rgba(203,194,168,0.4)',
+      textLabel: '#CBC2A8',
       accent: '#E8C879',
       accentStrong: '#C9A227',
       accentSoft: 'rgba(201,162,39,0.22)',
@@ -227,6 +233,7 @@ export const COLOR_THEMES: Record<ColorThemeId, ColorThemePreset> = {
         text: '#F5ECD2',
         textSecondary: '#CBC2A8',
         textMuted: 'rgba(203, 194, 168, 0.6)',
+        textLabel: '#CBC2A8',
         accent: '#E8C879',
         accentAlt: '#C9A227',
         accentSoft: 'rgba(201, 162, 39, 0.22)',

@@ -1,13 +1,11 @@
 import {
-  AlertTriangle,
-  ArrowRight,
   Eye,
   EyeOff,
   Fingerprint,
   Lock,
   ShieldCheck,
-} from 'lucide-react-native';
-import { useEffect, useMemo, useState } from 'react';
+} from "lucide-react-native";
+import { useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -19,34 +17,45 @@ import {
   Text,
   TextInput,
   View,
-} from 'react-native';
-import Animated, { FadeIn } from 'react-native-reanimated';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+} from "react-native";
+import Animated, { FadeIn } from "react-native-reanimated";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { Button, Toggle } from '@/components/ui';
-import { AnimatedBlobs, BLOB_PALETTES } from '@/components/ui/animated-blobs';
-import { useHaptics } from '@/hooks/use-haptics';
-import { useTheme } from '@/hooks/use-theme';
-import { type Theme } from '@/theme';
-import { BiometricAvailability, canUseBiometrics, getBiometricAvailability } from '@/services/biometric';
+import { Button, Toggle } from "@/components/ui";
+import { AnimatedBlobs, BLOB_PALETTES } from "@/components/ui/animated-blobs";
+import { useHaptics } from "@/hooks/use-haptics";
+import { useTheme } from "@/hooks/use-theme";
+import {
+  BiometricAvailability,
+  canUseBiometrics,
+  getBiometricAvailability,
+} from "@/services/biometric";
+import { type Theme } from "@/theme";
 
 interface SetupMasterPasswordScreenProps {
-  onCreate?: (password: string, biometricEnabled: boolean) => void | Promise<void>;
+  onCreate?: (
+    password: string,
+    biometricEnabled: boolean,
+  ) => void | Promise<void>;
 }
 
-export function SetupMasterPasswordScreen({ onCreate }: SetupMasterPasswordScreenProps) {
+export function SetupMasterPasswordScreen({
+  onCreate,
+}: SetupMasterPasswordScreenProps) {
   const insets = useSafeAreaInsets();
   const theme = useTheme();
   const haptics = useHaptics();
   const styles = useMemo(() => makeStyles(theme), [theme]);
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [biometricEnabled, setBiometricEnabled] = useState(false);
-  const [biometric, setBiometric] = useState<BiometricAvailability | null>(null);
+  const [biometric, setBiometric] = useState<BiometricAvailability | null>(
+    null,
+  );
   const [isCreating, setIsCreating] = useState(false);
   const [createError, setCreateError] = useState<string | null>(null);
-  const [loadingMessage, setLoadingMessage] = useState('Preparing your vault…');
+  const [loadingMessage, setLoadingMessage] = useState("Preparing your vault…");
 
   // Detect real device capability (BUG-012). Default the opt-in ON only when
   // biometrics are actually available and enrolled; otherwise keep it off.
@@ -64,21 +73,21 @@ export function SetupMasterPasswordScreen({ onCreate }: SetupMasterPasswordScree
 
   const biometricSupported = canUseBiometrics(biometric);
   const biometricSubtitle = !biometric
-    ? 'Checking device…'
+    ? "Checking device…"
     : biometricSupported
       ? `Use ${biometric.label} to unlock`
       : biometric.hasHardware
-        ? 'No biometrics enrolled on this device'
-        : 'Not available on this device';
+        ? "No biometrics enrolled on this device"
+        : "Not available on this device";
 
   function handleBiometricChange(next: boolean) {
     if (next && !biometricSupported) {
       haptics.warning();
       Alert.alert(
-        'Biometrics unavailable',
+        "Biometrics unavailable",
         biometric?.hasHardware
-          ? 'Add a fingerprint or face scan in your device settings, then re-open SecureVault to enable biometric unlock.'
-          : 'This device does not support biometric unlock. You can still unlock with your master password.',
+          ? "Add a fingerprint or face scan in your device settings, then re-open SecureVault to enable biometric unlock."
+          : "This device does not support biometric unlock. You can still unlock with your master password.",
       );
       return;
     }
@@ -100,30 +109,40 @@ export function SetupMasterPasswordScreen({ onCreate }: SetupMasterPasswordScree
 
     if (password.length < 12) {
       haptics.warning();
-      Alert.alert('Use a stronger password', 'Your master password must be at least 12 characters.');
+      Alert.alert(
+        "Use a stronger password",
+        "Your master password must be at least 12 characters.",
+      );
       return;
     }
 
     if (password !== confirmPassword) {
       haptics.warning();
-      Alert.alert('Passwords do not match', 'Confirm your master password before creating the vault.');
+      Alert.alert(
+        "Passwords do not match",
+        "Confirm your master password before creating the vault.",
+      );
       return;
     }
 
     setIsCreating(true);
     setCreateError(null);
-    setLoadingMessage('Preparing your vault…');
+    setLoadingMessage("Preparing your vault…");
 
     try {
       await yieldToUi();
-      setLoadingMessage('Deriving your encryption key…');
+      setLoadingMessage("Deriving your encryption key…");
       await yieldToUi();
       await onCreate?.(password, biometricEnabled);
-      setLoadingMessage('Opening your vault…');
+      setLoadingMessage("Opening your vault…");
       haptics.success();
     } catch (error) {
       haptics.error();
-      setCreateError(error instanceof Error ? error.message : 'Could not create vault. Please try again.');
+      setCreateError(
+        error instanceof Error
+          ? error.message
+          : "Could not create vault. Please try again.",
+      );
     } finally {
       setIsCreating(false);
     }
@@ -133,9 +152,9 @@ export function SetupMasterPasswordScreen({ onCreate }: SetupMasterPasswordScree
     if (!isCreating) return;
 
     const messages = [
-      'Deriving your encryption key…',
-      'Applying AES-256 encryption…',
-      'Securing your vault locally…',
+      "Deriving your encryption key…",
+      "Applying AES-256 encryption…",
+      "Securing your vault locally…",
     ];
     let index = 0;
     setLoadingMessage(messages[0]);
@@ -150,19 +169,24 @@ export function SetupMasterPasswordScreen({ onCreate }: SetupMasterPasswordScree
 
   return (
     <View style={styles.root}>
-      <AnimatedBlobs 
+      <AnimatedBlobs
         colors={
-          theme.colors.accent === '#2D6CF6' ? BLOB_PALETTES.blue : 
-          theme.colors.accent === '#b06af0' ? BLOB_PALETTES.purple : 
-          BLOB_PALETTES.gold
-        } 
+          theme.colors.accent === "#2D6CF6"
+            ? BLOB_PALETTES.blue
+            : theme.colors.accent === "#b06af0"
+              ? BLOB_PALETTES.purple
+              : BLOB_PALETTES.gold
+        }
         intensity={0.8}
       />
 
       {/* Header */}
-      <View style={[styles.header, { paddingTop: insets.top, height: 64 + insets.top }]}>
+      <View
+        style={[
+          styles.header,
+          { paddingTop: insets.top, height: 64 + insets.top },
+        ]}>
         <Text style={styles.brand}>SecureVault</Text>
-        <View style={styles.avatar} />
       </View>
 
       <ScrollView
@@ -176,7 +200,6 @@ export function SetupMasterPasswordScreen({ onCreate }: SetupMasterPasswordScree
         <Animated.View
           entering={FadeIn.duration(theme.motion.duration.cardExpand)}
           style={styles.lockBadgeWrapper}>
-          <View style={styles.lockBadgeGlow} />
           <View style={styles.lockBadge}>
             <Lock size={32} color={theme.colors.text} strokeWidth={1.75} />
           </View>
@@ -185,8 +208,8 @@ export function SetupMasterPasswordScreen({ onCreate }: SetupMasterPasswordScree
         {/* Headlines */}
         <Text style={styles.title}>Initialize Your Vault</Text>
         <Text style={styles.subtitle}>
-          This master password is the only key to your encrypted data. If lost, it cannot be
-          recovered.
+          This master password is the only key to your encrypted data. If lost,
+          it cannot be recovered.
         </Text>
 
         {/* Form */}
@@ -198,7 +221,7 @@ export function SetupMasterPasswordScreen({ onCreate }: SetupMasterPasswordScree
               <TextInput
                 value={password}
                 onChangeText={setPassword}
-                placeholder="Minimum 12 characters"
+                placeholder="Master Password"
                 placeholderTextColor={theme.colors.textMuted}
                 secureTextEntry={!showPassword}
                 autoCapitalize="none"
@@ -206,13 +229,23 @@ export function SetupMasterPasswordScreen({ onCreate }: SetupMasterPasswordScree
                 style={styles.input}
               />
               <Pressable
-                accessibilityLabel={showPassword ? 'Hide password' : 'Show password'}
+                accessibilityLabel={
+                  showPassword ? "Hide password" : "Show password"
+                }
                 hitSlop={12}
                 onPress={() => setShowPassword((prev) => !prev)}>
                 {showPassword ? (
-                  <EyeOff size={20} color={theme.colors.textSecondary} strokeWidth={1.75} />
+                  <EyeOff
+                    size={20}
+                    color={theme.colors.textSecondary}
+                    strokeWidth={1.75}
+                  />
                 ) : (
-                  <Eye size={20} color={theme.colors.textSecondary} strokeWidth={1.75} />
+                  <Eye
+                    size={20}
+                    color={theme.colors.textSecondary}
+                    strokeWidth={1.75}
+                  />
                 )}
               </Pressable>
             </View>
@@ -225,7 +258,7 @@ export function SetupMasterPasswordScreen({ onCreate }: SetupMasterPasswordScree
               <TextInput
                 value={confirmPassword}
                 onChangeText={setConfirmPassword}
-                placeholder="Repeat your password"
+                placeholder="Confirm your master password"
                 placeholderTextColor={theme.colors.textMuted}
                 secureTextEntry={!showPassword}
                 autoCapitalize="none"
@@ -235,15 +268,27 @@ export function SetupMasterPasswordScreen({ onCreate }: SetupMasterPasswordScree
             </View>
           </View>
 
-          {/* Biometric card */}
-          <View style={[styles.biometricCard, !biometricSupported && styles.biometricCardDisabled]}>
+          {/* Biometric card — keep as-is per user decision */}
+          <View
+            style={[
+              styles.biometricCard,
+              !biometricSupported && styles.biometricCardDisabled,
+            ]}>
             <View style={styles.biometricInfo}>
               <View style={styles.biometricIcon}>
-                <Fingerprint size={24} color={theme.colors.accent} strokeWidth={1.75} />
+                <Fingerprint
+                  size={24}
+                  color={theme.colors.accent}
+                  strokeWidth={1.75}
+                />
               </View>
               <View style={styles.biometricText}>
-                <Text style={styles.biometricTitle}>Enable Biometric Unlock</Text>
-                <Text style={styles.biometricSubtitle}>{biometricSubtitle}</Text>
+                <Text style={styles.biometricTitle}>
+                  Enable Biometric Unlock
+                </Text>
+                <Text style={styles.biometricSubtitle}>
+                  {biometricSubtitle}
+                </Text>
               </View>
             </View>
             <Toggle
@@ -254,33 +299,36 @@ export function SetupMasterPasswordScreen({ onCreate }: SetupMasterPasswordScree
             />
           </View>
 
-          {/* Caution note */}
-          <View style={styles.cautionNote}>
-            <AlertTriangle size={16} color={theme.colors.accent} strokeWidth={1.75} />
-            <Text style={styles.cautionText}>
-              I understand that SecureVault uses zero-knowledge encryption and my password is never
-              stored on any server.
-            </Text>
-          </View>
-
           {/* Action button */}
-          {createError ? <Text style={styles.createError}>{createError}</Text> : null}
+          {createError ? (
+            <Text style={styles.createError}>{createError}</Text>
+          ) : null}
           <Button
             onPress={() => void handleCreate()}
             disabled={isCreating}
             loading={isCreating}>
-            {isCreating ? 'CREATING VAULT…' : 'CREATE VAULT'}
+            {isCreating ? "CREATING VAULT…" : "CREATE VAULT"}
           </Button>
 
           {/* Footer meta */}
           <View style={styles.footerMeta}>
-            <ShieldCheck size={12} color={theme.colors.textMuted} strokeWidth={1.75} />
-            <Text style={styles.footerMetaText}>AES-256 Military Grade Encryption</Text>
+            <ShieldCheck
+              size={12}
+              color={theme.colors.textMuted}
+              strokeWidth={1.75}
+            />
+            <Text style={styles.footerMetaText}>
+              AES-256 Military Grade Encryption
+            </Text>
           </View>
         </View>
       </ScrollView>
 
-      <Modal visible={isCreating} transparent animationType="none" statusBarTranslucent>
+      <Modal
+        visible={isCreating}
+        transparent
+        animationType="none"
+        statusBarTranslucent>
         <View style={styles.loadingOverlay}>
           <Animated.View
             entering={FadeIn.duration(theme.motion.duration.modal)}
@@ -291,7 +339,9 @@ export function SetupMasterPasswordScreen({ onCreate }: SetupMasterPasswordScree
             <ActivityIndicator color={theme.colors.accent} size="large" />
             <Text style={styles.loadingTitle}>Creating your vault</Text>
             <Text style={styles.loadingSubtitle}>{loadingMessage}</Text>
-            <Text style={styles.loadingHint}>This secure step can take up to 15 seconds.</Text>
+            <Text style={styles.loadingHint}>
+              This secure step can take up to 15 seconds.
+            </Text>
           </Animated.View>
         </View>
       </Modal>
@@ -306,12 +356,12 @@ function makeStyles(t: Theme) {
       backgroundColor: t.colors.background,
     },
     header: {
-      flexDirection: 'row',
-      alignItems: 'flex-end',
-      justifyContent: 'space-between',
+      flexDirection: "row",
+      alignItems: "flex-end",
+      justifyContent: "space-between",
       paddingHorizontal: t.layout.screenPadding,
       paddingBottom: t.spacing.md,
-      backgroundColor: t.colors.surface,
+      backgroundColor: "rgba(25, 14, 39, 0.6)",
       borderBottomWidth: StyleSheet.hairlineWidth,
       borderBottomColor: t.glass.border,
     },
@@ -320,60 +370,39 @@ function makeStyles(t: Theme) {
       fontSize: 24,
       color: t.colors.accent,
     },
-    avatar: {
-      width: 40,
-      height: 40,
-      borderRadius: t.radius.full,
-      backgroundColor: t.colors.surfaceAlt,
-      borderWidth: 1,
-      borderColor: t.glass.border,
-    },
     scrollContent: {
       paddingHorizontal: t.layout.screenPadding,
       paddingTop: t.spacing.xxl + t.spacing.sm,
-      alignItems: 'center',
-      maxWidth: 448,
-      width: '100%',
-      alignSelf: 'center',
+      alignItems: "center",
+      alignSelf: "center",
     },
     lockBadgeWrapper: {
-      alignItems: 'center',
-      justifyContent: 'center',
+      alignItems: "center",
+      justifyContent: "center",
       marginBottom: t.spacing.xl,
-    },
-    lockBadgeGlow: {
-      position: 'absolute',
-      width: 96,
-      height: 96,
-      borderRadius: t.radius.full,
-      backgroundColor: t.colors.accentSoft,
-      opacity: 0.5,
     },
     lockBadge: {
       width: 80,
       height: 80,
       borderRadius: t.radius.full,
-      alignItems: 'center',
-      justifyContent: 'center',
-      backgroundColor: t.glass.fill,
-      borderWidth: 1,
-      borderColor: t.glass.border,
+      alignItems: "center",
+      justifyContent: "center",
     },
     title: {
       ...t.typography.displaySerif,
       color: t.colors.text,
-      textAlign: 'center',
+      textAlign: "center",
     },
     subtitle: {
       ...t.typography.body,
       marginTop: t.spacing.md,
       color: t.colors.textSecondary,
-      textAlign: 'center',
+      textAlign: "center",
       maxWidth: 320,
     },
     form: {
       marginTop: t.spacing.xxl + t.spacing.sm,
-      width: '100%',
+      width: 350,
       gap: t.spacing.xxl,
     },
     field: {
@@ -382,12 +411,11 @@ function makeStyles(t: Theme) {
     label: {
       ...t.typography.label,
       letterSpacing: 1.2,
-      color: t.colors.accent,
-      opacity: 0.7,
+      color: t.colors.textLabel,
     },
     inputRow: {
-      flexDirection: 'row',
-      alignItems: 'center',
+      flexDirection: "row",
+      alignItems: "center",
       gap: t.spacing.md,
       borderBottomWidth: 1,
       borderBottomColor: t.glass.border,
@@ -401,9 +429,9 @@ function makeStyles(t: Theme) {
       padding: 0,
     },
     biometricCard: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between',
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
       padding: t.spacing.xl,
       borderRadius: t.radius.sheet,
       borderWidth: 1,
@@ -414,8 +442,8 @@ function makeStyles(t: Theme) {
       opacity: 0.6,
     },
     biometricInfo: {
-      flexDirection: 'row',
-      alignItems: 'center',
+      flexDirection: "row",
+      alignItems: "center",
       gap: t.spacing.lg,
       flexShrink: 1,
     },
@@ -423,8 +451,8 @@ function makeStyles(t: Theme) {
       width: 48,
       height: 48,
       borderRadius: t.radius.full,
-      alignItems: 'center',
-      justifyContent: 'center',
+      alignItems: "center",
+      justifyContent: "center",
       backgroundColor: t.colors.accentSoft,
       borderWidth: 1,
       borderColor: t.glass.border,
@@ -446,36 +474,22 @@ function makeStyles(t: Theme) {
       color: t.colors.textSecondary,
       opacity: 0.7,
     },
-    cautionNote: {
-      flexDirection: 'row',
-      alignItems: 'flex-start',
-      gap: t.spacing.md,
-      paddingHorizontal: t.spacing.sm,
-    },
-    cautionText: {
-      flex: 1,
-      ...t.typography.label,
-      fontSize: 12,
-      lineHeight: 16,
-      color: t.colors.textSecondary,
-      opacity: 0.85,
-    },
     createError: {
       ...t.typography.caption,
       color: t.colors.error,
-      textAlign: 'center',
+      textAlign: "center",
     },
     loadingOverlay: {
       flex: 1,
-      alignItems: 'center',
-      justifyContent: 'center',
+      alignItems: "center",
+      justifyContent: "center",
       paddingHorizontal: t.spacing.xl,
-      backgroundColor: 'rgba(0,0,0,0.72)',
+      backgroundColor: "rgba(0,0,0,0.72)",
     },
     loadingCard: {
-      width: '100%',
+      width: "100%",
       maxWidth: 320,
-      alignItems: 'center',
+      alignItems: "center",
       gap: t.spacing.lg,
       paddingHorizontal: t.spacing.xl,
       paddingVertical: t.spacing.xxl,
@@ -488,8 +502,8 @@ function makeStyles(t: Theme) {
       width: 72,
       height: 72,
       borderRadius: t.radius.sheet,
-      alignItems: 'center',
-      justifyContent: 'center',
+      alignItems: "center",
+      justifyContent: "center",
       backgroundColor: t.colors.accentSoft,
       borderWidth: 1,
       borderColor: t.glass.border,
@@ -497,25 +511,25 @@ function makeStyles(t: Theme) {
     loadingTitle: {
       ...t.typography.headingSerif,
       color: t.colors.text,
-      textAlign: 'center',
+      textAlign: "center",
     },
     loadingSubtitle: {
       ...t.typography.body,
       fontSize: 14,
       color: t.colors.textSecondary,
-      textAlign: 'center',
+      textAlign: "center",
     },
     loadingHint: {
       ...t.typography.label,
       fontSize: 12,
       lineHeight: 16,
       color: t.colors.textMuted,
-      textAlign: 'center',
+      textAlign: "center",
     },
     footerMeta: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'center',
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "center",
       gap: t.spacing.sm,
     },
     footerMetaText: {

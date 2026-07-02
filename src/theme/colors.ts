@@ -43,6 +43,8 @@ export interface ColorScheme {
   textSecondary: string;
   /** Muted text (captions, disabled, placeholders). */
   textMuted: string;
+  /** Label/form field text (e.g. "MASTER PASSWORD" labels). */
+  textLabel: string;
 
   /** Brand accent + its companions (mirrors `brandDark`). */
   accent: string;
@@ -66,6 +68,7 @@ const dark: ColorScheme = {
   text: '#EAF1FF',
   textSecondary: '#B7C4DC',
   textMuted: 'rgba(183, 196, 220, 0.6)',
+  textLabel: '#B7C4DC',
 
   ...brandDark,
   ...semantic,
@@ -80,6 +83,7 @@ const light: ColorScheme = {
   text: '#15223A',
   textSecondary: '#41597E',
   textMuted: 'rgba(65, 89, 126, 0.65)',
+  textLabel: '#41597E',
 
   accent: '#2D6CF6',
   accentAlt: '#184ED0',
