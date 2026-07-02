@@ -1,0 +1,245 @@
+---
+description: Standards for expo-router file-based routing, navigation hooks, layout patterns, and typed routes. Apply when creating or editing route files in the app directory.
+globs: src/app/**/*.{ts,tsx}
+alwaysApply: true
+---
+
+# Expo Router — File-Based Routing Rule
+
+You are an expert in expo-router v6 (SDK 54+) file-based routing for React Native apps.
+
+## Route Directory
+
+- All route files live under `src/app/` (configured via `expo-router` plugin in `app.json`, root not overridden).
+- Entry point: `index.js` at project root uses `<ExpoRoot>` from `expo-router`.
+- The root layout is `src/app/_layout.tsx`.
+- **Never** place route files outside `src/app/`.
+
+## File-Based Route Conventions
+
+| File | Generated Route |
+|---|---|
+| `src/app/_layout.tsx` | Root layout (wraps all routes) |
+| `src/app/index.tsx` | `/` (entry route) |
+| `src/app/settings.tsx` | `/settings` |
+| `src/app/entry/[id].tsx` | `/entry/:id` (dynamic segment) |
+| `src/app/(auth)/_layout.tsx` | Route group layout (no path segment) |
+| `src/app/(auth)/unlock.tsx` | `/unlock` (inside group) |
+| `src/app/(tabs)/dashboard.tsx` | `/dashboard` (inside group) |
+
+**Route Groups** (`(name)`) — parentheses mean the directory name is **not** part of the URL path. Use for:
+- `(auth)` — onboarding, setup, unlock screens (no tab bar)
+- `(tabs)` — main app screens with tab navigation
+
+## Layout Files (`_layout.tsx`)
+
+Layouts are **nested** — every directory can have a `_layout.tsx`.
+
+### Root Layout (`src/app/_layout.tsx`)
+
+The root layout must export a **default component** that wraps children. Use `<Stack>` for top-level navigation between route groups:
+
+```typescript
+import { Stack } from "expo-router";
+
+export default function RootLayout() {
+  return (
+    <Stack screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="(auth)" options={{ animation: "none" }} />
+      <Stack.Screen name="(tabs)" options={{ animation: "none" }} />
+    </Stack>
+  );
+}
+```
+
+### Group Layout (`src/app/(tabs)/_layout.tsx`)
+
+Use `<Tabs>` from `expo-router` for tab navigation. When using a **custom bottom nav**, hide the built-in tab bar:
+
+```typescript
+import { Tabs } from "expo-router";
+
+export default function TabsLayout() {
+  return (
+    <Tabs
+      backBehavior="history"
+      screenOptions={{
+        headerShown: false,
+        tabBarStyle: { display: 'none' },
+      }}
+    >
+      <Tabs.Screen name="dashboard" />
+      <Tabs.Screen name="vault" />
+      <Tabs.Screen name="generator" />
+      <Tabs.Screen name="health" />
+      <Tabs.Screen name="settings" />
+    </Tabs>
+  );
+}
+```
+
+### Auth Stack Layout (`src/app/(auth)/_layout.tsx`)
+
+Use `<Stack>` for auth flow screens with header hidden:
+
+```typescript
+import { Stack } from "expo-router";
+
+export default function AuthLayout() {
+  return (
+    <Stack
+      screenOptions={{
+        headerShown: false,
+        contentStyle: { backgroundColor: theme.colors.background },
+      }}
+    />
+  );
+}
+```
+
+## Navigator Components
+
+Always import navigator components from `expo-router` only — never from `@react-navigation/*`:
+
+| Component | Usage |
+|---|---|
+| `Stack` | Push/pop navigation (root, auth flows, modal stacks) |
+| `Tabs` | Bottom tab navigation |
+| `Redirect` | Declarative redirect (render to navigate) |
+
+```typescript
+import { Stack, Tabs, Redirect } from "expo-router";
+```
+
+## Navigation Hooks
+
+Import all navigation hooks from `expo-router`:
+
+| Hook | Purpose | Example |
+|---|---|---|
+| `useRouter()` | Programmatic navigation | `router.push(path)`, `router.replace(path)`, `router.back()` |
+| `useLocalSearchParams()` | Read URL params from the current route | `const { id } = useLocalSearchParams<{ id?: string }>()` |
+| `useGlobalSearchParams()` | Read params from the full URL | `const { tab } = useGlobalSearchParams()` |
+| `usePathname()` | Get current path string | `const path = usePathname()` |
+| `useSegments()` | Get current path segments array | `const segments = useSegments()` |
+| `useFocusEffect()` | Run effect on screen focus | `useFocusEffect(useCallback(() => { ... }, []))` |
+| `useNavigation()` | Access native navigation object | For advanced use cases |
+
+## Navigation Methods (`useRouter()`)
+
+```typescript
+const router = useRouter();
+
+router.push("/dashboard");         // Navigate forward
+router.replace("/unlock");         // Replace current route (no back)
+router.back();                     // Go back
+router.navigate("/entry/abc123");  // Navigate to dynamic route
+router.setParams({ id: "newId" }); // Update current route params
+router.reload();                   // Reload current route
+router.canGoBack();                // Check if back is available
+router.dismiss(2);                 // Dismiss screens (modal stack)
+```
+
+## Redirect Pattern
+
+Use `<Redirect>` for **declarative** redirects (render-based):
+
+```typescript
+import { Redirect } from "expo-router";
+
+export default function Dashboard() {
+  if (!isUnlocked) return <Redirect href="/unlock" />;
+  return <DashboardScreen />;
+}
+```
+
+Use `router.replace()` for **imperative** redirects (after async operations):
+
+```typescript
+async function handleUnlock(password: string) {
+  await unlockVault(password);
+  router.replace("/dashboard");
+}
+```
+
+## Dynamic Routes
+
+- `src/app/entry/[id].tsx` → matches `/entry/:id`
+- Read params with `useLocalSearchParams()`:
+
+```typescript
+import { useLocalSearchParams } from "expo-router";
+
+export default function EntryDetail() {
+  const { id } = useLocalSearchParams<{ id?: string }>();
+}
+```
+
+## Typed Routes
+
+This project has `"typedRoutes": true` in `app.json` experiments, enabling TypeScript autocomplete for route paths.
+
+- Use string literals: `"/dashboard"`, `"/unlock"`, `"/entry/abc"`
+- For dynamic routes, pass params via object:
+
+```typescript
+router.push({ pathname: "/entry/[id]", params: { id: credential.id } });
+```
+
+## Path Aliases
+
+This project uses `@/` to map to `src/` in `tsconfig.json`:
+
+```typescript
+import { DashboardScreen } from "@/components/screens/dashboard";
+import { useVault } from "@/contexts/vault-context";
+```
+
+Use `@/` for all imports from `src/`. Use `@/assets/` for asset imports.
+
+## Screen Export Convention
+
+Every route file **must** have a **default export** of a React component:
+
+```typescript
+export default function Dashboard() { ... }
+```
+
+Named exports are not recognized as routes.
+
+## Key Rules
+
+1. **Always import from `expo-router`**, never from `@react-navigation/*` directly (SDK 54+).
+2. Route files must be in `src/app/` directory.
+3. Every route directory can have a `_layout.tsx` to wrap child routes.
+4. Use route groups `(name)` for organization without affecting URL paths.
+5. Dynamic segments use `[param]` syntax in filenames.
+6. Prefer `<Redirect>` for declarative guards, `router.replace()` for imperative navigation after async work.
+7. Use `useLocalSearchParams<T>()` with a generic type for typed URL params.
+8. Always provide `screenOptions` on navigators for consistent animation and appearance.
+9. When using a custom tab bar, set `tabBarStyle: { display: 'none' }` on `<Tabs>`.
+10. Avoid hardcoding navigation logic inside components — use context-based route guards.
+
+## Layout Nesting Example
+
+```
+src/app/
+├── _layout.tsx                    # Root Stack
+├── index.tsx                      # / (onboarding)
+├── (auth)/
+│   ├── _layout.tsx                # Auth Stack
+│   ├── setup.tsx                  # /setup
+│   └── unlock.tsx                 # /unlock
+├── (tabs)/
+│   ├── _layout.tsx                # Tabs layout (hidden tab bar)
+│   ├── dashboard.tsx              # /dashboard
+│   ├── vault.tsx                  # /vault
+│   ├── generator.tsx              # /generator
+│   ├── health.tsx                 # /health
+│   └── settings.tsx               # /settings
+├── add-credential.tsx             # /add-credential
+├── change-password.tsx            # /change-password
+└── entry/
+    └── [id].tsx                   # /entry/:id
+```
+

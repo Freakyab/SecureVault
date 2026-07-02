@@ -4,16 +4,16 @@ All completed roadmap tasks have been migrated to Jira under the **Tasks** compo
 
 ## Migration Summary
 
-| Detail             | Value             |
-| ------------------ | ----------------- |
-| **Date**           | 2026-06-30        |
-| **Total Migrated** | 50                |
-| **Jira Project**   | KAN (SecureVault) |
-| **Component**      | Tasks             |
-| **Issue Range**    | KAN-17 – KAN-66   |
-| **Status**         | Done              |
+| Detail             | Value                |
+| ------------------ | -------------------- |
+ine| **Date**           | 2026-07-02           |
+| **Total Migrated** | 79                   |
+| **Jira Project**   | KAN (SecureVault)    |
+| **Component**      | Tasks                |
+| **Issue Range**    | KAN-17 – KAN-95      |
+| **Status**         | Mixed (Done + To Do) |
 
-## Migrated Tasks
+## Migrated Tasks (Phase 1 — TASK-001 to TASK-050)
 
 | TASK ID  | Jira Issue                                                    | Summary                                                      |
 | -------- | ------------------------------------------------------------- | ------------------------------------------------------------ |
@@ -68,15 +68,50 @@ All completed roadmap tasks have been migrated to Jira under the **Tasks** compo
 | TASK-049 | [KAN-65](https://aryanbhisikar02.atlassian.net/browse/KAN-65) | Security review checklist completed                          |
 | TASK-050 | [KAN-66](https://aryanbhisikar02.atlassian.net/browse/KAN-66) | EAS Build profiles (development, preview, production)        |
 
+## Migrated Tasks (Phase 2 — TASK-051 to TASK-079)
+
+| TASK ID  | Jira Issue                                                    | Summary                                                        | Status |
+| -------- | ------------------------------------------------------------- | -------------------------------------------------------------- | ------ |
+| TASK-051 | [KAN-67](https://aryanbhisikar02.atlassian.net/browse/KAN-67) | Migrate Onboarding to Phase 6 tokens/hooks                     | Done   |
+| TASK-052 | [KAN-68](https://aryanbhisikar02.atlassian.net/browse/KAN-68) | Migrate Setup Master Password to Phase 6 tokens/hooks          | Done   |
+| TASK-053 | [KAN-69](https://aryanbhisikar02.atlassian.net/browse/KAN-69) | Migrate Unlock Vault to Phase 6 tokens/hooks                   | Done   |
+| TASK-054 | [KAN-70](https://aryanbhisikar02.atlassian.net/browse/KAN-70) | Migrate Main Vault to Phase 6 tokens/hooks                     | Done   |
+| TASK-055 | [KAN-71](https://aryanbhisikar02.atlassian.net/browse/KAN-71) | Migrate My Vault to Phase 6 tokens/hooks                       | Done   |
+| TASK-056 | [KAN-72](https://aryanbhisikar02.atlassian.net/browse/KAN-72) | Migrate Generator to Phase 6 tokens/hooks                      | Done   |
+| TASK-057 | [KAN-73](https://aryanbhisikar02.atlassian.net/browse/KAN-73) | Migrate Password Health to Phase 6 tokens/hooks                | Done   |
+| TASK-058 | [KAN-74](https://aryanbhisikar02.atlassian.net/browse/KAN-74) | Migrate Settings to Phase 6 tokens/hooks                       | Done   |
+| TASK-059 | [KAN-75](https://aryanbhisikar02.atlassian.net/browse/KAN-75) | Migrate Add Credential to Phase 6 tokens/hooks                 | Done   |
+| TASK-060 | [KAN-76](https://aryanbhisikar02.atlassian.net/browse/KAN-76) | Migrate Entry detail / Edit Credential to Phase 6 tokens/hooks | Done   |
+| TASK-061 | [KAN-77](https://aryanbhisikar02.atlassian.net/browse/KAN-77) | Migrate Change Password to Phase 6 tokens/hooks                | To Do  |
+| TASK-062 | [KAN-78](https://aryanbhisikar02.atlassian.net/browse/KAN-78) | Swipe-to-action vault rows (copy/edit/delete)                  | To Do  |
+| TASK-063 | [KAN-79](https://aryanbhisikar02.atlassian.net/browse/KAN-79) | Long-press context menu + drag-to-reorder favorites            | To Do  |
+| TASK-064 | [KAN-80](https://aryanbhisikar02.atlassian.net/browse/KAN-80) | Custom branded pull-to-refresh                                 | To Do  |
+| TASK-065 | [KAN-81](https://aryanbhisikar02.atlassian.net/browse/KAN-81) | Velocity-aware bottom sheet gestures                           | To Do  |
+| TASK-066 | [KAN-82](https://aryanbhisikar02.atlassian.net/browse/KAN-82) | Shared-element transition — vault row → entry detail           | To Do  |
+| TASK-067 | [KAN-83](https://aryanbhisikar02.atlassian.net/browse/KAN-83) | Scroll-driven collapsing headers + parallax hero               | To Do  |
+| TASK-068 | [KAN-84](https://aryanbhisikar02.atlassian.net/browse/KAN-84) | Spatial continuity between Dashboard and Health                | To Do  |
+| TASK-069 | [KAN-85](https://aryanbhisikar02.atlassian.net/browse/KAN-85) | Lottie / Reanimated success states                             | To Do  |
+| TASK-070 | [KAN-86](https://aryanbhisikar02.atlassian.net/browse/KAN-86) | Animated empty-state illustrations                             | To Do  |
+| TASK-071 | [KAN-87](https://aryanbhisikar02.atlassian.net/browse/KAN-87) | Generator strength meter spring fill + color interpolation     | To Do  |
+| TASK-072 | [KAN-88](https://aryanbhisikar02.atlassian.net/browse/KAN-88) | Health score ring draw-on synced with count-up                 | To Do  |
+| TASK-073 | [KAN-89](https://aryanbhisikar02.atlassian.net/browse/KAN-89) | Celebratory moment on health-score milestone                   | To Do  |
+| TASK-074 | [KAN-90](https://aryanbhisikar02.atlassian.net/browse/KAN-90) | Perf-budgeted animated gradient/glow backdrops                 | To Do  |
+| TASK-075 | [KAN-91](https://aryanbhisikar02.atlassian.net/browse/KAN-91) | Shimmer skeleton → content morph                               | To Do  |
+| TASK-076 | [KAN-92](https://aryanbhisikar02.atlassian.net/browse/KAN-92) | Spring-animated tab bar                                        | To Do  |
+| TASK-077 | [KAN-93](https://aryanbhisikar02.atlassian.net/browse/KAN-93) | Reduced-motion variants (useReducedMotion)                     | To Do  |
+| TASK-078 | [KAN-94](https://aryanbhisikar02.atlassian.net/browse/KAN-94) | 60fps worklet budget + perf profiling                          | To Do  |
+| TASK-079 | [KAN-95](https://aryanbhisikar02.atlassian.net/browse/KAN-95) | Motion consistency audit via theme/animations.ts               | To Do  |
+
 ## Verification
 
 To verify the migration, use the following JQL query in Jira:
 
 ```jql
-project = KAN AND component = Tasks AND status = Done ORDER BY key ASC
+project = KAN AND component = Tasks ORDER BY key ASC
 ```
 
 ## Notes
 
 - Individual task files (`docs/tasks/TASK-XXX.md`) were created temporarily and deleted after successful Jira migration.
 - The sync script is available at `scripts/jira-sync-tasks.js` for future migrations.
+- Phase 2 migration script: `scripts/jira-sync-tasks-phase2.js`

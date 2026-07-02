@@ -73,7 +73,6 @@ The script reads credentials from the Cline MCP config at:
 |----|-------|----------|------------|
 | BUG-022 | Export backup is plaintext and uses the non-clearing clipboard | P1 | [KAN-4](https://aryanbhisikar02.atlassian.net/browse/KAN-4) |
 | BUG-024 | "Quick Fix All" button in Password Health is a no-op | P1 | [KAN-5](https://aryanbhisikar02.atlassian.net/browse/KAN-5) |
-| BUG-027 | Generated passwords don't guarantee selected character types | P2 | [KAN-6](https://aryanbhisikar02.atlassian.net/browse/KAN-6) |
 | BUG-028 | Auto-lock "Immediately" fires during legit OS prompts | P2 | [KAN-7](https://aryanbhisikar02.atlassian.net/browse/KAN-7) |
 | BUG-029 | Credential writes use stale closures / no serialization (race) | P2 | [KAN-8](https://aryanbhisikar02.atlassian.net/browse/KAN-8) |
 | BUG-030 | Generator password copy does not auto-clear the clipboard | P2 | [KAN-9](https://aryanbhisikar02.atlassian.net/browse/KAN-9) |

@@ -55,7 +55,6 @@ let clearTimer: ReturnType<typeof setTimeout> | null = null;
 export async function copySensitiveToClipboard(value: string, clearAfterMs = CLIPBOARD_CLEAR_MS) {
   await copyToClipboard(value);
 
-  if (Platform.OS === 'web') return;
   if (clearTimer) clearTimeout(clearTimer);
 
   clearTimer = setTimeout(async () => {

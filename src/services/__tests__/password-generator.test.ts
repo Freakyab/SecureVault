@@ -52,10 +52,37 @@ describe('generatePassword', () => {
     expect(password).toMatch(/^[23456789]+$/);
   });
 
+  it('guarantees at least one character from each selected type', () => {
+    // All four types selected
+    const password = generatePassword(DEFAULT_GENERATOR_OPTIONS);
+    expect(password).toMatch(/[A-Z]/);   // uppercase
+    expect(password).toMatch(/[a-z]/);   // lowercase
+    expect(password).toMatch(/[2-9]/);   // numbers
+    expect(password).toMatch(/[!@#$%^&*()\-_=+[\]{}]/); // symbols
+  });
+
+  it('guarantees at least one char even for minimum-length passwords', () => {
+    const password = generatePassword({
+      length: 4,
+      uppercase: true,
+      lowercase: true,
+      numbers: true,
+      symbols: true,
+    });
+    expect(password).toHaveLength(4);
+    expect(password).toMatch(/[A-Z]/);
+    expect(password).toMatch(/[a-z]/);
+    expect(password).toMatch(/[2-9]/);
+    expect(password).toMatch(/[!@#$%^&*()\-_=+[\]{}]/);
+  });
+
   it('is deterministic when given a fixed random source', () => {
     const password = generatePassword(DEFAULT_GENERATOR_OPTIONS, () => 0);
-    const pool = buildCharPool(DEFAULT_GENERATOR_OPTIONS);
-    expect(password).toBe(pool[0].repeat(DEFAULT_GENERATOR_OPTIONS.length));
+    // With () => 0, guaranteed chars are the first of each selected set:
+    //   uppercase -> 'A', lowercase -> 'a', numbers -> '2', symbols -> '!'
+    // followed by 'A' for the remaining 14 slots, then Fisher-Yates shuffles
+    // the result (j=0 every iteration), producing: 'a2!AAAAAAAAAAAAAAA'
+    expect(password).toBe('a2!AAAAAAAAAAAAAAA');
   });
 
   it('throws when no character types are selected', () => {

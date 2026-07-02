@@ -39,8 +39,31 @@ export function generatePassword(
   const pool = buildCharPool(options);
   if (!pool) throw new Error('Select at least one character type.');
 
-  const safeLength = Math.max(4, Math.min(options.length, 128));
-  return Array.from({ length: safeLength }, () => pool[randomInt(pool.length)]).join('');
+const safeLength = Math.max(4, Math.min(options.length, 128));
+
+  // Identify which character types are selected
+  const selectedTypes = (['uppercase', 'lowercase', 'numbers', 'symbols'] as const).filter(
+    (type) => options[type],
+  );
+
+  // Ensure at least one char from each selected type, then fill the rest
+  const guaranteed: string[] = selectedTypes.map(
+    (type) => CHAR_SETS[type][randomInt(CHAR_SETS[type].length)],
+  );
+  const remaining = safeLength - guaranteed.length;
+  const rest = Array.from({ length: Math.max(0, remaining) }, () =>
+    pool[randomInt(pool.length)],
+  );
+
+  const result = [...guaranteed, ...rest];
+
+  // Fisher‑Yates shuffle so guaranteed chars aren't always at the front
+  for (let i = result.length - 1; i > 0; i--) {
+    const j = randomInt(i + 1);
+    [result[i], result[j]] = [result[j], result[i]];
+  }
+
+  return result.join('');
 }
 
 function secureRandomInt(max: number): number {
